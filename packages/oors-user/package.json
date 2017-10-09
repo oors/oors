@@ -1,8 +1,7 @@
 {
   "name": "oors-user",
   "version": "1.0.0",
-  "description":
-    "oors user module providing authentication, authorization, users and accounts management.",
+  "description": "oors user module providing authentication, authorization, users and accounts management.",
   "main": "build/index.js",
   "repository": {
     "type": "git",
@@ -23,12 +22,12 @@
     "joi": "10.5.1",
     "jsonwebtoken": "7.4.1",
     "lodash": "4.17.4",
-    "oors": "^1.4.5",
-    "oors-mongodb": "^1.4.4",
-    "oors-router": "^1.6.7",
     "moment": "2.18.1",
     "mongodb": "2.2.27",
     "octobus.js": "1.1.2",
+    "oors": "^1.0.0",
+    "oors-mongodb": "^1.0.0",
+    "oors-router": "^1.0.0",
     "passport": "0.3.2",
     "passport-jwt": "^2.2.1",
     "passport-local": "1.0.0",

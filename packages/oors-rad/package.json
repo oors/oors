@@ -1,6 +1,7 @@
 {
   "name": "oors-rad",
-  "version": "0.1.0",
+  "private": true,
+  "version": "1.0.0",
   "description": "Rapid Development tools for oors",
   "main": "build/index.js",
   "repository": {
@@ -14,6 +15,6 @@
   },
   "homepage": "https://github.com/viczam/oors#readme",
   "dependencies": {
-    "oors": "^1.4.5"
+    "oors": "^1.0.0"
   }
 }

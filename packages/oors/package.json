@@ -1,22 +1,25 @@
 {
   "name": "oors",
   "version": "1.0.0",
-  "description":
-    "Highly scalable and modular node.js web framework built on top of express.js",
+  "description": "Highly scalable and modular node.js web framework built on top of express.js",
   "main": "build/index.js",
   "scripts": {},
   "repository": {
     "type": "git",
     "url": "https://github.com/viczam/oors/tree/master/packages/oors"
   },
-  "keywords": ["oors", "octobus", "express.js", "node.js web framework"],
+  "keywords": [
+    "oors",
+    "octobus",
+    "express.js",
+    "node.js web framework"
+  ],
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/viczam/oors/issues"
   },
-  "homepage":
-    "https://github.com/viczam/oors/tree/master/packages/oors/readme.md",
+  "homepage": "https://github.com/viczam/oors/tree/master/packages/oors/readme.md",
   "dependencies": {
     "boom": "5.1.0",
     "express": "4.15.3",

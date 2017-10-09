@@ -16,6 +16,6 @@
   "dependencies": {
     "express": "4.15.3",
     "joi": "10.5.1",
-    "oors": "^1.4.5"
+    "oors": "^1.0.0"
   }
 }

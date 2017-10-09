@@ -19,9 +19,9 @@
     "express": "4.15.3",
     "joi": "10.5.1",
     "lodash": "4.17.4",
-    "oors": "^1.4.5",
-    "oors-mongodb": "^1.4.4",
     "mongodb": "2.2.27",
-    "octobus.js": "1.1.2"
+    "octobus.js": "1.1.2",
+    "oors": "^1.0.0",
+    "oors-mongodb": "^1.0.0"
   }
 }
