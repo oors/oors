@@ -1,12 +1,15 @@
 {
   "presets": [
-    ["env", {
-      "targets": {
-        "node": "current"
+    [
+      "env",
+      {
+        "targets": {
+          "node": "current"
+        }
       }
-    }],
-    "react",
-    "stage-0"
+    ],
+    "stage-0",
+    "react"
   ],
   "plugins": [
     "transform-es2015-destructuring",
