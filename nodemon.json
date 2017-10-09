@@ -1,0 +1,10 @@
+{
+  "verbose": false,
+  "watch": [
+    "packages/*/build/"
+  ],
+  "ignore": [
+    "packages/web"
+  ],
+  "ext": "js jsx json graphql"
+}

@@ -1,0 +1,29 @@
+{
+  "name": "oors-config",
+  "version": "1.0.0",
+  "description": "oors configuration strategy",
+  "main": "build/index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/viczam/oors"
+  },
+  "keywords": [
+    "oors",
+    "octobus",
+    "express.js",
+    "node.js web framework",
+    "config"
+  ],
+  "author": "Victor Zamfir <zamfir.victor@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/viczam/oors/issues"
+  },
+  "homepage":
+    "https://github.com/viczam/oors/tree/master/packages/oors/readme.md",
+  "dependencies": {
+    "invariant": "2.2.2",
+    "lodash": "4.17.4"
+  }
+}

@@ -1,0 +1,8 @@
+extend type Query {
+  modules(name: String): [Module]
+}
+
+type Module {
+  name: String!
+  dependencies: [Module]
+}

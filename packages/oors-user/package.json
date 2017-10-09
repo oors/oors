@@ -1,0 +1,38 @@
+{
+  "name": "oors-user",
+  "version": "1.0.0",
+  "description":
+    "oors user module providing authentication, authorization, users and accounts management.",
+  "main": "build/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/viczam/oors/tree/master/packages/oors-user"
+  },
+  "author": "Victor Zamfir <zamfir.victor@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/viczam/oors/issues"
+  },
+  "homepage": "https://github.com/viczam/oors#readme",
+  "dependencies": {
+    "bcryptjs": "2.4.3",
+    "boom": "5.1.0",
+    "celebrate": "4.0.1",
+    "express": "4.15.3",
+    "express-jwt": "5.3.0",
+    "joi": "10.5.1",
+    "jsonwebtoken": "7.4.1",
+    "lodash": "4.17.4",
+    "oors": "^1.4.5",
+    "oors-mongodb": "^1.4.4",
+    "oors-router": "^1.6.7",
+    "moment": "2.18.1",
+    "mongodb": "2.2.27",
+    "octobus.js": "1.1.2",
+    "passport": "0.3.2",
+    "passport-jwt": "^2.2.1",
+    "passport-local": "1.0.0",
+    "prop-types": "^15.5.10",
+    "react": "15.5.4"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "oors-octobus",
+  "version": "1.0.0",
+  "description": "oors octobus integration",
+  "main": "build/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/viczam/oors/tree/master/packages/oors-octobus"
+  },
+  "author": "Victor Zamfir <zamfir.victor@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/viczam/oors/issues"
+  },
+  "homepage": "https://github.com/viczam/oors#readme",
+  "dependencies": {
+    "axios": "0.16.2",
+    "express": "4.15.3",
+    "joi": "10.6.0",
+    "lodash": "4.17.4",
+    "oors": "^1.4.5",
+    "octobus.js": "1.1.2"
+  }
+}

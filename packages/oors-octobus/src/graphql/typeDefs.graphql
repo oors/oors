@@ -1,0 +1,13 @@
+extend type Query {
+  octobusMessages(topic: String): [OctobusMessage]
+}
+
+type OctobusMessage {
+  id: ID!
+  topic: String!
+  data: String
+  parentId: ID!
+  parent: OctobusMessage
+  timestamp: Float
+  children: [OctobusMessage]
+}

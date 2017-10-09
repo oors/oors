@@ -1,0 +1,11 @@
+type Query {
+  hello: String
+}
+
+type Mutation {
+  ping: String
+}
+
+scalar Date
+
+scalar JSON

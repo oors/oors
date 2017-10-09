@@ -1,0 +1,21 @@
+{
+  "name": "oors-health",
+  "version": "1.0.0",
+  "description": "oors health module.",
+  "main": "build/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/viczam/oors/tree/master/packages/oors-health"
+  },
+  "author": "Victor Zamfir <zamfir.victor@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/viczam/oors/issues"
+  },
+  "homepage": "https://github.com/viczam/oors#readme",
+  "dependencies": {
+    "express": "4.15.3",
+    "joi": "10.5.1",
+    "oors": "^1.4.5"
+  }
+}

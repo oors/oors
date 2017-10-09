@@ -1,0 +1,32 @@
+{
+  "name": "oors-cli",
+  "version": "1.0.0",
+  "description": "oors command line utilities.",
+  "main": "build/index.js",
+  "scripts": {},
+  "bin": {
+    "oors-build": "./build/scripts/build.js",
+    "oors-watch": "./build/scripts/watch.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/viczam/oors/tree/master/packages/oors-cli"
+  },
+  "author": "Victor Zamfir <zamfir.victor@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/viczam/oors/issues"
+  },
+  "url":
+    "https://github.com/viczam/oors/tree/master/packages/oors-cli/readme.md",
+  "dependencies": {
+    "babel-core": "~6.23.1",
+    "chokidar": "1.6.1",
+    "dotenv": "~4.0.0",
+    "fs-extra": "^3.0.1",
+    "glob": "7.1.1",
+    "joi": "10.0.2",
+    "lodash": "4.17.2",
+    "yargs": "7.0.2"
+  }
+}

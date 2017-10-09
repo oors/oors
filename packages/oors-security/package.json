@@ -1,0 +1,27 @@
+{
+  "name": "oors-security",
+  "version": "1.0.0",
+  "description": "oors security",
+  "main": "build/index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/viczam/oors.git"
+  },
+  "author": "Victor Zamfir <zamfir.victor@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/viczam/oors/issues"
+  },
+  "homepage": "https://github.com/viczam/oors#readme",
+  "dependencies": {
+    "boom": "5.1.0",
+    "express": "4.15.3",
+    "joi": "10.5.1",
+    "lodash": "4.17.4",
+    "oors": "^1.4.5",
+    "oors-mongodb": "^1.4.4",
+    "mongodb": "2.2.27",
+    "octobus.js": "1.1.2"
+  }
+}

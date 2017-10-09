@@ -1,0 +1,8 @@
+type File {
+  id: ID!
+  filename: String!
+  mimeType: String!
+  extension: String!
+  size: Int!
+  uploadedAt: Date
+}
