@@ -11,11 +11,11 @@ type User {
   name: String
   username: String
   email: String
-  createdAt: Date
-  lastLogin: Date
+  createdAt: DateTime
+  lastLogin: DateTime
 }
 
 type AuthenticatedUser {
   token: String
-  lastLogin: Date
+  lastLogin: DateTime
 }

@@ -6,6 +6,6 @@ type Mutation {
   ping: String
 }
 
-scalar Date
+scalar DateTime
 
 scalar JSON

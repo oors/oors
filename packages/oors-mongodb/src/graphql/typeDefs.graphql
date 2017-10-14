@@ -1,0 +1,16 @@
+type MongoQuery {
+  filters: JSON
+  offset: Int
+  limit: Int
+  orderBy: [SortItem!]
+}
+
+type SortItem {
+  field: String
+  order: SortOrder
+}
+
+enum SortOrder {
+  ASC
+  DESC
+}

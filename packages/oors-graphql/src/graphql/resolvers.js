@@ -9,9 +9,9 @@ export default {
   Query: {
     hello: () => 'Oooors!',
   },
-  Date: new GraphQLScalarType({
-    name: 'Date',
-    description: 'Date custom scalar type',
+  DateTime: new GraphQLScalarType({
+    name: 'DateTime',
+    description: 'DateTime custom scalar type',
     parseValue: value => new Date(value),
     serialize: value => value.getTime(),
     parseLiteral(ast) {

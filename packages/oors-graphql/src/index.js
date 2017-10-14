@@ -7,10 +7,11 @@ import set from 'lodash/set';
 import has from 'lodash/has';
 import identity from 'lodash/identity';
 import { Module } from 'oors';
-import { graphqlExpress, graphiqlExpress } from 'graphql-server-express';
+import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
 import merge from 'lodash/merge';
 import { makeExecutableSchema } from 'graphql-tools';
 import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
+import { express as playgroundMiddleware } from 'graphql-playground/middleware';
 import mainResolvers from './graphql/resolvers';
 import modulesResolvers from './graphql/modulesResolvers';
 
@@ -24,6 +25,9 @@ class Gql extends Module {
       enabled: Joi.boolean().default(true),
     }),
     voyager: Joi.object().keys({
+      enabled: Joi.boolean().default(true),
+    }),
+    playground: Joi.object().keys({
       enabled: Joi.boolean().default(true),
     }),
     middlewarePivot: Joi.string().default('isMethod'),
@@ -47,13 +51,7 @@ class Gql extends Module {
   }
 
   async setup({ exposeModules }) {
-    const {
-      collectFromModule,
-      addTypeDefs,
-      addTypeDefsByPath,
-      addResolvers,
-      addMiddleware,
-    } = this;
+    const { collectFromModule, addTypeDefs, addTypeDefsByPath, addResolvers, addMiddleware } = this;
 
     await this.createHook('load', collectFromModule, {
       addTypeDefs,
@@ -64,9 +62,7 @@ class Gql extends Module {
 
     if (exposeModules) {
       this.addResolvers(modulesResolvers);
-      await this.addTypeDefsByPath(
-        path.resolve(__dirname, './graphql/modulesTypeDefs.graphql'),
-      );
+      await this.addTypeDefsByPath(path.resolve(__dirname, './graphql/modulesTypeDefs.graphql'));
     }
 
     await this.createHook('buildContext', () => {}, {
@@ -80,6 +76,7 @@ class Gql extends Module {
       this.getGraphQLMiddleware(schema),
       this.getGraphiQLMiddleware(),
       this.getVoyagerMiddleware(),
+      this.getPlaygroundMiddleware(),
     );
 
     this.export({
@@ -146,9 +143,7 @@ class Gql extends Module {
           await this.addTypeDefsByPath(get(module, 'graphql.typeDefsPath'));
         }
       } else {
-        await this.loadFromDir(
-          path.resolve(path.dirname(module.filePath), 'graphql'),
-        );
+        await this.loadFromDir(path.resolve(path.dirname(module.filePath), 'graphql'));
       }
     } catch (err) {}
   }
@@ -168,10 +163,7 @@ class Gql extends Module {
 
       const resolver = [...middlewares]
         .reverse()
-        .reduce(
-          (acc, middleware) => (...args) => middleware(...args, acc),
-          get(resolvers, branch),
-        );
+        .reduce((acc, middleware) => (...args) => middleware(...args, acc), get(resolvers, branch));
 
       set(resolvers, branch, resolver);
     });
@@ -221,8 +213,23 @@ class Gql extends Module {
     return {
       id: 'voyager',
       path: '/voyager',
-      factory: () => voyagerMiddleware({ endpointUrl: '/graphql' }),
+      factory: ({ endpointURL }) => voyagerMiddleware({ endpointUrl: endpointURL }),
+      params: {
+        endpointURL: '/graphql',
+      },
       enabled: this.getConfig('voyager.enabled'),
+    };
+  }
+
+  getPlaygroundMiddleware() {
+    return {
+      id: 'playground',
+      path: '/playground',
+      factory: ({ endpointURL }) => playgroundMiddleware({ endpoint: endpointURL }),
+      params: {
+        endpointURL: '/graphql',
+      },
+      enabled: this.getConfig('playground.enabled'),
     };
   }
 }

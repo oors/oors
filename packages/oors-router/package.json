@@ -22,6 +22,7 @@
     "mongodb": "2.2.24",
     "mongodb-extended-json": "1.9.0",
     "octobus.js": "1.1.2",
-    "oors": "^1.0.0"
+    "oors": "^1.0.0",
+    "oors-mongodb": "*"
   }
 }
