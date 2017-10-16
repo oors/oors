@@ -6,23 +6,31 @@ import camelCase from 'lodash/camelCase';
 class Module {
   constructor(config = {}) {
     this.name = config.name || this.name || camelCase(this.constructor.name);
-    this.config = this.constructor.configSchema
-      ? Joi.attempt(
-          config,
-          Joi.object()
-            .keys({
-              name: Joi.string(),
-              ...this.constructor.configSchema,
-            })
-            .unknown(),
-        )
-      : config;
+    this.config = this.parseConfig(config);
 
     this.filePath = new Error().stack
       .toString()
       .split(/\r\n|\n/)[2]
       .match(/\((.*.js)/)[1];
     this.hooks = {};
+  }
+
+  parseConfig(config) {
+    const schema = this.constructor.configSchema;
+
+    if (!schema) {
+      return config;
+    }
+
+    return Joi.attempt(
+      config,
+      Joi.object()
+        .keys({
+          name: Joi.string(),
+          ...schema,
+        })
+        .unknown(),
+    );
   }
 
   initialize(config, manager) {} // eslint-disable-line
@@ -34,9 +42,7 @@ class Module {
 
   get manager() {
     if (!this._manager) {
-      throw new Error(
-        'You need to connect the module to a manager in order to get access to it!',
-      );
+      throw new Error('You need to connect the module to a manager in order to get access to it!');
     }
 
     return this._manager;
@@ -56,10 +62,7 @@ class Module {
 
   get(key) {
     if (!Object.keys(this.manager.exportMap[this.name]).includes(key)) {
-      throw new Error(
-        `Unable to get exported value for "${key}" key in "${this
-          .name}" module!`,
-      );
+      throw new Error(`Unable to get exported value for "${key}" key in "${this.name}" module!`);
     }
 
     return this.manager.exportMap[this.name][key];
@@ -99,10 +102,7 @@ class Module {
   }
 
   emit(event, ...args) {
-    return this.manager.emit(
-      `module:${this.name}:${event}`,
-      ...args.concat([this]),
-    );
+    return this.manager.emit(`module:${this.name}:${event}`, ...args.concat([this]));
   }
 
   createHook(hook, handler, context) {
