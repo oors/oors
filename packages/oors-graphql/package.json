@@ -1,8 +1,7 @@
 {
   "name": "oors-graphql",
-  "version": "1.0.1",
-  "description":
-    "oors GraphQL module that integrates apollo and helps you publish a GraphQL API in the fastest way possible.",
+  "version": "1.0.3",
+  "description": "oors GraphQL module that integrates apollo and helps you publish a GraphQL API in the fastest way possible.",
   "main": "build/index.js",
   "repository": {
     "type": "git",
@@ -26,7 +25,7 @@
     "isomorphic-fetch": "2.2.1",
     "joi": "10.5.1",
     "lodash": "4.17.4",
-    "oors": "^1.0.1",
+    "oors": "^1.0.3",
     "react": "15.5.4",
     "react-dom": "15.5.4"
   }

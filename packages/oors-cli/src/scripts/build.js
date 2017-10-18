@@ -2,20 +2,12 @@
 import { transformFileSync } from 'babel-core';
 import path from 'path';
 import fse from 'fs-extra';
-import {
-  getPackageDirs,
-  getPackageFiles,
-  makeConfig,
-  isJSFile,
-} from '../libs/utils';
+import { getPackageDirs, getPackageFiles, makeConfig, isJSFile } from '../libs/utils';
 
-const run = async ({
-  packagesDir,
-  babelConfig,
-  ignoredPackages,
-  srcDir,
-  buildDir,
-}) => {
+process.on('unhandledRejection', reason => console.log(reason)); // eslint-disable-line
+process.on('uncaughtException', err => console.log(err)); // eslint-disable-line
+
+const run = async ({ packagesDir, babelConfig, ignoredPackages, srcDir, buildDir }) => {
   const packages = await getPackageDirs({ packagesDir, ignoredPackages });
 
   return Promise.all(
