@@ -1,6 +1,11 @@
 {
   "lerna": "2.0.0",
-  "packages": ["packages/*"],
   "version": "independent",
-  "npmClient": "yarn"
+  "npmClient": "yarn",
+  "useWorkspaces": true,
+  "commands": {
+    "publish": {
+      "ignore": ["src", "*.md"]
+    }
+  }
 }

@@ -3,10 +3,10 @@
   "engines": {
     "node": "8.x.x"
   },
+  "private": true,
   "description": "",
   "main": "index.js",
   "scripts": {
-    "postinstall": "yarn run bootstrap",
     "bootstrap": "lerna bootstrap",
     "clean-modules":
       "rm -rf node_modules/ && rm -rf packages/*/node_modules && rm -rf packages/*/build",
@@ -17,7 +17,8 @@
     "precommit": "lint-staged",
     "watch": "babel-node ./packages/oors-cli/src/scripts/watch.js",
     "build": "babel-node ./packages/oors-cli/src/scripts/build.js",
-    "publish-packages": "npm run build && lerna publish"
+    "publish-packages": "npm run build && lerna publish --skip-git",
+    "check-update": "lerna updated"
   },
   "repository": {
     "type": "git",
@@ -51,10 +52,11 @@
     "eslint-plugin-jsx-a11y": "5.0.3",
     "eslint-plugin-react": "7.0.1",
     "husky": "0.13.4",
-    "lerna": "^2.0.0",
+    "lerna": "^2.4.0",
     "lint-staged": "3.5.1",
     "nodemon": "1.11.0",
     "npm-run-all": "4.0.2",
     "prettier": "1.7.0"
-  }
+  },
+  "workspaces": ["packages/*"]
 }
