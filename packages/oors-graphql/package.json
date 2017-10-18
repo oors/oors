@@ -1,7 +1,8 @@
 {
   "name": "oors-graphql",
   "version": "1.0.1",
-  "description": "oors GraphQL module that integrates apollo and helps you publish a GraphQL API in the fastest way possible.",
+  "description":
+    "oors GraphQL module that integrates apollo and helps you publish a GraphQL API in the fastest way possible.",
   "main": "build/index.js",
   "repository": {
     "type": "git",
@@ -14,7 +15,7 @@
   },
   "homepage": "https://github.com/viczam/oors#readme",
   "dependencies": {
-    "apollo-server-express": "1.1.2",
+    "apollo-server-express": "1.1.7",
     "express": "4.15.3",
     "fs-extra": "^3.0.1",
     "graphql": "^0.10.*",
