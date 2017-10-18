@@ -1,11 +1,11 @@
-type MongoQuery {
+input MongoQuery {
   filters: JSON
   offset: Int
   limit: Int
   orderBy: [SortItem!]
 }
 
-type SortItem {
+input SortItem {
   field: String
   order: SortOrder
 }
