@@ -1,6 +1,6 @@
 {
   "name": "oors-user",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "oors user module providing authentication, authorization, users and accounts management.",
   "main": "build/index.js",
   "repository": {
