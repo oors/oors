@@ -272,13 +272,7 @@ class User extends ServiceContainer {
         'createdAt',
         'updatedAt',
       ]),
-      account: pick(account, [
-        'isConfirmed',
-        'isActive',
-        '_id',
-        'updatedAt',
-        'createdAt',
-      ]),
+      account: pick(account, ['isConfirmed', 'isActive', '_id', 'updatedAt', 'createdAt']),
     };
   }
 
@@ -376,15 +370,42 @@ class User extends ServiceContainer {
     });
   }
 
-  validateJWT = (decodedToken, request, cb) => {
-    if (!decodedToken || !decodedToken.id) {
-      cb(null, false);
-    } else {
-      this.serviceBus
-        .send('UserRepository.findById', objectId(decodedToken.id))
-        .then(result => cb(null, !!result), cb);
-    }
-  };
+  @service()
+  verify({ token }, { extract }) {
+    const UserRepository = extract('UserRepository');
+    const AccountRepository = extract('AccountRepository');
+
+    /**
+     * TODO
+     * check if we need to specify maxAge as an option for jwt.verify
+     */
+    return new Promise((resolve, reject) => {
+      jwt.verify(token, this.jwtConfig.key, async (err, decoded) => {
+        if (err) {
+          return reject(err);
+        }
+
+        try {
+          const { id } = decoded;
+          const user = await UserRepository.findById(objectId(id));
+          const account = await AccountRepository.findById(user.accountId);
+
+          const canLogin = await User.canLogin({
+            user,
+            account,
+          });
+
+          if (!canLogin) {
+            return reject(Boom.unauthorized('Unable to find user!'));
+          }
+
+          return resolve(user);
+        } catch (error) {
+          return reject(error);
+        }
+      });
+    });
+  }
 }
 
 export default User;
