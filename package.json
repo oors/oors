@@ -17,7 +17,7 @@
     "precommit": "lint-staged",
     "watch": "babel-node ./packages/oors-cli/src/scripts/watch.js",
     "build": "babel-node ./packages/oors-cli/src/scripts/build.js",
-    "publish-packages": "npm run build && lerna publish --skip-git",
+    "publish-packages": "npm run build && lerna publish",
     "check-update": "lerna updated"
   },
   "repository": {
