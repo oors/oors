@@ -17,6 +17,7 @@ import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
 import { express as playgroundMiddleware } from 'graphql-playground/middleware';
 import mainResolvers from './graphql/resolvers';
 import modulesResolvers from './graphql/modulesResolvers';
+import LoadersMap from './libs/LoadersMap';
 
 class Gql extends Module {
   static configSchema = {
@@ -47,6 +48,7 @@ class Gql extends Module {
   resolvers = mainResolvers;
   middlewares = {};
   gqlContext = {};
+  loaders = new LoadersMap();
 
   constructor(...args) {
     super(...args);
@@ -55,17 +57,27 @@ class Gql extends Module {
     this.addTypeDefsByPath = this.addTypeDefsByPath.bind(this);
     this.addResolvers = this.addResolvers.bind(this);
     this.addMiddleware = this.addMiddleware.bind(this);
+    this.addLoader = this.addLoader.bind(this);
   }
 
   async setup({ exposeModules }) {
     const { logger } = await this.dependency('oors.logger');
-    const { collectFromModule, addTypeDefs, addTypeDefsByPath, addResolvers, addMiddleware } = this;
+    const {
+      loaders,
+      collectFromModule,
+      addTypeDefs,
+      addTypeDefsByPath,
+      addResolvers,
+      addMiddleware,
+      addLoader,
+    } = this;
 
     await this.createHook('load', collectFromModule, {
       addTypeDefs,
       addTypeDefsByPath,
       addResolvers,
       addMiddleware,
+      addLoader,
     });
 
     if (exposeModules) {
@@ -91,6 +103,7 @@ class Gql extends Module {
 
     this.export({
       schema,
+      loaders,
     });
   }
 
@@ -108,6 +121,10 @@ class Gql extends Module {
     }
 
     this.middlewares[branch].push(middleware);
+  }
+
+  addLoader(...args) {
+    this.loaders.add(...args);
   }
 
   async addTypeDefsByPath(filePath) {
@@ -227,6 +244,7 @@ class Gql extends Module {
           req,
           app: req.app,
           user: req.user,
+          loaders: this.loaders.build(),
         },
       }),
     };

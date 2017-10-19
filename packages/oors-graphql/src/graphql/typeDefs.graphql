@@ -9,3 +9,9 @@ type Mutation {
 scalar DateTime
 
 scalar JSON
+
+enum MutationType {
+  CREATED
+  UPDATED
+  DELETED
+}
