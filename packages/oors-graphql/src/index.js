@@ -58,6 +58,7 @@ class Gql extends Module {
   }
 
   async setup({ exposeModules }) {
+    const { logger } = await this.dependency('oors.logger');
     const { collectFromModule, addTypeDefs, addTypeDefsByPath, addResolvers, addMiddleware } = this;
 
     await this.createHook('load', collectFromModule, {
@@ -76,7 +77,8 @@ class Gql extends Module {
       context: this.gqlContext,
     });
 
-    const schema = this.buildSchema();
+    const schema = this.buildSchema({ logger });
+
     this.setupSubscriptionServer(schema);
 
     this.app.middlewares.insertBefore(
@@ -156,7 +158,7 @@ class Gql extends Module {
     } catch (err) {}
   }
 
-  buildSchema() {
+  buildSchema({ logger }) {
     const resolvers = this.resolvers;
 
     Object.keys(this.middlewares).forEach(branch => {
@@ -181,7 +183,7 @@ class Gql extends Module {
         typeDefs: this.typeDefs,
         resolvers,
         logger: {
-          log: err => this.app.modules.get('oors.logger').logger.error(err),
+          log: err => logger.error(err),
         },
         allowUndefinedInResolve: false,
       }),
