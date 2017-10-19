@@ -19,6 +19,7 @@
     "fs-extra": "^3.0.1",
     "graphql": "^0.10.*",
     "graphql-playground": "^1.0.8",
+    "graphql-subscriptions": "0.5.4",
     "graphql-tools": "1.2.3",
     "graphql-type-json": "0.1.4",
     "graphql-voyager": "1.0.0-rc.7",
@@ -27,6 +28,7 @@
     "lodash": "4.17.4",
     "oors": "^1.0.3",
     "react": "15.5.4",
-    "react-dom": "15.5.4"
+    "react-dom": "15.5.4",
+    "subscriptions-transport-ws": "0.9.1"
   }
 }

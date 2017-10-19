@@ -8,6 +8,9 @@ import has from 'lodash/has';
 import identity from 'lodash/identity';
 import { Module } from 'oors';
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
+import { execute, subscribe } from 'graphql';
+import { PubSub } from 'graphql-subscriptions';
+import { SubscriptionServer } from 'subscriptions-transport-ws';
 import merge from 'lodash/merge';
 import { makeExecutableSchema } from 'graphql-tools';
 import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
@@ -33,6 +36,10 @@ class Gql extends Module {
     middlewarePivot: Joi.string().default('isMethod'),
     configureSchema: Joi.func().default(identity),
     exposeModules: Joi.boolean().default(true),
+    subscriptions: Joi.object().keys({
+      enabled: Joi.boolean().default(true),
+      path: '/subscriptions',
+    }),
   };
 
   name = 'oors.graphQL';
@@ -70,6 +77,7 @@ class Gql extends Module {
     });
 
     const schema = this.buildSchema();
+    this.setupSubscriptionServer(schema);
 
     this.app.middlewares.insertBefore(
       this.getConfig('middlewarePivot'),
@@ -178,6 +186,31 @@ class Gql extends Module {
         allowUndefinedInResolve: false,
       }),
     );
+  }
+
+  setupSubscriptionServer(schema) {
+    if (this.getConfig('subscriptions.enabled')) {
+      return;
+    }
+
+    const pubsub = new PubSub();
+    const server = this.app.server;
+    const subscriptionServer = new SubscriptionServer(
+      {
+        execute,
+        subscribe,
+        schema,
+      },
+      {
+        server,
+        path: this.getConfig('subscriptions.path'),
+      },
+    );
+
+    this.export({
+      pubsub,
+      subscriptionServer,
+    });
   }
 
   getGraphQLMiddleware(schema) {
