@@ -226,6 +226,8 @@ class Gql extends Module {
       },
     );
 
+    this.gqlContext.pubsub = pubsub;
+
     this.export({
       pubsub,
       subscriptionServer,
