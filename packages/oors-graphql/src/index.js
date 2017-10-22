@@ -49,6 +49,7 @@ class Gql extends Module {
   middlewares = {};
   gqlContext = {};
   loaders = new LoadersMap();
+  pubsub = new PubSub();
 
   constructor(...args) {
     super(...args);
@@ -70,9 +71,11 @@ class Gql extends Module {
       addResolvers,
       addMiddleware,
       addLoader,
+      pubsub,
     } = this;
 
     await this.createHook('load', collectFromModule, {
+      pubsub,
       addTypeDefs,
       addTypeDefsByPath,
       addResolvers,
@@ -212,7 +215,6 @@ class Gql extends Module {
       return;
     }
 
-    const pubsub = new PubSub();
     const server = this.app.server;
     const subscriptionServer = new SubscriptionServer(
       {
@@ -226,10 +228,10 @@ class Gql extends Module {
       },
     );
 
-    this.gqlContext.pubsub = pubsub;
+    this.gqlContext.pubsub = this.pubsub;
 
     this.export({
-      pubsub,
+      pubsub: this.pubsub,
       subscriptionServer,
     });
   }
