@@ -27,6 +27,10 @@ class Gql extends Module {
     }),
     graphiql: Joi.object().keys({
       enabled: Joi.boolean().default(true),
+      params: Joi.object().keys({
+        endpointURL: Joi.string().default('/graphql'),
+        subscriptionsEndpoint: Joi.string().required(),
+      }),
     }),
     voyager: Joi.object().keys({
       enabled: Joi.boolean().default(true),
@@ -39,7 +43,7 @@ class Gql extends Module {
     exposeModules: Joi.boolean().default(true),
     subscriptions: Joi.object().keys({
       enabled: Joi.boolean().default(true),
-      path: '/subscriptions',
+      path: Joi.string().default('/subscriptions'),
     }),
   };
 
@@ -259,9 +263,7 @@ class Gql extends Module {
       id: 'graphiql',
       path: '/graphiql',
       factory: graphiqlExpress,
-      params: {
-        endpointURL: '/graphql',
-      },
+      params: this.getConfig('graphiql.params'),
       enabled: this.getConfig('graphiql.enabled'),
     };
   }
