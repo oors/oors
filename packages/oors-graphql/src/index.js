@@ -50,7 +50,7 @@ class Gql extends Module {
   name = 'oors.graphQL';
   typeDefs = [];
   resolvers = mainResolvers;
-  middlewares = {};
+  middlewares = []; // for resolvers
   gqlContext = {};
   loaders = new LoadersMap();
   pubsub = new PubSub();
@@ -122,12 +122,13 @@ class Gql extends Module {
     merge(this.resolvers, resolvers);
   }
 
-  addMiddleware(branch, middleware) {
-    if (!this.middlewares[branch]) {
-      this.middlewares[branch] = [];
-    }
+  addMiddleware(matcher, middleware) {
+    this.middlewares.push({
+      matcher: typeof matcher === 'string' ? new RegExp(`^${matcher}$`) : matcher,
+      middleware,
+    });
 
-    this.middlewares[branch].push(middleware);
+    return this;
   }
 
   addLoader(...args) {
@@ -185,22 +186,7 @@ class Gql extends Module {
   buildSchema({ logger }) {
     const resolvers = this.resolvers;
 
-    Object.keys(this.middlewares).forEach(branch => {
-      const middlewares = this.middlewares[branch];
-      if (!middlewares.length) {
-        return;
-      }
-
-      if (!has(resolvers, branch)) {
-        throw new Error(`Couldn't find a resolver for "${branch}" branch!`);
-      }
-
-      const resolver = [...middlewares]
-        .reverse()
-        .reduce((acc, middleware) => (...args) => middleware(...args, acc), get(resolvers, branch));
-
-      set(resolvers, branch, resolver);
-    });
+    this.applyMiddlewares(resolvers);
 
     return makeExecutableSchema(
       this.getConfig('configureSchema')({
@@ -212,6 +198,27 @@ class Gql extends Module {
         allowUndefinedInResolve: false,
       }),
     );
+  }
+
+  applyMiddlewares(resolvers) {
+    Object.keys(resolvers).forEach(type => {
+      Object.keys(type).forEach(propr => {
+        const branch = `${type}.${propr}`;
+        const middlewares = this.middlewares.filter(({ matcher }) => matcher.test(branch));
+        if (!middlewares.length) {
+          return;
+        }
+
+        const resolver = [...middlewares]
+          .reverse()
+          .reduce(
+            (acc, middleware) => (...args) => middleware(...args, acc),
+            resolvers[type][propr],
+          );
+
+        set(resolvers, branch, resolver);
+      });
+    });
   }
 
   setupSubscriptionServer(schema) {
