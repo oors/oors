@@ -21,37 +21,66 @@ import LoadersMap from './libs/LoadersMap';
 
 class Gql extends Module {
   static configSchema = {
-    schemaOptions: Joi.object().keys({
-      typeDefs: Joi.array().default([]),
-      resolvers: Joi.array().default([]),
-    }),
-    graphiql: Joi.object().keys({
-      enabled: Joi.boolean().default(true),
-      params: Joi.object().keys({
-        endpointURL: Joi.string().default('/graphql'),
-        subscriptionsEndpoint: Joi.string().required(),
+    graphiql: Joi.object()
+      .keys({
+        enabled: Joi.boolean().required(),
+        params: Joi.object()
+          .keys({
+            endpointURL: Joi.string().default('/graphql'),
+            subscriptionsEndpoint: Joi.string().required(),
+          })
+          .required(),
+      })
+      .default({
+        enabled: true,
+        params: {
+          endpointURL: '/graphql',
+        },
       }),
-    }),
-    voyager: Joi.object().keys({
-      enabled: Joi.boolean().default(true),
-      params: Joi.object().keys({
-        endpointURL: Joi.string().default('/graphql'),
+    voyager: Joi.object()
+      .keys({
+        enabled: Joi.boolean().required(),
+        params: Joi.object()
+          .keys({
+            endpointURL: Joi.string().required(),
+          })
+          .required(),
+      })
+      .default({
+        enabled: true,
+        params: {
+          endpointURL: '/graphql',
+        },
       }),
-    }),
-    playground: Joi.object().keys({
-      enabled: Joi.boolean().default(true),
-      params: Joi.object().keys({
-        endpointURL: Joi.string().default('/graphql'),
+    playground: Joi.object()
+      .keys({
+        enabled: Joi.boolean().required(),
+        params: Joi.object()
+          .keys({
+            endpointURL: Joi.string().required(),
+          })
+          .required(),
+      })
+      .default({
+        enabled: true,
+        params: {
+          endpointURL: '/graphql',
+        },
       }),
-    }),
     middlewarePivot: Joi.string().default('isMethod'),
     configureSchema: Joi.func().default(identity),
     exposeModules: Joi.boolean().default(true),
-    subscriptions: Joi.object().keys({
-      enabled: Joi.boolean().default(true),
-      path: Joi.string().default('/subscriptions'),
-      createPubSub: Joi.func().default(() => Promise.resolve(new PubSub())),
-    }),
+    subscriptions: Joi.object()
+      .keys({
+        enabled: Joi.boolean().required(),
+        path: Joi.string().required(),
+        createPubSub: Joi.func().required(),
+      })
+      .default({
+        enabled: true,
+        path: '/subscriptions',
+        createPubSub: () => Promise.resolve(new PubSub()),
+      }),
   };
 
   name = 'oors.graphQL';
@@ -59,6 +88,7 @@ class Gql extends Module {
   resolvers = mainResolvers;
   middlewares = []; // for resolvers
   gqlContext = {};
+  pubsub = undefined;
   loaders = new LoadersMap();
 
   constructor(...args) {
@@ -71,8 +101,11 @@ class Gql extends Module {
     this.addLoader = this.addLoader.bind(this);
   }
 
-  async setup({ exposeModules, subscriptions: { createPubSub } }, manager) {
-    this.pubsub = await createPubSub(manager);
+  async setup({ exposeModules, subscriptions }, manager) {
+    if (subscriptions.enabled) {
+      this.pubsub = await subscriptions.createPubSub(manager);
+    }
+
     const { logger } = await this.dependency('oors.logger');
     const {
       loaders,
@@ -82,11 +115,10 @@ class Gql extends Module {
       addResolvers,
       addMiddleware,
       addLoader,
-      pubsub,
     } = this;
 
     await this.createHook('load', collectFromModule, {
-      pubsub,
+      pubsub: this.pubsub,
       addTypeDefs,
       addTypeDefsByPath,
       addResolvers,
