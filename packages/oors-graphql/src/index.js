@@ -72,8 +72,8 @@ class Gql extends Module {
     exposeModules: Joi.boolean().default(true),
     subscriptions: Joi.object()
       .keys({
-        enabled: Joi.boolean().required(),
-        path: Joi.string().required(),
+        enabled: Joi.boolean().default(true),
+        path: Joi.string().default('/subscriptions'),
         createPubSub: Joi.func().required(),
       })
       .default({
@@ -263,7 +263,7 @@ class Gql extends Module {
   }
 
   setupSubscriptionServer(schema) {
-    if (this.getConfig('subscriptions.enabled')) {
+    if (!this.getConfig('subscriptions.enabled')) {
       return;
     }
 
