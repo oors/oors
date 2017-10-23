@@ -213,8 +213,8 @@ class Gql extends Module {
         const resolver = [...middlewares]
           .reverse()
           .reduce(
-            (acc, middleware) => (...args) => middleware(...args, acc),
-            resolvers[type][propr],
+            (acc, { middleware }) => (...args) => middleware(...args, acc),
+            get(resolvers, branch),
           );
 
         set(resolvers, branch, resolver);
