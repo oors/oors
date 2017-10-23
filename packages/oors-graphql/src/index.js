@@ -34,9 +34,15 @@ class Gql extends Module {
     }),
     voyager: Joi.object().keys({
       enabled: Joi.boolean().default(true),
+      params: Joi.object().keys({
+        endpointURL: Joi.string().default('/graphql'),
+      }),
     }),
     playground: Joi.object().keys({
       enabled: Joi.boolean().default(true),
+      params: Joi.object().keys({
+        endpointURL: Joi.string().default('/graphql'),
+      }),
     }),
     middlewarePivot: Joi.string().default('isMethod'),
     configureSchema: Joi.func().default(identity),
@@ -44,6 +50,7 @@ class Gql extends Module {
     subscriptions: Joi.object().keys({
       enabled: Joi.boolean().default(true),
       path: Joi.string().default('/subscriptions'),
+      createPubSub: Joi.func().default(() => Promise.resolve(new PubSub())),
     }),
   };
 
@@ -53,7 +60,6 @@ class Gql extends Module {
   middlewares = []; // for resolvers
   gqlContext = {};
   loaders = new LoadersMap();
-  pubsub = new PubSub();
 
   constructor(...args) {
     super(...args);
@@ -65,7 +71,8 @@ class Gql extends Module {
     this.addLoader = this.addLoader.bind(this);
   }
 
-  async setup({ exposeModules }) {
+  async setup({ exposeModules, subscriptions: { createPubSub } }, manager) {
+    this.pubsub = await createPubSub(manager);
     const { logger } = await this.dependency('oors.logger');
     const {
       loaders,
@@ -112,6 +119,7 @@ class Gql extends Module {
       schema,
       loaders,
       addMiddleware,
+      addLoader,
     });
   }
 
@@ -203,8 +211,8 @@ class Gql extends Module {
 
   applyMiddlewares(resolvers) {
     Object.keys(resolvers).forEach(type => {
-      Object.keys(resolvers[type]).forEach(propr => {
-        const branch = `${type}.${propr}`;
+      Object.keys(resolvers[type]).forEach(field => {
+        const branch = `${type}.${field}`;
         const middlewares = this.middlewares.filter(({ matcher }) => matcher.test(branch));
         if (!middlewares.length) {
           return;
@@ -227,6 +235,7 @@ class Gql extends Module {
       return;
     }
 
+    const { pubsub } = this;
     const server = this.app.server;
     const subscriptionServer = new SubscriptionServer(
       {
@@ -240,10 +249,10 @@ class Gql extends Module {
       },
     );
 
-    this.gqlContext.pubsub = this.pubsub;
+    this.gqlContext.pubsub = pubsub;
 
     this.export({
-      pubsub: this.pubsub,
+      pubsub,
       subscriptionServer,
     });
   }
@@ -281,9 +290,7 @@ class Gql extends Module {
       id: 'voyager',
       path: '/voyager',
       factory: ({ endpointURL }) => voyagerMiddleware({ endpointUrl: endpointURL }),
-      params: {
-        endpointURL: '/graphql',
-      },
+      params: this.getConfig('voyager.params'),
       enabled: this.getConfig('voyager.enabled'),
     };
   }
@@ -293,9 +300,7 @@ class Gql extends Module {
       id: 'playground',
       path: '/playground',
       factory: ({ endpointURL }) => playgroundMiddleware({ endpoint: endpointURL }),
-      params: {
-        endpointURL: '/graphql',
-      },
+      params: this.getConfig('playground.params'),
       enabled: this.getConfig('playground.enabled'),
     };
   }

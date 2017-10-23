@@ -77,7 +77,7 @@ class Module {
 
   async load() {
     this.emit('before:setup');
-    await this.setup(this.config);
+    await this.setup(this.config, this.manager);
     this.emit('after:setup');
   }
 
