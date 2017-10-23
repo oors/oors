@@ -111,6 +111,7 @@ class Gql extends Module {
     this.export({
       schema,
       loaders,
+      addMiddleware,
     });
   }
 
@@ -202,7 +203,7 @@ class Gql extends Module {
 
   applyMiddlewares(resolvers) {
     Object.keys(resolvers).forEach(type => {
-      Object.keys(type).forEach(propr => {
+      Object.keys(resolvers[type]).forEach(propr => {
         const branch = `${type}.${propr}`;
         const middlewares = this.middlewares.filter(({ matcher }) => matcher.test(branch));
         if (!middlewares.length) {
