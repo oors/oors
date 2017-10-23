@@ -1,6 +1,6 @@
 {
   "name": "oors-octobus",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "oors octobus integration",
   "main": "build/index.js",
   "repository": {
@@ -19,6 +19,6 @@
     "joi": "10.6.0",
     "lodash": "4.17.4",
     "octobus.js": "1.1.2",
-    "oors": "^1.0.4"
+    "oors": "^1.0.5"
   }
 }

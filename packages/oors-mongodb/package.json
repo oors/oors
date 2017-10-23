@@ -1,6 +1,6 @@
 {
   "name": "oors-mongodb",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "oors database storage module providing MongoDB integration.",
   "main": "build/index.js",
   "repository": {
@@ -20,6 +20,6 @@
     "mongodb-extended-json": "^1.10.0",
     "octobus-crud": "0.6.0",
     "octobus-mongodb-store": "0.5.0",
-    "oors": "^1.0.4"
+    "oors": "^1.0.5"
   }
 }
