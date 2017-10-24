@@ -18,6 +18,8 @@ export const fromMongo = item => ({
   id: item._id.toString(),
 });
 
+export const fromMongoCursor = data => data.map(fromMongo).toArray();
+
 export const toMongo = item => ({
   ...item,
   _id: objectId(item.id),
@@ -44,3 +46,45 @@ export const parseMongoQuery = params => {
 
   return query;
 };
+
+export const createLoaders = Repository => ({
+  findById: {
+    loader: ids =>
+      Repository.findMany({
+        query: {
+          _id: {
+            $in: ids.map(objectId),
+          },
+        },
+      }).then(fromMongoCursor),
+    options: {
+      cacheKeyFn: key => key.toString(),
+    },
+  },
+  findOne: {
+    loader: queries =>
+      Promise.all(
+        queries.map(query =>
+          Repository.findOne({
+            query,
+          }).then(fromMongoCursor),
+        ),
+      ),
+    options: {
+      cacheKeyFn: key => JSON.stringify(key),
+    },
+  },
+  findMany: {
+    loader: queries =>
+      Promise.all(
+        queries.map(query =>
+          Repository.findMany({
+            query,
+          }).then(fromMongoCursor),
+        ),
+      ),
+    options: {
+      cacheKeyFn: key => JSON.stringify(key),
+    },
+  },
+});
