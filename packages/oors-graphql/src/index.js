@@ -176,6 +176,10 @@ class Gql extends Module {
     this.loaders.add(...args);
   }
 
+  addLoaders(...args) {
+    this.loaders.multiAdd(...args);
+  }
+
   async addTypeDefsByPath(filePath) {
     this.addTypeDefs(await fse.readFile(filePath, 'utf8'));
   }

@@ -9,10 +9,13 @@ class LoadersMap {
     this.loaders = {};
   }
 
-  multiAdd(map, namespace) {
-    Object.keys(map).forEach(key => {
-      this.add(`${namespace ? `${namespace}.` : ''}${key}`, map[key]);
+  multiAdd(loaders, namespace) {
+    Object.keys(loaders).forEach(key => {
+      const { loader, options } = loaders[key];
+      this.add(`${namespace ? `${namespace}.` : ''}${key}`, loader, options);
     });
+
+    return this;
   }
 
   add(id, batchLoadFn, options) {
