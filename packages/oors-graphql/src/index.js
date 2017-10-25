@@ -18,6 +18,7 @@ import { express as playgroundMiddleware } from 'graphql-playground/middleware';
 import mainResolvers from './graphql/resolvers';
 import modulesResolvers from './graphql/modulesResolvers';
 import LoadersMap from './libs/LoadersMap';
+import * as decorators from './libs/decorators';
 
 class Gql extends Module {
   static configSchema = {
@@ -345,4 +346,4 @@ class Gql extends Module {
   }
 }
 
-export default Gql;
+export { Gql as default, decorators };

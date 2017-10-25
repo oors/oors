@@ -12,10 +12,7 @@ class MongoDB extends Module {
       Joi.object().keys({
         name: Joi.string().required(),
         url: Joi.string().required(),
-        Store: Joi.object().default(
-          () => decorators.withTimestamps(MongoStore),
-          'Mongo store',
-        ),
+        Store: Joi.object().default(() => decorators.withTimestamps(MongoStore), 'Mongo store'),
       }),
     ),
     defaultConnection: Joi.string(),
@@ -25,10 +22,11 @@ class MongoDB extends Module {
 
   hooks = {
     'oors.graphQL.buildContext': ({ context }) => {
-      const { fromMongo, toMongo } = helpers;
+      const { fromMongo, fromMongoCursor, toMongo } = helpers;
 
       Object.assign(context, {
         fromMongo,
+        fromMongoCursor,
         toMongo,
       });
     },
@@ -66,10 +64,7 @@ class MongoDB extends Module {
     if (store) {
       repository.setStore(store);
     } else {
-      this.bindRepository(
-        repository,
-        connectionName || this.defaultConnectionName,
-      );
+      this.bindRepository(repository, connectionName || this.defaultConnectionName);
     }
 
     return repository;
@@ -130,13 +125,7 @@ class MongoDB extends Module {
   }
 
   async setup({ connections }) {
-    const {
-      createConnection,
-      getConnection,
-      createStore,
-      createRepository,
-      bindRepository,
-    } = this;
+    const { createConnection, getConnection, createStore, createRepository, bindRepository } = this;
 
     await Promise.all(connections.map(createConnection));
 
