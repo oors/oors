@@ -33,7 +33,7 @@ class LoadersMap {
       (acc, key) => ({
         ...acc,
         [key]: Array.isArray(loaders[key])
-          ? (...args) => new DataLoader(...loaders[key]).load(...args)
+          ? new DataLoader(...loaders[key])
           : this.build(`${path ? `${path}.` : ''}${key}`),
       }),
       {},
