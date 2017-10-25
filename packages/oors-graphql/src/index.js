@@ -99,6 +99,7 @@ class Gql extends Module {
     this.addResolvers = this.addResolvers.bind(this);
     this.addMiddleware = this.addMiddleware.bind(this);
     this.addLoader = this.addLoader.bind(this);
+    this.addLoaders = this.addLoaders.bind(this);
   }
 
   async setup({ exposeModules, subscriptions }, manager) {
