@@ -115,6 +115,7 @@ class Gql extends Module {
       addResolvers,
       addMiddleware,
       addLoader,
+      addLoaders,
     } = this;
 
     await this.createHook('load', collectFromModule, {
@@ -152,6 +153,7 @@ class Gql extends Module {
       loaders,
       addMiddleware,
       addLoader,
+      addLoaders,
     });
   }
 
