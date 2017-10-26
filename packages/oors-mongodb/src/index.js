@@ -39,6 +39,7 @@ class MongoDB extends Module {
 
     this.createStore = this.createStore.bind(this);
     this.createRepository = this.createRepository.bind(this);
+    this.createRepositories = this.createRepositories.bind(this);
     this.createConnection = this.createConnection.bind(this);
     this.getConnection = this.getConnection.bind(this);
     this.bindRepository = this.bindRepository.bind(this);
@@ -138,13 +139,21 @@ class MongoDB extends Module {
   }
 
   async setup({ connections }) {
-    const { createConnection, getConnection, createStore, createRepository, bindRepository } = this;
+    const {
+      createConnection,
+      getConnection,
+      createStore,
+      createRepository,
+      createRepositories,
+      bindRepository,
+    } = this;
 
     await Promise.all(connections.map(createConnection));
 
     this.export({
       createStore,
       createRepository,
+      createRepositories,
       createConnection,
       getConnection,
       bindRepository,
