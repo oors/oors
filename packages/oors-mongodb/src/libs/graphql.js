@@ -76,13 +76,7 @@ export const createLoaders = Repository => ({
   },
   findMany: {
     loader: queries =>
-      Promise.all(
-        queries.map(query =>
-          Repository.findMany({
-            query,
-          }).then(fromMongoCursor),
-        ),
-      ),
+      Promise.all(queries.map((query = {}) => Repository.findMany(query).then(fromMongoCursor))),
     options: {
       cacheKeyFn: key => JSON.stringify(key),
     },
