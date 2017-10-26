@@ -7,7 +7,7 @@ export const withSchema = schema => resolver => (_, args, ctx, info) => {
 };
 
 export const withArgs = parser => resolver => (_, args, ctx, info) =>
-  resolver(_, parser(args), ctx, info);
+  resolver(_, parser(args, ctx), ctx, info);
 
 export const withContext = fn => resolver => (_, args, ctx, info) =>
   resolver(_, args, fn(ctx), info);
