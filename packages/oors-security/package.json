@@ -1,6 +1,6 @@
 {
   "name": "oors-security",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "oors security",
   "main": "build/index.js",
   "scripts": {},
@@ -22,6 +22,6 @@
     "mongodb": "2.2.27",
     "octobus.js": "1.1.2",
     "oors": "^1.0.5",
-    "oors-mongodb": "^1.0.7"
+    "oors-mongodb": "^1.1.0"
   }
 }
