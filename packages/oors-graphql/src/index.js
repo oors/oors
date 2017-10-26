@@ -205,7 +205,7 @@ class Gql extends Module {
 
     try {
       // eslint-disable-next-line import/no-dynamic-require, global-require
-      const resolvers = require(`${dirPath}/resolvers.js`);
+      const resolvers = require(`${dirPath}/resolvers`);
       if (resolvers.default) {
         Object.assign(resolvers, resolvers.default);
         delete resolvers.default;
@@ -347,3 +347,4 @@ class Gql extends Module {
 }
 
 export { Gql as default, decorators };
+export { default as Resolvers } from './libs/Resolvers';

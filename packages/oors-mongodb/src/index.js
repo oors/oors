@@ -70,6 +70,19 @@ class MongoDB extends Module {
     return repository;
   }
 
+  createRepositories(repositories) {
+    return Object.keys(repositories).reduce(
+      (acc, name) => ({
+        ...acc,
+        [`${name}Repository`]: this.createRepository({
+          name,
+          ...repositories[name],
+        }),
+      }),
+      {},
+    );
+  }
+
   bindRepository(repository, connectionName) {
     const store = this.createStore(
       {
