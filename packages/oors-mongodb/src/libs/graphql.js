@@ -4,7 +4,7 @@ import { fromMongoCursor } from './helpers';
 
 export const createCRUDResolvers = ({ getRepository, getLoaders }) => ({
   findOne: (_, { id }, ctx) => getLoaders(ctx).findOne.load(id),
-  findMany: (_, args, ctx) => getLoaders(ctx).findMany.load(),
+  findMany: (_, args, ctx) => getLoaders(ctx).findMany.load({}),
   createOne: async (_, { input }, ctx) => ctx.fromMongo(await getRepository(ctx).createOne(input)),
   updateOne: async (_, { id, input }, ctx) => {
     const { fromMongo } = ctx;
