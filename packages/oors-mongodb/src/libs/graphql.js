@@ -2,11 +2,13 @@ import { ObjectID as objectId } from 'mongodb';
 import omit from 'lodash/omit';
 import { fromMongoCursor } from './helpers';
 
-export const createCRUDResolvers = ({ Repository, getLoaders }) => ({
+export const createCRUDResolvers = ({ getRepository, getLoaders }) => ({
   findOne: (_, { id }, ctx) => getLoaders(ctx).findOne.load(id),
   findMany: (_, args, ctx) => getLoaders(ctx).findMany.load(),
-  createOne: async (_, { input }, { fromMongo }) => fromMongo(await Repository.createOne(input)),
-  updateOne: async (_, { id, input }, { fromMongo }) => {
+  createOne: async (_, { input }, ctx) => ctx.fromMongo(await getRepository(ctx).createOne(input)),
+  updateOne: async (_, { id, input }, ctx) => {
+    const { fromMongo } = ctx;
+    const Repository = getRepository(ctx);
     const item = await Repository.findById(objectId(id));
 
     if (!item) {
@@ -34,7 +36,9 @@ export const createCRUDResolvers = ({ Repository, getLoaders }) => ({
       }),
     );
   },
-  deleteOne: async (_, { id }, { fromMongo }) => {
+  deleteOne: async (_, { id }, ctx) => {
+    const { fromMongo } = ctx;
+    const Repository = getRepository(ctx);
     const item = await Repository.findById(objectId(id));
 
     if (!item) {
