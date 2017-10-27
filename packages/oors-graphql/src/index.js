@@ -82,6 +82,7 @@ class Gql extends Module {
         path: '/subscriptions',
         createPubSub: () => Promise.resolve(new PubSub()),
       }),
+    getServerOptions: Joi.func().default(() => {}),
   };
 
   name = 'oors.graphQL';
@@ -311,6 +312,7 @@ class Gql extends Module {
           user: req.user,
           loaders: this.loaders.build(),
         },
+        ...this.getConfig('getServerOptions')(req),
       }),
     };
   }
