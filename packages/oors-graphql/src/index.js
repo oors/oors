@@ -312,6 +312,16 @@ class Gql extends Module {
           user: req.user,
           loaders: this.loaders.build(),
         },
+        formatError: err => {
+          if (err.originalError.isJoi) {
+            Object.assign(err, {
+              details: err.originalError.details,
+              message: err.originalError.details.map(({ message }) => message).join('\n'),
+            });
+          }
+
+          return err;
+        },
         ...this.getConfig('getServerOptions')(req),
       }),
     };
