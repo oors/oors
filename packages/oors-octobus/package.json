@@ -15,7 +15,7 @@
   "homepage": "https://github.com/viczam/oors#readme",
   "dependencies": {
     "axios": "0.16.2",
-    "express": "4.15.3",
+    "express": "4.16.2",
     "joi": "10.6.0",
     "lodash": "4.17.4",
     "octobus.js": "1.1.2",

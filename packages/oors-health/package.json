@@ -14,7 +14,7 @@
   },
   "homepage": "https://github.com/viczam/oors#readme",
   "dependencies": {
-    "express": "4.15.3",
+    "express": "4.16.2",
     "joi": "10.5.1",
     "oors": "^1.0.5"
   }
