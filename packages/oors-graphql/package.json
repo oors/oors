@@ -1,6 +1,6 @@
 {
   "name": "oors-graphql",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "oors GraphQL module that integrates apollo and helps you publish a GraphQL API in the fastest way possible.",
   "main": "build/index.js",
   "repository": {
