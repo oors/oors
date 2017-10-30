@@ -34,6 +34,10 @@ class Repository extends CRUDServiceContainer {
   }
 
   addStamps() {
+    if (!this.stamps) {
+      return;
+    }
+
     if (this.stamps.user) {
       Object.assign(this.schema, {
         createdBy: Joi.object(),
