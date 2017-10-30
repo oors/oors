@@ -6,11 +6,11 @@ export const withSchema = schema => resolver => (_, args, ctx, info) => {
   return resolver(_, args, ctx, info);
 };
 
-export const withArgs = parser => resolver => (_, args, ctx, info) =>
-  resolver(_, parser(args, ctx), ctx, info);
+export const withArgs = parser => resolver => async (_, args, ctx, info) =>
+  resolver(_, await parser(args, ctx), ctx, info);
 
-export const withContext = fn => resolver => (_, args, ctx, info) =>
-  resolver(_, args, fn(ctx), info);
+export const withContext = fn => resolver => async (_, args, ctx, info) =>
+  resolver(_, args, await fn(ctx), info);
 
 export const compose = (...decorators) => flow(decorators.reverse());
 
