@@ -24,8 +24,11 @@ class Repository extends CRUDServiceContainer {
 
   set schema(schema) {
     this._schema = schema;
-    this.addIdToSchema();
-    this.addStamps();
+
+    if (schema) {
+      this.addIdToSchema();
+      this.addStamps();
+    }
   }
 
   get schema() {
