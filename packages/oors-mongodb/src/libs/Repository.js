@@ -38,14 +38,14 @@ class Repository extends CRUDServiceContainer {
     }
 
     if (this.stamps.user) {
-      Object.assign(this.schema, {
+      Object.assign(this._schema, {
         createdBy: Joi.object(),
         updatedBy: Joi.object(),
       });
     }
 
     if (this.stamps.time) {
-      Object.assign(this.schema, {
+      Object.assign(this._schema, {
         createdAt: Joi.date(),
         updatedAt: Joi.date(),
       });
@@ -53,11 +53,11 @@ class Repository extends CRUDServiceContainer {
   }
 
   addIdToSchema() {
-    if (this.schema._id) {
+    if (this._schema._id) {
       return;
     }
 
-    Object.assign(this.schema, {
+    Object.assign(this._schema, {
       _id: Joi.object(),
     });
   }
