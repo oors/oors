@@ -8,18 +8,17 @@ class Repository extends CRUDServiceContainer {
     time: true,
   };
 
-  constructor(...args) {
-    super(...args);
+  constructor(schema, collectionName) {
+    super(schema);
 
     if (!this.schema) {
       this.schema = this.constructor.schema;
     }
 
     if (!this.collectionName) {
-      this.collectionName = this.constructor.name.substr(
-        0,
-        this.constructor.name.indexOf('Repository'),
-      );
+      this.collectionName =
+        collectionName ||
+        this.constructor.name.substr(0, this.constructor.name.indexOf('Repository'));
     }
   }
 
