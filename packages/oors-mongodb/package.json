@@ -1,6 +1,6 @@
 {
   "name": "oors-mongodb",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "description": "oors database storage module providing MongoDB integration.",
   "main": "build/index.js",
   "repository": {
