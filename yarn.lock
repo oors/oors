@@ -74,6 +74,10 @@ add-stream@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/add-stream/-/add-stream-1.0.0.tgz#6a7990437ca736d5e1288db92bd3266d5f5cb2aa"
 
+ajv-keywords@2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/ajv-keywords/-/ajv-keywords-2.1.1.tgz#617997fc5f60576894c435f940d819e135b80762"
+
 ajv-keywords@^1.0.0:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/ajv-keywords/-/ajv-keywords-1.5.1.tgz#314dd0a4b3368fad3dfcdc54ede6171b886daf3c"
@@ -335,13 +339,6 @@ aws-sign2@~0.6.0:
 aws4@^1.2.1:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.6.0.tgz#83ef5ca860b2b32e4a0deedee8c771b9db57471e"
-
-axios@0.16.2:
-  version "0.16.2"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-0.16.2.tgz#ba4f92f17167dfbab40983785454b9ac149c3c6d"
-  dependencies:
-    follow-redirects "^1.2.3"
-    is-buffer "^1.1.5"
 
 axobject-query@^0.1.0:
   version "0.1.0"
@@ -2104,7 +2101,7 @@ debug@2.6.8:
   dependencies:
     ms "2.0.0"
 
-debug@2.6.9, debug@^2.1.1, debug@^2.2.0, debug@^2.6.6, debug@^2.6.8, debug@^2.6.9:
+debug@2.6.9, debug@^2.1.1, debug@^2.2.0, debug@^2.6.6, debug@^2.6.8:
   version "2.6.9"
   resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.9.tgz#5d128515df134ff327e90a4c93f4e077a536341f"
   dependencies:
@@ -2647,10 +2644,6 @@ esrecurse@^4.1.0:
     estraverse "^4.1.0"
     object-assign "^4.0.1"
 
-estraverse-fb@^1.3.1:
-  version "1.3.2"
-  resolved "https://registry.yarnpkg.com/estraverse-fb/-/estraverse-fb-1.3.2.tgz#d323a4cb5e5ac331cea033413a9253e1643e07c4"
-
 estraverse@^4.0.0, estraverse@^4.1.0, estraverse@^4.1.1, estraverse@^4.2.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/estraverse/-/estraverse-4.2.0.tgz#0dee3fed31fcd469618ce7342099fc1afa0bdb13"
@@ -2963,12 +2956,6 @@ flat-cache@^1.2.1:
     del "^2.0.2"
     graceful-fs "^4.1.2"
     write "^0.2.1"
-
-follow-redirects@^1.2.3:
-  version "1.2.5"
-  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.2.5.tgz#ffd3e14cbdd5eaa72f61b6368c1f68516c2a26cc"
-  dependencies:
-    debug "^2.6.9"
 
 for-in@^1.0.1:
   version "1.0.2"
@@ -4025,36 +4012,9 @@ iterall@1.1.3, iterall@^1.0.0, iterall@^1.1.0, iterall@^1.1.1, iterall@^1.1.3:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/iterall/-/iterall-1.1.3.tgz#1cbbff96204056dde6656e2ed2e2226d0e6d72c9"
 
-joi@10.0.2:
-  version "10.0.2"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-10.0.2.tgz#02b970ec29251f0c185615056adf3e984af2c426"
-  dependencies:
-    hoek "4.x.x"
-    isemail "2.x.x"
-    items "2.x.x"
-    topo "2.x.x"
-
-joi@10.2.2:
-  version "10.2.2"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-10.2.2.tgz#dc5a792b7b4c6fffa562242a95b55d9d3f077e24"
-  dependencies:
-    hoek "4.x.x"
-    isemail "2.x.x"
-    items "2.x.x"
-    topo "2.x.x"
-
 joi@10.5.1:
   version "10.5.1"
   resolved "https://registry.yarnpkg.com/joi/-/joi-10.5.1.tgz#22c608d106c1f7fe18c6f1bf38a228fdf2daab7f"
-  dependencies:
-    hoek "4.x.x"
-    isemail "2.x.x"
-    items "2.x.x"
-    topo "2.x.x"
-
-joi@10.6.0:
-  version "10.6.0"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-10.6.0.tgz#52587f02d52b8b75cdb0c74f0b164a191a0e1fc2"
   dependencies:
     hoek "4.x.x"
     isemail "2.x.x"
@@ -4076,16 +4036,6 @@ joi@^8.0.5:
   dependencies:
     hoek "4.x.x"
     isemail "2.x.x"
-    moment "2.x.x"
-    topo "2.x.x"
-
-joi@^9.1.1:
-  version "9.2.0"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-9.2.0.tgz#3385ac790192130cbe230e802ec02c9215bbfeda"
-  dependencies:
-    hoek "4.x.x"
-    isemail "2.x.x"
-    items "2.x.x"
     moment "2.x.x"
     topo "2.x.x"
 
@@ -4781,16 +4731,6 @@ moment@2.x.x, moment@^2.10.6, moment@^2.6.0:
   version "2.19.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.19.1.tgz#56da1a2d1cbf01d38b7e1afc31c10bcfa1929167"
 
-mongo-dnorm@0.2.4:
-  version "0.2.4"
-  resolved "https://registry.yarnpkg.com/mongo-dnorm/-/mongo-dnorm-0.2.4.tgz#ba87592e8665021e03dd89d2a2256b6a20b7e7e4"
-  dependencies:
-    babel-runtime "^6.6.1"
-    estraverse-fb "^1.3.1"
-    joi "^9.1.1"
-    lodash "^4.11.1"
-    pluralize "^3.0.0"
-
 mongodb-core@2.1.11:
   version "2.1.11"
   resolved "https://registry.yarnpkg.com/mongodb-core/-/mongodb-core-2.1.11.tgz#1c38776ceb174997a99c28860eed9028da9b3e1a"
@@ -5080,36 +5020,6 @@ object.omit@^2.0.0:
   dependencies:
     for-own "^0.1.4"
     is-extendable "^0.1.1"
-
-octobus-crud@0.6.0:
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/octobus-crud/-/octobus-crud-0.6.0.tgz#ad646404e3f36028f723074a9820f76cc264acc1"
-  dependencies:
-    babel-runtime "^6.6.1"
-    joi "10.2.2"
-    lodash "^4.11.1"
-    octobus.js "0.31.1"
-    uuid "3.0.1"
-
-octobus-mongodb-store@0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/octobus-mongodb-store/-/octobus-mongodb-store-0.5.0.tgz#568c7a01a5a8cc879b5e4a70cfc7542fa30b2ff3"
-  dependencies:
-    babel-runtime "^6.6.1"
-    joi "10.2.2"
-    lodash "^4.11.1"
-    mongo-dnorm "0.2.4"
-    mongodb "2.2.24"
-    octobus-crud "0.6.0"
-
-octobus.js@0.31.1:
-  version "0.31.1"
-  resolved "https://registry.yarnpkg.com/octobus.js/-/octobus.js-0.31.1.tgz#1f0137a6f63b9c146d46edf5eeaabf68057ae7a4"
-  dependencies:
-    babel-runtime "^6.6.1"
-    joi "^8.0.5"
-    lodash "^4.11.1"
-    uuid "3.0.0"
 
 octobus.js@1.1.2:
   version "1.1.2"
@@ -5441,10 +5351,6 @@ pkg-up@^1.0.0:
 pluralize@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/pluralize/-/pluralize-1.2.1.tgz#d1a21483fd22bb41e58a12fa3421823140897c45"
-
-pluralize@^3.0.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/pluralize/-/pluralize-3.1.0.tgz#84213d0a12356069daa84060c559242633161368"
 
 postcss-modules-extract-imports@1.1.0:
   version "1.1.0"
@@ -7082,10 +6988,6 @@ utils-merge@1.0.1:
 uuid@3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.0.0.tgz#6728fc0459c450d796a99c31837569bdf672d728"
-
-uuid@3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.0.1.tgz#6544bba2dfda8c1cf17e629a3a305e2bb1fee6c1"
 
 uuid@^2.0.1:
   version "2.0.3"

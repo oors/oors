@@ -1,9 +1,20 @@
 import flow from 'lodash/flow';
-import { validate } from 'oors/build/helpers';
+import ValidationError from 'oors/build/errors/ValidationError';
 
-export const withSchema = schema => resolver => (_, args, ctx, info) => {
-  validate(args, schema);
-  return resolver(_, args, ctx, info);
+export const withSchema = schema => {
+  let validate;
+
+  return resolver => (_, args, ctx, info) => {
+    if (!validate) {
+      validate = ctx.ajv.compile(schema);
+    }
+
+    if (!validate(args)) {
+      throw new ValidationError(validate.errors);
+    }
+
+    return resolver(_, args, ctx, info);
+  };
 };
 
 export const withArgs = parser => resolver => async (_, args, ctx, info) =>

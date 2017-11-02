@@ -1,14 +1,21 @@
 import ValidationError from 'oors/build/errors/ValidationError';
 
-export default schemas => (req, res, next) => {
-  Object.keys(schemas).forEach(propr => {
-    const schema = schemas[propr];
-    const validate = req.ajv.compile(schema);
+export default schemas => {
+  let validate;
 
-    if (!validate(req[propr])) {
-      return next(new ValidationError(validate.errors));
-    }
+  return (req, res, next) => {
+    Object.keys(schemas).forEach(propr => {
+      const schema = schemas[propr];
 
-    return next();
-  });
+      if (!validate) {
+        validate = req.ajv.compile(schema);
+      }
+
+      if (!validate(req[propr])) {
+        return next(new ValidationError(validate.errors));
+      }
+
+      return next();
+    });
+  };
 };

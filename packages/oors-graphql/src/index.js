@@ -4,6 +4,8 @@ import fse from 'fs-extra';
 import get from 'lodash/get';
 import set from 'lodash/set';
 import has from 'lodash/has';
+import Ajv from 'ajv';
+import ajvKeywords from 'ajv-keywords';
 import identity from 'lodash/identity';
 import { Module } from 'oors';
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
@@ -124,9 +126,20 @@ class Gql extends Module {
   typeDefs = [];
   resolvers = mainResolvers;
   middlewares = []; // for resolvers
-  gqlContext = {};
+  gqlContext = {
+    ajv: new Ajv({
+      allErrors: true,
+      verbose: true,
+      async: 'es7',
+      useDefaults: true,
+    }),
+  };
   pubsub = undefined;
   loaders = new LoadersMap();
+
+  initialize() {
+    ajvKeywords(this.gqlContext.ajv, 'instanceof');
+  }
 
   async setup({ exposeModules, subscriptions }, manager) {
     const createPubSub = this.getConfig('subscriptions.createPubSub', () => new PubSub());

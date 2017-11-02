@@ -3,6 +3,7 @@ import { MongoClient } from 'mongodb';
 import { Module } from 'oors';
 import Repository from './Repository';
 import * as helpers from './libs/helpers';
+import idValidator from './libs/idValidator';
 
 class MongoDB extends Module {
   static configSchema = {
@@ -37,6 +38,10 @@ class MongoDB extends Module {
   hooks = {
     'oors.graphQL.buildContext': ({ context }) => {
       const { fromMongo, fromMongoCursor, toMongo } = helpers;
+
+      if (context.ajv) {
+        context.ajv.addKeyword('isId', idValidator);
+      }
 
       Object.assign(context, {
         fromMongo,
