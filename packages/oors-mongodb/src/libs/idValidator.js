@@ -12,6 +12,10 @@ export default {
         return true;
       }
 
+      if (id === undefined || id === null) {
+        return true;
+      }
+
       if (!objectId.isValid(id)) {
         return false;
       }
