@@ -14,7 +14,7 @@ import { Application } from '../../../packages/oors/src/index';
 import './env';
 import CoreModule from './modules/Core';
 import Config from './config';
-import * as middlewares from './middlewares';
+import * as middlewares from '../../../packages/oors/src/middlewares';
 
 dotenv.config();
 

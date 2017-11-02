@@ -12,6 +12,7 @@ import errorHandler from './errorHandler';
 import cookieParser from './cookieParser';
 import validationErrorHandler from './validationErrorHandler';
 import boomErrorHandler from './boomErrorHandler';
+import inject from './inject';
 
 export {
   bodyParserJSON,
@@ -28,4 +29,5 @@ export {
   cookieParser,
   validationErrorHandler,
   boomErrorHandler,
+  inject,
 };
