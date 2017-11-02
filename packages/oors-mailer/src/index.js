@@ -1,20 +1,31 @@
 import { Module } from 'oors';
-import Joi from 'joi';
 import express from 'express';
 import serverIndex from 'serve-index';
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
+import pivotSchema from 'oors/build/schemas/pivot';
 import MailService from './services/Mail';
 
 class Mailer extends Module {
   static configSchema = {
-    transport: Joi.object().default({
-      jsonTransport: true,
-    }),
-    saveToDisk: Joi.boolean().default(false),
-    emailsDir: Joi.string().required(),
-    templatesDir: Joi.string().required(),
-    middlewarePivot: Joi.any().required(),
+    type: 'object',
+    properties: {
+      transport: {
+        type: 'object',
+        default: {
+          jsonTransport: true,
+        },
+      },
+      saveToDisk: {
+        type: 'boolean',
+        default: 'false',
+      },
+      emailsDir: {
+        type: 'string',
+      },
+      middlewarePivot: pivotSchema,
+    },
+    required: ['emailsDir'],
   };
 
   name = 'oors.mailer';
@@ -36,17 +47,12 @@ class Mailer extends Module {
   }
 
   async setup({ transport, emailsDir, saveToDisk }) {
-    const { registerServices } = await this.dependency('oors.octobus');
-    const { Mail } = registerServices(this, {
-      Mail: new MailService({
-        transport,
-        emailsDir,
-        saveToDisk,
-        renderTemplate: (component, context = {}) =>
-          ReactDOMServer.renderToStaticMarkup(
-            React.createElement(component, context),
-          ),
-      }),
+    const Mail = new MailService({
+      transport,
+      emailsDir,
+      saveToDisk,
+      renderTemplate: (component, context = {}) =>
+        ReactDOMServer.renderToStaticMarkup(React.createElement(component, context)),
     });
 
     this.export({

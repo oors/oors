@@ -1,7 +1,6 @@
 /* eslint-disable no-empty */
 import path from 'path';
 import fse from 'fs-extra';
-import Joi from 'joi';
 import get from 'lodash/get';
 import set from 'lodash/set';
 import has from 'lodash/has';
@@ -22,67 +21,103 @@ import * as decorators from './libs/decorators';
 
 class Gql extends Module {
   static configSchema = {
-    graphiql: Joi.object()
-      .keys({
-        enabled: Joi.boolean().required(),
-        params: Joi.object()
-          .keys({
-            endpointURL: Joi.string().default('/graphql'),
-            subscriptionsEndpoint: Joi.string().required(),
-          })
-          .required(),
-      })
-      .default({
-        enabled: true,
-        params: {
-          endpointURL: '/graphql',
+    type: 'object',
+    properties: {
+      graphiql: {
+        type: 'object',
+        properties: {
+          enabled: {
+            type: 'boolean',
+            default: true,
+          },
+          params: {
+            type: 'object',
+            properties: {
+              endpointURL: {
+                type: 'string',
+                default: '/graphql',
+              },
+              subscriptionsEndpoint: {
+                type: 'string',
+              },
+            },
+            default: {},
+          },
         },
-      }),
-    voyager: Joi.object()
-      .keys({
-        enabled: Joi.boolean().required(),
-        params: Joi.object()
-          .keys({
-            endpointURL: Joi.string().required(),
-          })
-          .required(),
-      })
-      .default({
-        enabled: true,
-        params: {
-          endpointURL: '/graphql',
+        default: {},
+      },
+      voyager: {
+        type: 'object',
+        properties: {
+          enabled: {
+            type: 'boolean',
+            default: true,
+          },
+          params: {
+            type: 'object',
+            properties: {
+              endpointURL: {
+                type: 'string',
+                default: '/graphql',
+              },
+            },
+            default: {},
+          },
         },
-      }),
-    playground: Joi.object()
-      .keys({
-        enabled: Joi.boolean().required(),
-        params: Joi.object()
-          .keys({
-            endpointURL: Joi.string().required(),
-          })
-          .required(),
-      })
-      .default({
-        enabled: true,
-        params: {
-          endpointURL: '/graphql',
+        default: {},
+      },
+      playground: {
+        type: 'object',
+        properties: {
+          enabled: {
+            type: 'boolean',
+            default: true,
+          },
+          params: {
+            type: 'object',
+            properties: {
+              endpointURL: {
+                type: 'string',
+                default: '/graphql',
+              },
+            },
+            default: {},
+          },
         },
-      }),
-    middlewarePivot: Joi.string().default('isMethod'),
-    configureSchema: Joi.func().default(identity),
-    exposeModules: Joi.boolean().default(true),
-    subscriptions: Joi.object()
-      .keys({
-        enabled: Joi.boolean().default(true),
-        path: Joi.string().default('/subscriptions'),
-        createPubSub: Joi.func().required(),
-      })
-      .default({
-        enabled: true,
-        path: '/subscriptions',
-        createPubSub: () => Promise.resolve(new PubSub()),
-      }),
-    getServerOptions: Joi.func().default(() => {}),
+        default: {},
+      },
+      middlewarePivot: {
+        type: 'string',
+        default: 'isMethod',
+      },
+      configureSchema: {
+        instanceof: 'Function',
+      },
+      exposeModules: {
+        type: 'boolean',
+        default: true,
+      },
+      subscriptions: {
+        type: 'object',
+        properties: {
+          enabled: {
+            type: 'boolean',
+            default: true,
+          },
+          path: {
+            type: 'string',
+            default: '/subscriptions',
+          },
+          createPubSub: {
+            instanceof: 'Function',
+          },
+        },
+        default: {},
+      },
+      getServerOptions: {
+        instanceof: 'Function',
+      },
+    },
   };
 
   name = 'oors.graphQL';
@@ -93,20 +128,11 @@ class Gql extends Module {
   pubsub = undefined;
   loaders = new LoadersMap();
 
-  constructor(...args) {
-    super(...args);
-    this.collectFromModule = this.collectFromModule.bind(this);
-    this.addTypeDefs = this.addTypeDefs.bind(this);
-    this.addTypeDefsByPath = this.addTypeDefsByPath.bind(this);
-    this.addResolvers = this.addResolvers.bind(this);
-    this.addMiddleware = this.addMiddleware.bind(this);
-    this.addLoader = this.addLoader.bind(this);
-    this.addLoaders = this.addLoaders.bind(this);
-  }
-
   async setup({ exposeModules, subscriptions }, manager) {
+    const createPubSub = this.getConfig('subscriptions.createPubSub', () => new PubSub());
+
     if (subscriptions.enabled) {
-      this.pubsub = await subscriptions.createPubSub(manager);
+      this.pubsub = await createPubSub(manager);
     }
 
     const { logger } = await this.dependency('oors.logger');
@@ -160,34 +186,34 @@ class Gql extends Module {
     });
   }
 
-  addTypeDefs(typeDefs) {
+  addTypeDefs = typeDefs => {
     this.typeDefs.push(typeDefs);
-  }
+  };
 
-  addResolvers(resolvers) {
+  addResolvers = resolvers => {
     merge(this.resolvers, resolvers);
-  }
+  };
 
-  addMiddleware(matcher, middleware) {
+  addMiddleware = (matcher, middleware) => {
     this.middlewares.push({
       matcher: typeof matcher === 'string' ? new RegExp(`^${matcher}$`) : matcher,
       middleware,
     });
 
     return this;
-  }
+  };
 
-  addLoader(...args) {
+  addLoader = (...args) => {
     this.loaders.add(...args);
-  }
+  };
 
-  addLoaders(...args) {
+  addLoaders = (...args) => {
     this.loaders.multiAdd(...args);
-  }
+  };
 
-  async addTypeDefsByPath(filePath) {
+  addTypeDefsByPath = async filePath => {
     this.addTypeDefs(await fse.readFile(filePath, 'utf8'));
-  }
+  };
 
   async loadFromDir(dirPath) {
     try {
@@ -215,7 +241,7 @@ class Gql extends Module {
     } catch (err) {}
   }
 
-  async collectFromModule(module) {
+  collectFromModule = async module => {
     if (!module.getConfig('graphql.autoload', true)) {
       return;
     }
@@ -231,7 +257,7 @@ class Gql extends Module {
         await this.loadFromDir(path.resolve(path.dirname(module.filePath), 'graphql'));
       }
     } catch (err) {}
-  }
+  };
 
   buildSchema({ logger }) {
     const resolvers = this.resolvers;
@@ -239,7 +265,7 @@ class Gql extends Module {
     this.applyMiddlewares(resolvers);
 
     return makeExecutableSchema(
-      this.getConfig('configureSchema')({
+      this.getConfig('configureSchema', identity)({
         typeDefs: this.typeDefs,
         resolvers,
         logger: {
@@ -322,7 +348,7 @@ class Gql extends Module {
 
           return err;
         },
-        ...this.getConfig('getServerOptions')(req),
+        ...this.getConfig('getServerOptions', () => ({}))(req),
       }),
     };
   }

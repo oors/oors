@@ -1,26 +1,35 @@
 /* eslint-disable no-console */
 import Table from 'cli-table';
 import { inspect } from 'util';
-import Joi from 'joi';
 import { Module } from 'oors';
 import path from 'path';
 import { Logger, transports as loggerTransports } from 'winston';
 
 class LoggerModule extends Module {
   static configSchema = {
-    logsDir: Joi.string().required(),
-    printModules: Joi.boolean().default(true),
-    printDependencyGraph: Joi.boolean().default(true),
-    printMiddlewares: Joi.boolean().default(true),
+    type: 'object',
+    properties: {
+      logsDir: {
+        type: 'string',
+      },
+      printModules: {
+        type: 'boolean',
+        default: true,
+      },
+      printDependencyGraph: {
+        type: 'boolean',
+        default: true,
+      },
+      printMiddlewares: {
+        type: 'boolean',
+        default: true,
+      },
+    },
+    required: ['logsDir'],
   };
   name = 'oors.logger';
 
-  initialize({
-    logsDir,
-    printModules,
-    printDependencyGraph,
-    printMiddlewares,
-  }) {
+  initialize({ logsDir, printModules, printDependencyGraph, printMiddlewares }) {
     const logger = new Logger({
       transports: [
         new loggerTransports.Console({
@@ -78,15 +87,9 @@ class LoggerModule extends Module {
         head: ['Id', 'Path', 'Params'],
       });
 
-      this.app.middlewares
-        .reject({ enabled: false })
-        .forEach(({ path: mPath, id, params }) => {
-          table.push([
-            id,
-            mPath || '/',
-            typeof params !== 'undefined' ? inspect(params) : 'N/A',
-          ]);
-        });
+      this.app.middlewares.reject({ enabled: false }).forEach(({ path: mPath, id, params }) => {
+        table.push([id, mPath || '/', typeof params !== 'undefined' ? inspect(params) : 'N/A']);
+      });
 
       console.log(table.toString());
     });

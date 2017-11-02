@@ -1,10 +1,7 @@
-import Joi from 'joi';
 import { Router } from 'express';
-import celebrate from 'celebrate';
 import { helpers } from 'oors-router';
-import pick from 'lodash/pick';
 import Boom from 'boom';
-import userSchema from '../schemas/user';
+import validate from 'oors-router/build/middlewares/validate';
 import { sanitizeUserData } from '../libs/helpers';
 import { FailedLogin } from '../libs/errors';
 import injectServices from '../middlewares/injectServices';
@@ -18,8 +15,19 @@ export default ({ jwtMiddleware }) => {
 
   router.post(
     '/login',
-    celebrate({
-      body: pick(userSchema, ['username', 'password']),
+    validate({
+      body: {
+        type: 'object',
+        properties: {
+          username: {
+            type: 'string',
+          },
+          password: {
+            type: 'string',
+          },
+        },
+        required: ['username', 'password'],
+      },
     }),
     wrapHandler(async (req, res) => {
       const { User, UserLoginRepository } = req.services;
@@ -52,24 +60,46 @@ export default ({ jwtMiddleware }) => {
 
   router.post(
     '/signup',
-    celebrate({
-      body: pick(userSchema, ['name', 'username', 'email', 'password']),
+    validate({
+      body: {
+        type: 'object',
+        properties: {
+          username: {
+            type: 'string',
+          },
+          name: {
+            type: 'string',
+          },
+          email: {
+            type: 'string',
+            format: 'email',
+          },
+          password: {
+            type: 'string',
+          },
+        },
+        required: ['username', 'name', 'email', 'password'],
+      },
     }),
     wrapHandler(req => req.services.User.signup(req.body)),
   );
 
   router.post(
     '/reset-password',
-    celebrate({
+    validate({
       body: {
-        usernameOrEmail: Joi.string().required(),
+        type: 'object',
+        properties: {
+          usernameOrEmail: {
+            type: 'string',
+          },
+        },
+        required: ['usernameOrEmail'],
       },
     }),
     wrapHandler(async req => {
       const { User } = req.services;
-      const { user, updateResult } = await User.resetPassword(
-        req.body.usernameOrEmail,
-      );
+      const { user, updateResult } = await User.resetPassword(req.body.usernameOrEmail);
       const curatedUser = await User.dump(user);
       return {
         user: curatedUser,
@@ -80,12 +110,24 @@ export default ({ jwtMiddleware }) => {
 
   router.post(
     '/recover-password/:token',
-    celebrate({
+    validate({
       body: {
-        password: Joi.string().required(),
+        type: 'object',
+        properties: {
+          password: {
+            type: 'string',
+          },
+        },
+        required: ['password'],
       },
       params: {
-        token: Joi.string().required(),
+        type: 'object',
+        properties: {
+          token: {
+            type: 'string',
+          },
+        },
+        required: ['token'],
       },
     }),
     wrapHandler(async req => {
@@ -107,10 +149,18 @@ export default ({ jwtMiddleware }) => {
   router.post(
     '/change-password',
     jwtMiddleware,
-    celebrate({
+    validate({
       body: {
-        oldPassword: Joi.string().required(),
-        password: Joi.string().required(),
+        type: 'object',
+        properties: {
+          password: {
+            type: 'string',
+          },
+          oldPassword: {
+            type: 'string',
+          },
+        },
+        required: ['password, oldPassword'],
       },
     }),
     wrapHandler(req =>
@@ -121,17 +171,23 @@ export default ({ jwtMiddleware }) => {
     ),
   );
 
-  router.get(
-    '/me',
-    jwtMiddleware,
-    wrapHandler(async req => sanitizeUserData(req.user)),
-  );
+  router.get('/me', jwtMiddleware, wrapHandler(async req => sanitizeUserData(req.user)));
 
   router.post(
     '/me',
     jwtMiddleware,
-    celebrate({
-      body: pick(userSchema, ['name', 'username']),
+    validate({
+      body: {
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+          },
+          username: {
+            type: 'string',
+          },
+        },
+      },
     }),
     wrapHandler(async req => {
       await req.services.UserRepository.updateOne({

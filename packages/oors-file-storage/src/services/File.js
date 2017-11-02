@@ -1,37 +1,53 @@
-import Joi from 'joi';
-import { decorators, ServiceContainer } from 'octobus.js';
+import Ajv from 'ajv';
 import path from 'path';
 import fs from 'fs-extra';
+import ValidationError from 'oors/build/errors/ValidationError';
 
-const { service, withSchema } = decorators;
+const ajv = new Ajv({
+  allErrors: true,
+  verbose: true,
+  async: 'es7',
+  useDefaults: true,
+});
 
-class File extends ServiceContainer {
-  constructor({ uploadDir }) {
-    super();
+const validateUploadData = ajv.compile({
+  type: 'object',
+  properties: {
+    filename: {
+      type: 'string',
+    },
+    path: {
+      type: 'string',
+    },
+    size: {
+      type: 'number',
+    },
+    mimeType: {
+      type: 'string',
+    },
+    uploadDir: {
+      type: 'string',
+    },
+    meta: {
+      type: 'object',
+    },
+  },
+  required: ['filename', 'path', 'size', 'mimeType'],
+});
+
+class File {
+  constructor({ uploadDir, FileRepository }) {
     this.uploadDir = uploadDir;
+    this.FileRepository = FileRepository;
   }
 
-  setServiceBus(...args) {
-    super.setServiceBus(...args);
-    this.FileRepository = this.extract('FileRepository');
-  }
+  async createFromUpload(data) {
+    if (!validateUploadData(data)) {
+      throw new ValidationError(validateUploadData.errors);
+    }
 
-  @service()
-  @withSchema({
-    filename: Joi.string().required(),
-    path: Joi.string().required(),
-    size: Joi.number().required(),
-    mimeType: Joi.string().required(),
-    uploadDir: Joi.string(),
-    meta: Joi.object(),
-  })
-  async createFromUpload({
-    path: uploadPath,
-    filename,
-    size,
-    mimeType,
-    uploadDir,
-  }) {
+    const { path: uploadPath, filename, size, mimeType, uploadDir } = data;
+
     const file = await this.FileRepository.createOne({
       filename: path.basename(filename),
       extension: path.extname(filename),
@@ -40,19 +56,15 @@ class File extends ServiceContainer {
       uploadedAt: new Date(),
     });
 
-    const destination = await this.getPath({ file, uploadDir });
+    const destination = this.getPath({ file, uploadDir });
 
     await fs.rename(uploadPath, destination);
 
     return file;
   }
 
-  @service()
   getPath({ file, uploadDir }) {
-    return path.join(
-      uploadDir || this.uploadDir,
-      `${file._id}${file.extension}`,
-    );
+    return path.join(uploadDir || this.uploadDir, `${file._id}${file.extension}`);
   }
 }
 

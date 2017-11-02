@@ -19,12 +19,12 @@
   },
   "url": "https://github.com/viczam/oors/tree/master/packages/oors-cli/readme.md",
   "dependencies": {
+    "ajv": "5.3.0",
     "babel-core": "~6.23.1",
     "chokidar": "1.6.1",
     "dotenv": "~4.0.0",
     "fs-extra": "^3.0.1",
     "glob": "7.1.1",
-    "joi": "10.0.2",
     "lodash": "4.17.2",
     "yargs": "7.0.2"
   }

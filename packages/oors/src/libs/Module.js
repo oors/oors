@@ -1,36 +1,58 @@
 /* eslint-disable no-underscore-dangle */
-import Joi from 'joi';
+import Ajv from 'ajv';
+import ajvKeywords from 'ajv-keywords';
 import getPath from 'lodash/get';
 import camelCase from 'lodash/camelCase';
+import ValidationError from '../errors/ValidationError';
 
 class Module {
   constructor(config = {}) {
     this.name = config.name || this.name || camelCase(this.constructor.name);
-    this.config = this.parseConfig(config);
 
     this.filePath = new Error().stack
       .toString()
       .split(/\r\n|\n/)[2]
       .match(/\((.*.js)/)[1];
+
     this.hooks = {};
+
+    this.ajv = new Ajv({
+      allErrors: true,
+      // verbose: true,
+      async: 'es7',
+      coerceTypes: 'array',
+      useDefaults: true,
+    });
+
+    ajvKeywords(this.ajv, 'instanceof');
+
+    this.config = this.parseConfig(config);
+  }
+
+  createValidator(schema) {
+    return this.ajv.compile(schema);
   }
 
   parseConfig(config) {
     const schema = this.constructor.configSchema;
 
-    if (!schema) {
-      return config;
+    if (schema) {
+      const validate = this.createValidator({
+        ...schema,
+        properties: {
+          ...schema.properties,
+          name: {
+            type: 'string',
+          },
+        },
+      });
+
+      if (!validate(config)) {
+        throw new ValidationError(validate.errors);
+      }
     }
 
-    return Joi.attempt(
-      config,
-      Joi.object()
-        .keys({
-          name: Joi.string(),
-          ...schema,
-        })
-        .unknown(),
-    );
+    return config;
   }
 
   initialize(config, manager) {} // eslint-disable-line

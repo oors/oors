@@ -1,24 +1,38 @@
-import Joi from 'joi';
+import invariant from 'invariant';
 import { MongoClient } from 'mongodb';
-import { RefManager } from 'mongo-dnorm';
-import { Store as MongoStore, decorators } from 'octobus-mongodb-store';
 import { Module } from 'oors';
-import Repository from './libs/Repository';
+import Repository from './Repository';
 import * as helpers from './libs/helpers';
 
 class MongoDB extends Module {
   static configSchema = {
-    connections: Joi.array().items(
-      Joi.object().keys({
-        name: Joi.string().required(),
-        url: Joi.string().required(),
-        Store: Joi.object().default(() => decorators.withTimestamps(MongoStore), 'Mongo store'),
-      }),
-    ),
-    defaultConnection: Joi.string(),
+    type: 'object',
+    properties: {
+      connections: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+            },
+            url: {
+              type: 'string',
+            },
+          },
+          required: ['name', 'url'],
+        },
+        minItems: 1,
+      },
+      defaultConnection: {
+        type: 'string',
+      },
+    },
+    required: ['connections'],
   };
 
   name = 'oors.mongoDb';
+  connections = {};
 
   hooks = {
     'oors.graphQL.buildContext': ({ context }) => {
@@ -32,108 +46,68 @@ class MongoDB extends Module {
     },
   };
 
-  constructor(...args) {
-    super(...args);
+  createRepository = ({ collection, schema, collectionName, methods = {}, connectionName }) => {
+    const repository = new Repository({ collection, schema, collectionName });
 
-    this.connections = {};
-
-    this.createStore = this.createStore.bind(this);
-    this.createRepository = this.createRepository.bind(this);
-    this.createRepositories = this.createRepositories.bind(this);
-    this.createConnection = this.createConnection.bind(this);
-    this.getConnection = this.getConnection.bind(this);
-    this.bindRepository = this.bindRepository.bind(this);
-  }
-
-  createStore(options, connectionName) {
-    const { refManager, db, Store } = this.getConnection(
-      connectionName || this.defaultConnectionName,
-    );
-    return new Store({
-      db,
-      refManager,
-      ...options,
-    });
-  }
-
-  createRepository({ name, schema, methods = {}, connectionName, store }) {
-    const repository = new Repository(schema, name);
     Object.keys(methods).forEach(methodName => {
       repository[methodName] = methods[methodName].bind(repository);
     });
 
-    if (store) {
-      repository.setStore(store);
-    } else {
-      this.bindRepository(repository, connectionName || this.defaultConnectionName);
+    this.bindRepository(repository, connectionName);
+
+    return repository;
+  };
+
+  bindRepositories = (repositories, connectionName) => {
+    repositories.forEach(repository => {
+      this.bindRepository(repository, connectionName);
+    });
+  };
+
+  bindRepository = (repository, connectionName) => {
+    invariant(
+      repository.collectionName,
+      `Missing repository collection name - ${repository.constructor.name}!`,
+    );
+
+    const db = this.getConnection(connectionName);
+
+    Object.assign(repository, {
+      collection: db.collection(repository.collectionName),
+    });
+
+    return repository;
+  };
+
+  createConnection = async options => {
+    const { name, url } = options;
+
+    this.connections[name] = await MongoClient.connect(url);
+
+    return this.connections[name];
+  };
+
+  getConnection = name => {
+    if (!name) {
+      return this.connections[this.defaultConnectionName];
     }
 
-    return repository;
-  }
-
-  createRepositories(repositories) {
-    return Object.keys(repositories).reduce(
-      (acc, name) => ({
-        ...acc,
-        [`${name}Repository`]: this.createRepository({
-          name,
-          ...repositories[name],
-        }),
-      }),
-      {},
-    );
-  }
-
-  bindRepository(repository, connectionName) {
-    const store = this.createStore(
-      {
-        collectionName: repository.collectionName,
-      },
-      connectionName || this.defaultConnectionName,
-    );
-
-    repository.setStore(store);
-
-    return repository;
-  }
-
-  async createConnection(options) {
-    const { name, Store, url } = options;
-    const db = await MongoClient.connect(url);
-    const refManager = new RefManager(db);
-
-    const connection = {
-      db,
-      refManager,
-      Store,
-    };
-
-    this.connections[name] = connection;
-
-    return connection;
-  }
-
-  getConnection(name) {
     if (!this.connections[name]) {
       throw new Error(`Unknown connection name - "${name}"!`);
     }
 
     return this.connections[name];
-  }
+  };
 
   initialize({ connections, defaultConnection }) {
-    this.defaultConnectionName = defaultConnection;
-
-    if (!this.defaultConnectionName && connections.length === 1) {
-      this.defaultConnectionName = connections[0].name;
-    }
+    this.defaultConnectionName = defaultConnection || connections[0].name;
 
     const names = connections.map(({ name }) => name);
 
     if (!names.includes(this.defaultConnectionName)) {
       throw new Error(
-        `Default connection name (${this
-          .defaultConnectionName}) can't be found through the list of available connections (${names})`,
+        `Default connection name - "(${this
+          .defaultConnectionName})" - can't be found through the list of available connections (${names})`,
       );
     }
   }
@@ -144,8 +118,8 @@ class MongoDB extends Module {
       getConnection,
       createStore,
       createRepository,
-      createRepositories,
       bindRepository,
+      bindRepositories,
     } = this;
 
     await Promise.all(connections.map(createConnection));
@@ -153,10 +127,10 @@ class MongoDB extends Module {
     this.export({
       createStore,
       createRepository,
-      createRepositories,
       createConnection,
       getConnection,
       bindRepository,
+      bindRepositories,
     });
   }
 }

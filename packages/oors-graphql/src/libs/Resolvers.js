@@ -1,6 +1,5 @@
 /* eslint-disable no-underscore-dangle */
 import invariant from 'invariant';
-import Joi from 'joi';
 import set from 'lodash/set';
 
 class Resolvers {
@@ -32,7 +31,7 @@ class Resolvers {
     });
   }
 
-  addResolver({ path, schema, resolver, type, field }) {
+  addResolver({ path, resolver, type, field }) {
     invariant(
       typeof resolver === 'function',
       `"resolver" has to be a function (received ${typeof resolver} instead)`,
@@ -45,15 +44,7 @@ class Resolvers {
       'Invalid resolver path. You must provide a path as either a "path" option or a "type" and "field"',
     );
 
-    this.resolvers[resolverPath] = (_, args, ctx, info) => {
-      let finalArgs = args;
-
-      if (schema) {
-        finalArgs = Joi.attempt(args, schema);
-      }
-
-      return resolver(_, finalArgs, ctx, info);
-    };
+    this.resolvers[resolverPath] = resolver;
   }
 
   dump() {

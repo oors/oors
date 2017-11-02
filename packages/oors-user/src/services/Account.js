@@ -1,17 +1,14 @@
-import Joi from 'joi';
-import { ServiceContainer, decorators } from 'octobus.js';
+import invariant from 'invariant';
 
-const { service, withSchema } = decorators;
-
-class Account extends ServiceContainer {
-  setServiceBus(...args) {
-    super.setServiceBus(...args);
-    this.AccountRepository = this.extract('AccountRepository');
+class Account {
+  constructor({ AccountRepository, UserRepository, Mail }) {
+    this.AccountRepository = AccountRepository;
+    this.UserRepository = UserRepository;
+    this.Mail = Mail;
   }
 
-  @service()
-  @withSchema(Joi.object().required())
   async confirm(_id) {
+    invariant(_id, 'Id is required!');
     const account = await this.AccountRepository.findById(_id);
 
     if (!account) {
@@ -24,14 +21,13 @@ class Account extends ServiceContainer {
 
     account.isConfirmed = true;
 
-    return this.AccountRepository.replaceOne(account);
+    return this.AccountRepository.save(account);
   }
 
-  @service()
-  @withSchema(Joi.string().email().required())
   async resendActivationEmail(email) {
-    const UserRepository = this.extract('user.UserRepository');
-    const Mail = this.extract('mailer.Mail');
+    invariant(email, 'Email is required!');
+
+    const { UserRepository, Mail, AccountRepository } = this;
 
     const user = await UserRepository.findOne({
       query: { email },
@@ -41,7 +37,7 @@ class Account extends ServiceContainer {
       throw new Error('User not found!');
     }
 
-    const account = await this.AccountRepository.findById(user.accountId);
+    const account = await AccountRepository.findById(user.accountId);
 
     if (account.isConfirmed) {
       throw new Error('Account is already confirmed!');

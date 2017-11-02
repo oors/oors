@@ -1,17 +1,12 @@
 import nodemailer from 'nodemailer';
-import { ServiceContainer, decorators } from 'octobus.js';
 import fs from 'fs-extra';
 
-const { service } = decorators;
-
-class Mail extends ServiceContainer {
+class Mail {
   constructor(options) {
-    super();
     this.options = options;
     this.transporter = nodemailer.createTransport(this.options.transport);
   }
 
-  @service()
   async send(options) {
     const { template, context } = options;
 
@@ -27,20 +22,19 @@ class Mail extends ServiceContainer {
 
         return resolve(info);
       });
-    }).then(this.saveToDisk.bind(this));
+    }).then(this.saveToDisk);
   }
 
-  async saveToDisk(info) {
+  saveToDisk = async info => {
     if (this.options.saveToDisk && this.options.transport.jsonTransport) {
       const { subject, html } = JSON.parse(info.message);
-      const emailPath = `${this.options
-        .emailsDir}/${new Date().getTime()} - ${subject}.html`;
+      const emailPath = `${this.options.emailsDir}/${new Date().getTime()} - ${subject}.html`;
 
       await fs.writeFile(emailPath, html);
     }
 
     return info;
-  }
+  };
 }
 
 export default Mail;

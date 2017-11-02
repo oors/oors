@@ -14,13 +14,12 @@
   },
   "homepage": "https://github.com/viczam/oors#readme",
   "dependencies": {
-    "joi": "10.5.1",
+    "ajv": "5.3.0",
+    "ajv-keywords": "2.1.1",
+    "invariant": "2.2.2",
     "lodash": "4.17.4",
-    "mongo-dnorm": "0.2.4",
     "mongodb": "2.2.27",
     "mongodb-extended-json": "^1.10.0",
-    "octobus-crud": "0.6.0",
-    "octobus-mongodb-store": "0.5.0",
     "oors": "^1.0.6"
   }
 }

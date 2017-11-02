@@ -1,8 +1,10 @@
-import Joi from 'joi';
+import util from 'util';
+import Ajv from 'ajv';
 import findIndex from 'lodash/findIndex';
 import filter from 'lodash/filter';
 import reject from 'lodash/reject';
 import find from 'lodash/find';
+import pivotSchema from '../schemas/pivot';
 
 const findIndexById = (list, id) => {
   const index = findIndex(list, { id });
@@ -12,16 +14,18 @@ const findIndexById = (list, id) => {
   return index;
 };
 
+const ajv = new Ajv();
+const validatePivot = ajv.compile(pivotSchema);
+
 class List extends Array {
   insert(pivot, ...items) {
+    if (!validatePivot(pivot)) {
+      throw new Error(`Invalid pivot: ${util.inspect(pivot)}!`);
+    }
+
     if (typeof pivot === 'string') {
       return this.insertAfter(pivot, ...items);
     }
-
-    Joi.attempt(pivot, {
-      before: Joi.string(),
-      after: Joi.string(),
-    });
 
     if (pivot.before) {
       return this.insertBefore(pivot.before, ...items);

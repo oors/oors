@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import Joi from 'joi';
+import Ajv from 'ajv';
 import { transformFileSync } from 'babel-core';
 import path from 'path';
 import fse from 'fs-extra';
@@ -8,6 +8,12 @@ import glob from 'glob';
 import yargs from 'yargs';
 import omit from 'lodash/omit';
 import argsSchema from '../schemas/args';
+
+const validateArgs = new Ajv({
+  allErrors: true,
+  coerceTypes: 'array',
+  useDefaults: true,
+}).compile(argsSchema);
 
 export const getPackageDirs = async ({ packagesDir, ignoredPackages }) =>
   (await fse.readdir(packagesDir))
@@ -26,12 +32,7 @@ export const getPackgeJSFiles = ({ pkg, srcDir }) =>
 
 export const isJSFile = file => ['.js', '.jsx'].includes(path.extname(file));
 
-export const getBuildDestinationPath = ({
-  srcPath,
-  packagesDir,
-  srcDir,
-  buildDir,
-}) => {
+export const getBuildDestinationPath = ({ srcPath, packagesDir, srcDir, buildDir }) => {
   const pkgName = path.relative(packagesDir, srcPath).split(path.sep)[0];
   const pkg = path.resolve(packagesDir, pkgName);
   const pkgSrcDir = path.resolve(pkg, srcDir);
@@ -40,13 +41,7 @@ export const getBuildDestinationPath = ({
   return path.resolve(pkgBuildDir, relativeToSrcPath);
 };
 
-export const compileFile = async ({
-  file,
-  babelConfig,
-  packagesDir,
-  srcDir,
-  buildDir,
-}) => {
+export const compileFile = async ({ file, babelConfig, packagesDir, srcDir, buildDir }) => {
   const destPath = getBuildDestinationPath({
     srcPath: file,
     packagesDir,
@@ -67,10 +62,7 @@ export const makeConfig = (config = {}) => {
     packagesDir: path.resolve('./packages'),
     babelConfig: fse.readJsonSync(path.resolve('./.babelrc')),
     watchGlob: [path.resolve('./packages/*/src/**')],
-    ...omit(yargs.array('watchGlob').array('ignoredPackages').argv, [
-      '_',
-      '$0',
-    ]),
+    ...omit(yargs.array('watchGlob').array('ignoredPackages').argv, ['_', '$0']),
     ...config,
   };
 
@@ -81,5 +73,9 @@ export const makeConfig = (config = {}) => {
     console.log('Unable to locate a oors.config.js file.'); // eslint-disable-line no-console
   }
 
-  return Joi.attempt(finalConfig, argsSchema);
+  if (!validateArgs(finalConfig)) {
+    throw new Error(`Invalid args! \n ${JSON.stringify(validateArgs.errors)}`);
+  }
+
+  return finalConfig;
 };

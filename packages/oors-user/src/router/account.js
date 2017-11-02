@@ -1,20 +1,25 @@
-import Joi from 'joi';
 import { Router } from 'express';
-import celebrate from 'celebrate';
 import { ObjectID as objectId } from 'mongodb';
 import { helpers } from 'oors-router';
+import validate from 'oors-router/build/middlewares/validate';
 import injectServices from '../middlewares/injectServices';
 
-const { wrapHandler, idValidator } = helpers;
+const { wrapHandler } = helpers;
 const router = Router();
 
 router.use(injectServices);
 
 router.get(
   '/:id/confirm',
-  celebrate({
+  validate({
     params: {
-      id: idValidator,
+      type: 'object',
+      properties: {
+        id: {
+          type: 'string',
+        },
+      },
+      required: ['id'],
     },
   }),
   wrapHandler(async req => {
@@ -25,11 +30,16 @@ router.get(
 
 router.post(
   '/resend-activation-email',
-  celebrate({
+  validate({
     body: {
-      email: Joi.string()
-        .required()
-        .email(),
+      type: 'object',
+      properties: {
+        email: {
+          type: 'string',
+          format: 'email',
+        },
+      },
+      required: ['email'],
     },
   }),
   wrapHandler(async req => {

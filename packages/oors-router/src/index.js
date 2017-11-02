@@ -1,31 +1,48 @@
-import Joi from 'joi';
 import { Module } from 'oors';
 import path from 'path';
 import { Router as ExpressRouter } from 'express';
+import pivotSchema from 'oors/build/schemas/pivot';
+import { validate } from 'oors/build/helpers';
 import BaseRouter from './libs/Router';
 import * as helpers from './libs/helpers';
 import generateRESTRouter from './libs/generateRESTRouter';
+import validatorMiddleware from './middlewares/validator';
 
 class Router extends Module {
   static configSchema = {
-    middlewarePivot: Joi.any().required(),
-    autoload: Joi.boolean().default(true),
+    type: 'object',
+    properties: {
+      middlewarePivot: pivotSchema,
+      validatorMiddlewarePivot: {
+        ...pivotSchema,
+        default: {
+          before: 'isMethod',
+        },
+      },
+      autoload: {
+        type: 'boolean',
+        default: true,
+      },
+    },
   };
 
   static moduleConfigSchema = {
-    autoload: Joi.boolean().default(true),
-    prefixPath: Joi.string().default('/'),
+    type: 'object',
+    properties: {
+      autoload: {
+        type: 'boolean',
+        default: true,
+      },
+      prefixPath: {
+        type: 'string',
+        default: '/',
+      },
+    },
   };
 
   name = 'oors.router';
 
-  constructor(...args) {
-    super(...args);
-    this.addRouter = this.addRouter.bind(this);
-    this.loadModuleRouter = this.loadModuleRouter.bind(this);
-  }
-
-  addRouter(...args) {
+  addRouter = (...args) => {
     if (args.length === 2) {
       args.unshift('/');
     }
@@ -37,10 +54,10 @@ class Router extends Module {
       id,
       factory: () => router,
     });
-  }
+  };
 
-  loadModuleRouter(module) {
-    const { autoload, prefixPath } = Joi.attempt(
+  loadModuleRouter = module => {
+    const { autoload, prefixPath } = validate(
       module.getConfig('router', {}),
       Router.moduleConfigSchema,
     );
@@ -62,9 +79,9 @@ class Router extends Module {
     if (router) {
       this.addRouter(prefixPath, `${module.name}Router`, router);
     }
-  }
+  };
 
-  async setup({ autoload }) {
+  async setup({ autoload, validatorMiddlewarePivot }) {
     const { addRouter } = this;
     const router = ExpressRouter();
 
@@ -74,6 +91,8 @@ class Router extends Module {
         router,
       });
     }
+
+    this.app.middlewares.insert(validatorMiddlewarePivot, validatorMiddleware);
 
     addRouter('mainRouter', router);
 

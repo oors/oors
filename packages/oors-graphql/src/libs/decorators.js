@@ -1,8 +1,8 @@
-import Joi from 'joi';
 import flow from 'lodash/flow';
+import { validate } from 'oors/build/helpers';
 
 export const withSchema = schema => resolver => (_, args, ctx, info) => {
-  Joi.attempt(args, schema);
+  validate(args, schema);
   return resolver(_, args, ctx, info);
 };
 

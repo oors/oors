@@ -1,7 +1,9 @@
-import Joi from 'joi';
 import { Module } from 'oors';
+import pivotSchema from 'oors/build/schemas/pivot';
+import UserRepository from './repositories/User';
+import AccountRepository from './repositories/Account';
+import UserLoginRepository from './repositories/UserLogin';
 import UserService from './services/User';
-import UserRepositoryService from './services/UserRepository';
 import AccountService from './services/Account';
 import router from './router';
 import * as gqlMiddlewares from './graphql/middlewares';
@@ -10,46 +12,62 @@ import passportInitialize from './middlewares/passportInitialize';
 import passportSession from './middlewares/passportSession';
 import passportFactory from './libs/passport';
 import mockUser from './middlewares/mockUser';
-import * as schemas from './schemas';
 import ForgotPasswordTemplate from './mailerTemplates/ForgotPassword';
 import UserSignupTemplate from './mailerTemplates/UserSignup';
 
-class User extends Module {
+class UserModule extends Module {
   static configSchema = {
-    jwtSecret: Joi.string().required(),
-    jwtConfig: Joi.object().required(),
-    passportMiddlewarePivot: Joi.any(),
-    mockUserMiddlewarePivot: Joi.any(),
-    mockUserConfig: Joi.object().keys({
-      path: Joi.string().default('/'),
-      enabled: Joi.boolean().default(false),
-      params: Joi.object().default({}),
-    }),
-    passportConfig: Joi.object()
-      .keys({
-        enabled: Joi.boolean().default(false),
-      })
-      .default({
-        enabled: false,
-      }),
-    emailTemplates: Joi.object()
-      .keys({
-        forgotPassword: Joi.any().required(),
-        userSignUp: Joi.any().required(),
-      })
-      .default({
-        forgotPassword: ForgotPasswordTemplate,
-        userSignUp: UserSignupTemplate,
-      }),
-    rootURL: Joi.string().required(),
-    storageModule: Joi.string().default('oors.mongoDb'),
-    schemas: Joi.object()
-      .keys({
-        account: Joi.object().required(),
-        user: Joi.object().required(),
-        userLogin: Joi.object().required(),
-      })
-      .default(schemas),
+    type: 'object',
+    properties: {
+      jwtSecret: {
+        type: 'string',
+      },
+      jwtConfig: {
+        type: 'object',
+      },
+      passportMiddlewarePivot: pivotSchema,
+      mockUserMiddlewarePivot: pivotSchema,
+      mockUserConfig: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            default: '/',
+          },
+          enabled: {
+            type: 'boolean',
+            default: false,
+          },
+          params: {
+            type: 'object',
+            default: {},
+          },
+        },
+        default: {},
+      },
+      passportConfig: {
+        type: 'object',
+        properties: {
+          enabled: {
+            type: 'boolean',
+            default: false,
+          },
+        },
+        default: {},
+      },
+      emailTemplates: {
+        type: 'object',
+        default: {},
+      },
+      rootURL: {
+        type: 'string',
+      },
+      storageModule: {
+        type: 'string',
+        default: 'oors.mongoDb',
+      },
+    },
+    required: ['jwtSecret', 'jwtConfig', 'rootURL'],
   };
 
   name = 'oors.user';
@@ -58,29 +76,27 @@ class User extends Module {
     'oors.router.load': () => {},
   };
 
-  initialize({ jwtSecret }) {
+  initialize({ jwtSecret, emailTemplates }) {
     this.jwtMiddleware = jwtMiddleware({
       secret: jwtSecret,
     });
+
+    this.config.emailTemplates = {
+      forgotPassword: ForgotPasswordTemplate,
+      userSignUp: UserSignupTemplate,
+      ...emailTemplates,
+    };
   }
 
   configurePassport(routerConfig) {
-    const {
-      passportConfig,
-      passportMiddlewarePivot,
-      jwtSecret,
-    } = this.getConfig();
+    const { passportConfig, passportMiddlewarePivot, jwtSecret } = this.getConfig();
 
     if (!passportConfig.enabled) {
       return;
     }
 
     const passport = passportFactory({ jwtSecret });
-    this.app.middlewares.insert(
-      passportMiddlewarePivot,
-      passportInitialize,
-      passportSession,
-    );
+    this.app.middlewares.insert(passportMiddlewarePivot, passportInitialize, passportSession);
     this.export({ passport });
     Object.assign(routerConfig, { passport });
   }
@@ -93,48 +109,43 @@ class User extends Module {
     emailTemplates,
     rootURL,
     storageModule,
-    schemas: {
-      user: userSchema,
-      account: accountSchema,
-      userLogin: userLoginSchema,
-    },
   }) {
-    const [
-      { createRepository, bindRepository },
-      { createServiceBus },
-      { addRouter },
-    ] = await this.dependencies([storageModule, 'oors.octobus', 'oors.router']);
+    const [{ bindRepository }, { addRouter }, { Mail }] = await this.dependencies([
+      storageModule,
+      'oors.router',
+      'oors.mailer',
+    ]);
+
     const routerConfig = {
       jwtMiddleware: this.jwtMiddleware,
     };
 
-    this.serviceBus = createServiceBus(this.name, [
-      { matcher: /^oors\.mailer/ },
-    ]);
-
-    const services = this.serviceBus.registerServices({
-      User: new UserService({
-        jwtConfig: {
-          key: jwtSecret,
-          options: jwtConfig,
-        },
-        emailTemplates,
-        rootURL,
-      }),
-      UserRepository: bindRepository(new UserRepositoryService(userSchema)),
-      Account: new AccountService(),
-      AccountRepository: createRepository({
-        name: 'Account',
-        schema: accountSchema,
-      }),
-      UserLoginRepository: createRepository({
-        name: 'UserLogin',
-        schema: userLoginSchema,
-      }),
+    const userRepository = bindRepository(new UserRepository());
+    const accountRepository = bindRepository(new AccountRepository());
+    const userLoginRepository = bindRepository(new UserLoginRepository());
+    const User = new UserService({
+      jwtConfig: {
+        key: jwtSecret,
+        options: jwtConfig,
+      },
+      emailTemplates,
+      rootURL,
+      UserRepository: userRepository,
+      AccountRepository: accountRepository,
+      Mail,
+    });
+    const Account = new AccountService({
+      UserRepository: userRepository,
+      AccountRepository: accountRepository,
+      Mail,
     });
 
     this.export({
-      ...services,
+      UserRepository: userRepository,
+      AccountRepository: accountRepository,
+      UserLoginRepository: userLoginRepository,
+      User,
+      Account,
       gqlMiddlewares,
       jwtMiddleware: this.jwtMiddleware,
     });
@@ -152,4 +163,4 @@ class User extends Module {
   }
 }
 
-export default User;
+export default UserModule;

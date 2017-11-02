@@ -1,13 +1,18 @@
-import Joi from 'joi';
 import { Module } from 'oors';
-import FileService from './services/File';
-import FileRepositoryService from './services/FileRepository';
+import File from './services/File';
+import FileRepository from './repositories/File';
 import router from './router';
 import uploadMiddleware from './middlewares/upload';
 
 class FileStorage extends Module {
   static configSchema = {
-    uploadDir: Joi.string().required(),
+    type: 'object',
+    properties: {
+      uploadDir: {
+        type: 'string',
+      },
+    },
+    required: ['uploadDir'],
   };
 
   name = 'oors.fileStorage';
@@ -23,19 +28,19 @@ class FileStorage extends Module {
   }
 
   async setup() {
-    const [{ registerServices }, { bindRepository }] = await this.dependencies([
-      'oors.octobus',
-      'oors.mongoDb',
-    ]);
+    const [{ bindRepository }] = await this.dependencies(['oors.mongoDb']);
 
-    const services = registerServices(this, {
-      File: new FileService({
-        uploadDir: this.getConfig('uploadDir'),
-      }),
-      FileRepository: bindRepository(new FileRepositoryService()),
+    const fileRepository = bindRepository(new FileRepository());
+    const file = new File({
+      uploadDir: this.getConfig('uploadDir'),
+      FileRepository: fileRepository,
     });
+    fileRepository.File = file;
 
-    this.export(services);
+    this.export({
+      File: file,
+      FileRepository: fileRepository,
+    });
   }
 }
 

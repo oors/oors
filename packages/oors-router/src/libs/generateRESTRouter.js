@@ -1,28 +1,19 @@
 import { Router } from 'express';
 import Boom from 'boom';
-import Joi from 'joi';
-import celebrate from 'celebrate';
 import { ObjectID as objectId } from 'mongodb';
 import pick from 'lodash/pick';
-import {
-  wrapHandler,
-  idValidator as mongoIdValidator,
-  toBSON,
-} from './helpers';
+import { wrapHandler, toBSON } from './helpers';
+import validate from '../middlewares/validate';
 
-export default ({
-  router = Router(),
-  repository,
-  idValidator = mongoIdValidator,
-}) => {
+export default ({ router = Router(), repository }) => {
   router.param('id', async (req, res, next, rawId) => {
-    const { error, value } = Joi.validate(rawId, idValidator);
+    let id;
 
-    if (error) {
+    try {
+      id = objectId(rawId);
+    } catch (error) {
       return next(error);
     }
-
-    const id = objectId(value);
 
     try {
       const entity = await repository.findById(id);
@@ -42,13 +33,30 @@ export default ({
   router
     .route('/')
     .get(
-      celebrate({
+      validate({
         query: {
-          query: Joi.object().default({}),
-          offset: Joi.number(),
-          limit: Joi.number(),
-          orderBy: Joi.object().default({}),
-          fields: Joi.object().default({}),
+          type: 'object',
+          properties: {
+            query: {
+              type: 'object',
+              default: {},
+            },
+            offset: {
+              type: 'number',
+            },
+            limit: {
+              type: 'number',
+            },
+            orderBy: {
+              type: 'object',
+              default: {},
+            },
+            fields: {
+              type: 'object',
+              default: {},
+            },
+          },
+          default: {},
         },
       }),
       wrapHandler(async req => {
@@ -72,9 +80,16 @@ export default ({
 
   router.get(
     '/count',
-    celebrate({
+    validate({
       query: {
-        query: Joi.object().default({}),
+        type: 'object',
+        properties: {
+          query: {
+            type: 'object',
+            default: {},
+          },
+        },
+        default: {},
       },
     }),
     wrapHandler(req => repository.count({ query: toBSON(req.query.query) })),
@@ -82,12 +97,18 @@ export default ({
 
   router.delete(
     '/deleteOne',
-    celebrate({
-      query: Joi.object().required(),
+    validate({
+      query: {
+        type: 'object',
+        properties: {
+          query: {
+            type: 'object',
+          },
+        },
+        required: ['query'],
+      },
     }),
-    wrapHandler(req =>
-      repository.deleteOne({ query: toBSON(req.query.query) }),
-    ),
+    wrapHandler(req => repository.deleteOne({ query: toBSON(req.query.query) })),
   );
 
   router
@@ -118,17 +139,20 @@ export default ({
         });
       }),
     )
-    .delete(
-      wrapHandler(req =>
-        repository.deleteOne({ query: { _id: req.entity._id } }),
-      ),
-    );
+    .delete(wrapHandler(req => repository.deleteOne({ query: { _id: req.entity._id } })));
 
   router.get(
     '/findOne',
-    celebrate({
+    validate({
       query: {
-        query: Joi.object().default({}),
+        type: 'object',
+        properties: {
+          query: {
+            type: 'object',
+            default: {},
+          },
+        },
+        default: {},
       },
     }),
     wrapHandler(async req => {

@@ -1,56 +1,65 @@
 /* eslint-disable class-methods-use-this */
-import Joi from 'joi';
+import invariant from 'invariant';
 import { ObjectID as objectId } from 'mongodb';
 import jwt from 'jsonwebtoken';
 import pick from 'lodash/pick';
-import bcrypt from 'bcryptjs';
 import moment from 'moment';
-import { decorators, ServiceContainer } from 'octobus.js';
 import Boom from 'boom';
+import { validate } from 'oors/build/helpers';
 import { FailedLogin } from '../libs/errors';
+import { hashPassword } from '../libs/helpers';
 
-const { service, withSchema } = decorators;
-
-class User extends ServiceContainer {
-  constructor({ jwtConfig, emailTemplates, rootURL }) {
-    super();
+class User {
+  constructor({ jwtConfig, emailTemplates, rootURL, UserRepository, AccountRepository, Mail }) {
+    this.UserRepository = UserRepository;
+    this.AccountRepository = AccountRepository;
+    this.Mail = Mail;
     this.jwtConfig = jwtConfig;
     this.emailTemplates = emailTemplates;
     this.rootURL = rootURL;
   }
 
-  setServiceBus(serviceBus) {
-    super.setServiceBus(serviceBus);
-    this.UserRepository = serviceBus.extract('UserRepository');
-    this.AccountRepository = serviceBus.extract('AccountRepository');
-    this.Mail = serviceBus.extract('oors.mailer.Mail');
-  }
+  createToken(params) {
+    const { options, user } = validate(params, {
+      type: 'object',
+      properties: {
+        user: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+            },
+            accountId: {
+              isId: true,
+            },
+            username: {
+              type: 'string',
+            },
+            scope: {
+              type: 'array',
+              items: {
+                type: 'string',
+              },
+              default: [],
+            },
+          },
+          required: ['id', 'username'],
+        },
+      },
+    });
 
-  @service()
-  @withSchema({
-    user: Joi.object().keys({
-      id: Joi.string().required(),
-      accountId: Joi.object(),
-      username: Joi.string().required(),
-      scope: Joi.array().default([]),
-    }),
-    options: Joi.object().default({}),
-  })
-  createToken({ options, user }) {
     return jwt.sign(user, this.jwtConfig.key, {
       ...this.jwtConfig.options,
       ...options,
     });
   }
 
-  @service()
-  @withSchema({
-    username: Joi.string().required(),
-    password: Joi.string().required(),
-  })
-  async login({ username, password }, { extract }) {
-    const UserRepository = extract('UserRepository');
-    const AccountRepository = extract('AccountRepository');
+  async login({ username, password }) {
+    invariant(typeof username === 'string' && username, 'Username is required');
+    invariant(typeof password === 'string' && password, 'Password is required');
+
+    const { UserRepository, AccountRepository } = this;
+
     const user = await UserRepository.findOneByUsername(username);
 
     if (!user) {
@@ -69,7 +78,6 @@ class User extends ServiceContainer {
     return this.tryLogin(user);
   }
 
-  @service()
   async canLogin({ user, account }) {
     if (!account) {
       throw new FailedLogin('Unable to find user account!');
@@ -94,9 +102,8 @@ class User extends ServiceContainer {
     return account;
   }
 
-  @service()
   async checkPassword({ password, user }) {
-    const hashedPassword = await this.hashPassword({
+    const hashedPassword = await hashPassword({
       password,
       salt: user.salt,
     });
@@ -104,16 +111,14 @@ class User extends ServiceContainer {
     return user.password === hashedPassword;
   }
 
-  @service()
-  async tryLogin(user, { extract }) {
-    const UserRepository = extract('UserRepository');
-    const updatedUser = await UserRepository.replaceOne({
+  async tryLogin(user) {
+    const updatedUser = await this.UserRepository.save({
       ...user,
       lastLogin: new Date(),
     });
 
     const token = await this.createToken({
-      user: await this.serialize(updatedUser),
+      user: this.serialize(updatedUser),
     });
 
     return {
@@ -122,7 +127,6 @@ class User extends ServiceContainer {
     };
   }
 
-  @service()
   dump(data) {
     return pick(data, [
       'accountId',
@@ -140,7 +144,6 @@ class User extends ServiceContainer {
     ]);
   }
 
-  @service()
   serialize(data) {
     return {
       id: data._id.toString(),
@@ -150,20 +153,21 @@ class User extends ServiceContainer {
     };
   }
 
-  @service()
-  @withSchema({
-    userId: Joi.object().required(),
-    oldPassword: Joi.string().required(),
-    password: Joi.string().required(),
-  })
-  async changePassword({ userId, oldPassword, password }) {
+  async changePassword({ userId, oldPassword, password } = {}) {
+    invariant(userId, 'User id is required!');
+    invariant(
+      typeof oldPassword === 'string' && oldPassword,
+      'Previously set password is required!',
+    );
+    invariant(typeof password === 'string' && password, 'Password is required!');
+
     const user = await this.UserRepository.findById(userId);
 
     if (!user) {
       throw Boom.badRequest('User not found!');
     }
 
-    const oldHashedPassword = await this.hashPassword({
+    const oldHashedPassword = await hashPassword({
       password: oldPassword,
       salt: user.salt,
     });
@@ -172,7 +176,7 @@ class User extends ServiceContainer {
       throw Boom.badRequest('Invalid password!');
     }
 
-    const hashedPassword = await this.hashPassword({
+    const hashedPassword = await hashPassword({
       password,
       salt: user.salt,
     });
@@ -187,12 +191,10 @@ class User extends ServiceContainer {
     });
   }
 
-  @service()
-  @withSchema({
-    password: Joi.string().required(),
-    token: Joi.string().required(),
-  })
-  async recoverPassword({ password, token }) {
+  async recoverPassword({ password, token } = {}) {
+    invariant(typeof password === 'string' && password, 'Password is required!');
+    invariant(typeof token === 'string' && token, 'Token is required!');
+
     const user = await this.UserRepository.findOne({
       query: {
         'resetPassword.token': token,
@@ -203,7 +205,7 @@ class User extends ServiceContainer {
       throw Boom.badRequest('Token not found!');
     }
 
-    const hashedPassword = await this.hashPassword({
+    const hashedPassword = await hashPassword({
       password,
       salt: user.salt,
     });
@@ -223,8 +225,8 @@ class User extends ServiceContainer {
     };
   }
 
-  @service()
-  async signup({ username, email }, { message }) {
+  async signup(data) {
+    const { username, email } = data;
     const existingUser = await this.UserRepository.findOneByUsernameOrEmail({
       username,
       email,
@@ -244,7 +246,7 @@ class User extends ServiceContainer {
 
     const user = await this.UserRepository.createOne({
       accountId: account._id,
-      ...message.data,
+      ...data,
     });
 
     this.Mail.send({
@@ -276,8 +278,12 @@ class User extends ServiceContainer {
     };
   }
 
-  @service()
   async resetPassword(usernameOrEmail) {
+    invariant(
+      typeof usernameOrEmail === 'string' && usernameOrEmail,
+      'Username or email is required!',
+    );
+
     const user = await this.UserRepository.findOneByUsername(usernameOrEmail);
 
     if (!user) {
@@ -306,7 +312,6 @@ class User extends ServiceContainer {
     };
   }
 
-  @service()
   async socialLogin({ provider, token, expiresIn, profile }) {
     if (provider === 'google') {
       Object.assign(profile, {
@@ -357,23 +362,8 @@ class User extends ServiceContainer {
     };
   }
 
-  @service()
-  hashPassword({ password, salt }) {
-    return new Promise((resolve, reject) => {
-      bcrypt.hash(password, salt, (err, result) => {
-        if (err) {
-          return reject(err);
-        }
-
-        return resolve(result);
-      });
-    });
-  }
-
-  @service()
-  verify({ token }, { extract }) {
-    const UserRepository = extract('UserRepository');
-    const AccountRepository = extract('AccountRepository');
+  verify({ token }) {
+    const { UserRepository, AccountRepository } = this;
 
     /**
      * TODO

@@ -1,7 +1,8 @@
 {
   "name": "oors-user",
   "version": "1.0.21",
-  "description": "oors user module providing authentication, authorization, users and accounts management.",
+  "description":
+    "oors user module providing authentication, authorization, users and accounts management.",
   "main": "build/index.js",
   "repository": {
     "type": "git",
@@ -19,7 +20,7 @@
     "celebrate": "4.0.1",
     "express": "4.16.2",
     "express-jwt": "5.3.0",
-    "joi": "10.5.1",
+    "invariant": "2.2.2",
     "jsonwebtoken": "7.4.1",
     "lodash": "4.17.4",
     "moment": "2.18.1",
