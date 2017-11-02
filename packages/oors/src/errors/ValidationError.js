@@ -3,6 +3,7 @@ class ValidationError extends Error {
     super(message || 'Failed validation!');
     this.errors = errors;
     this.code = 'VALIDATION_ERROR';
+    Error.captureStackTrace(this, ValidationError);
   }
 
   // toString() {

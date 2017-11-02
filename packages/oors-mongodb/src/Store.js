@@ -95,7 +95,7 @@ class Store {
     return result.value;
   }
 
-  updateMany({ query = {}, update, options = {} } = {}) {
+  async updateMany({ query = {}, update, options = {} } = {}) {
     invariant(typeof update === 'object', 'Update payload is required!');
     return this.collection.updateMany(query, update, options);
   }

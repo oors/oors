@@ -20,6 +20,14 @@ export default (
 ) => {
   const { createOne, createMany, updateOne, updateMany, replaceOne } = repository;
 
+  set(repository, `schema.properties.${createProperty}`, {
+    instanceof: 'Date',
+  });
+
+  set(repository, `schema.properties.${updateProperty}`, {
+    instanceof: 'Date',
+  });
+
   Object.assign(repository, {
     createOne(data) {
       if (typeof data === 'object') {

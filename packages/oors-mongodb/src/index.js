@@ -63,11 +63,8 @@ class MongoDB extends Module {
     return repository;
   };
 
-  bindRepositories = (repositories, connectionName) => {
-    repositories.forEach(repository => {
-      this.bindRepository(repository, connectionName);
-    });
-  };
+  bindRepositories = (repositories, connectionName) =>
+    repositories.map(repository => this.bindRepository(repository, connectionName));
 
   bindRepository = (repository, connectionName) => {
     invariant(
