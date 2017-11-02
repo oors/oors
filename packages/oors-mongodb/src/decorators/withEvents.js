@@ -18,6 +18,7 @@ export default (
       'save',
     ],
     emitter,
+    prefix = '',
   },
 ) => {
   invariant(emitter instanceof EventEmitter, 'emitter has to be an instance of EventEmitter!');
@@ -26,9 +27,9 @@ export default (
     const previous = repository[method];
     Object.assign(repository, {
       [method]: async (...args) => {
-        emitter.emit(`before:${method}`, ...args);
+        emitter.emit(`${prefix}before:${method}`, ...args);
         const result = await previous.call(repository, ...args);
-        emitter.emit(`after:${method}`, result, ...args);
+        emitter.emit(`${prefix}after:${method}`, result, ...args);
         return result;
       },
     });
