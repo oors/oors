@@ -1,7 +1,10 @@
+import Ajv from 'ajv';
+import ajvKeywords from 'ajv-keywords';
 import uniq from 'lodash/uniq';
 import getPath from 'lodash/get';
 import setPath from 'lodash/set';
 import EventEmitter from 'events';
+import ValidationError from '../errors/ValidationError';
 
 class ModulesManager extends EventEmitter {
   constructor(context = {}) {
@@ -12,6 +15,34 @@ class ModulesManager extends EventEmitter {
     this.loads = {};
     this.modules = {};
     this.exportMap = {};
+    this.ajv = new Ajv({
+      allErrors: true,
+      // verbose: true,
+      async: 'es7',
+      coerceTypes: 'array',
+      useDefaults: true,
+    });
+
+    ajvKeywords(this.ajv, 'instanceof');
+  }
+
+  parseModuleConfig(config, schema = {}) {
+    const validate = this.ajv.compile({
+      type: 'object',
+      ...schema,
+      properties: {
+        ...(schema.properties || {}),
+        name: {
+          type: 'string',
+        },
+      },
+    });
+
+    if (!validate(config)) {
+      throw new ValidationError(validate.errors);
+    }
+
+    return config;
   }
 
   setContext(key, value) {
@@ -42,21 +73,18 @@ class ModulesManager extends EventEmitter {
         resolve(this.exportMap[name]);
       });
     });
+    module.config = this.parseModuleConfig(module.config, module.constructor.configSchema); // eslint-disable-line
     module.connect(this);
     return this;
   }
 
   setup() {
-    return Promise.all(
-      Object.keys(this.modules).map(name => this.modules[name].load()),
-    );
+    return Promise.all(Object.keys(this.modules).map(name => this.modules[name].load()));
   }
 
   addDependency(from, to) {
     if (from === to) {
-      throw new Error(
-        `Cyclic dependency detected - module "${from}" waits for itself to load!`,
-      );
+      throw new Error(`Cyclic dependency detected - module "${from}" waits for itself to load!`);
     }
 
     if (!this.getModuleNames().includes(to)) {
@@ -67,10 +95,7 @@ class ModulesManager extends EventEmitter {
 
     this.dependencyGraph[from].push(to);
     Object.keys(this.expandedDependencyGraph)
-      .filter(
-        node =>
-          node === from || this.expandedDependencyGraph[node].includes(from),
-      )
+      .filter(node => node === from || this.expandedDependencyGraph[node].includes(from))
       .forEach(node => {
         this.expandedDependencyGraph[node] = uniq([
           ...this.expandedDependencyGraph[node],
@@ -78,9 +103,7 @@ class ModulesManager extends EventEmitter {
           ...this.expandedDependencyGraph[to],
         ]);
         if (this.expandedDependencyGraph[node].includes(node)) {
-          throw new Error(
-            `Cyclic dependency detected from "${from}" to "${to}"!`,
-          );
+          throw new Error(`Cyclic dependency detected from "${from}" to "${to}"!`);
         }
       });
   }
@@ -101,9 +124,7 @@ class ModulesManager extends EventEmitter {
     const hooks = this.getModules()
       .map(module => module.hooks[hookName])
       .filter(hook => typeof hook === 'function');
-    return hooks.length
-      ? Promise.all(hooks.map(hook => hook(context)))
-      : Promise.resolve();
+    return hooks.length ? Promise.all(hooks.map(hook => hook(context))) : Promise.resolve();
   }
 
   async run(commandName, command, context) {

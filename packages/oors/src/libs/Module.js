@@ -1,9 +1,6 @@
 /* eslint-disable no-underscore-dangle */
-import Ajv from 'ajv';
-import ajvKeywords from 'ajv-keywords';
 import getPath from 'lodash/get';
 import camelCase from 'lodash/camelCase';
-import ValidationError from '../errors/ValidationError';
 
 class Module {
   constructor(config = {}) {
@@ -15,44 +12,7 @@ class Module {
       .match(/\((.*.js)/)[1];
 
     this.hooks = {};
-
-    this.ajv = new Ajv({
-      allErrors: true,
-      // verbose: true,
-      async: 'es7',
-      coerceTypes: 'array',
-      useDefaults: true,
-    });
-
-    ajvKeywords(this.ajv, 'instanceof');
-
-    this.config = this.parseConfig(config);
-  }
-
-  createValidator(schema) {
-    return this.ajv.compile(schema);
-  }
-
-  parseConfig(config) {
-    const schema = this.constructor.configSchema;
-
-    if (schema) {
-      const validate = this.createValidator({
-        ...schema,
-        properties: {
-          ...schema.properties,
-          name: {
-            type: 'string',
-          },
-        },
-      });
-
-      if (!validate(config)) {
-        throw new ValidationError(validate.errors);
-      }
-    }
-
-    return config;
+    this.config = config;
   }
 
   initialize(config, manager) {} // eslint-disable-line
