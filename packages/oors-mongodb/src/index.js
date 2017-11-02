@@ -1,3 +1,5 @@
+import Ajv from 'ajv';
+import ajvKeywords from 'ajv-keywords';
 import invariant from 'invariant';
 import { MongoClient } from 'mongodb';
 import { Module } from 'oors';
@@ -76,6 +78,8 @@ class MongoDB extends Module {
 
     Object.assign(repository, {
       collection: db.collection(repository.collectionName),
+      ajv: this.ajv,
+      validate: this.ajv.compile(repository.schema),
     });
 
     return repository;
@@ -126,6 +130,17 @@ class MongoDB extends Module {
 
     await Promise.all(connections.map(createConnection));
 
+    this.ajv = new Ajv({
+      allErrors: true,
+      verbose: true,
+      async: 'es7',
+      useDefaults: true,
+    });
+
+    ajvKeywords(this.ajv, 'instanceof');
+
+    this.ajv.addKeyword('isId', idValidator);
+
     this.export({
       createStore,
       createRepository,
@@ -133,6 +148,7 @@ class MongoDB extends Module {
       getConnection,
       bindRepository,
       bindRepositories,
+      ajv: this.ajv,
     });
   }
 }
