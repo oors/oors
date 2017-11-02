@@ -1,8 +1,8 @@
 import { Module } from 'oors';
 import pivotSchema from 'oors/build/schemas/pivot';
-import UserRepository from './repositories/User';
-import AccountRepository from './repositories/Account';
-import UserLoginRepository from './repositories/UserLogin';
+import UserRepositoryClass from './repositories/User';
+import AccountRepositoryClass from './repositories/Account';
+import UserLoginRepositoryClass from './repositories/UserLogin';
 import UserService from './services/User';
 import AccountService from './services/Account';
 import router from './router';
@@ -101,6 +101,24 @@ class UserModule extends Module {
     Object.assign(routerConfig, { passport });
   }
 
+  bindRepositories(bindRepository) {
+    const UserRepository = bindRepository(new UserRepositoryClass());
+    const AccountRepository = bindRepository(new AccountRepositoryClass());
+    const UserLoginRepository = bindRepository(new UserLoginRepositoryClass());
+
+    this.export({
+      UserRepository,
+      AccountRepository,
+      UserLoginRepository,
+    });
+
+    return {
+      UserRepository,
+      AccountRepository,
+      UserLoginRepository,
+    };
+  }
+
   async setup({
     jwtSecret,
     jwtConfig,
@@ -120,9 +138,10 @@ class UserModule extends Module {
       jwtMiddleware: this.jwtMiddleware,
     };
 
-    const userRepository = bindRepository(new UserRepository());
-    const accountRepository = bindRepository(new AccountRepository());
-    const userLoginRepository = bindRepository(new UserLoginRepository());
+    const { UserRepository, AccountRepository, UserLoginRepository } = this.bindRepositories(
+      bindRepository,
+    );
+
     const User = new UserService({
       jwtConfig: {
         key: jwtSecret,
@@ -130,20 +149,20 @@ class UserModule extends Module {
       },
       emailTemplates,
       rootURL,
-      UserRepository: userRepository,
-      AccountRepository: accountRepository,
+      UserRepository,
+      AccountRepository,
       Mail,
     });
     const Account = new AccountService({
-      UserRepository: userRepository,
-      AccountRepository: accountRepository,
+      UserRepository,
+      AccountRepository,
       Mail,
     });
 
     this.export({
-      UserRepository: userRepository,
-      AccountRepository: accountRepository,
-      UserLoginRepository: userLoginRepository,
+      UserRepository,
+      AccountRepository,
+      UserLoginRepository,
       User,
       Account,
       gqlMiddlewares,
