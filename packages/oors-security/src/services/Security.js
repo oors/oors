@@ -1,17 +1,17 @@
 /* eslint-disable class-methods-use-this */
-import Joi from 'joi';
-import { ServiceContainer, decorators } from 'octobus.js';
+import invariant from 'invariant';
 
-const { service, withSchema } = decorators;
+class Security {
+  constructor({ UserRepository, GroupRepository }) {
+    this.UserRepository = UserRepository;
+    this.GroupRepository = GroupRepository;
+  }
 
-class Security extends ServiceContainer {
-  @service()
-  @withSchema({
-    userId: Joi.any().required(),
-    permissions: Joi.array().items(Joi.string()).required(),
-  })
-  async setUserPermissions({ userId, permissions }, { extract }) {
-    const UserRepository = extract('UserRepository');
+  async setUserPermissions({ userId, permissions }) {
+    invariant(userId, 'User id is required!');
+    invariant(permissions && Array.isArray(permissions), 'Permissions array is required!');
+
+    const { UserRepository } = this;
 
     const user = await UserRepository.findOne({
       query: {
@@ -36,14 +36,11 @@ class Security extends ServiceContainer {
       });
   }
 
-  @service()
-  @withSchema({
-    userId: Joi.any().required(),
-    includeGroups: Joi.boolean().default(true),
-  })
-  async getUserPermissions({ userId, includeGroups }, { extract }) {
-    const UserRepository = extract('UserRepository');
-    const GroupRepository = extract('GroupRepository');
+  async getUserPermissions({ userId, includeGroups = false }) {
+    invariant(userId, 'User id is required!');
+
+    const { UserRepository, GroupRepository } = this;
+
     const user = await UserRepository.findOne({
       query: {
         userId,
@@ -52,7 +49,7 @@ class Security extends ServiceContainer {
 
     let groupsPermissions = [];
 
-    if (includeGroups && Array.isArray(user.groupIds) && user.groupIds.length) {
+    if (!!includeGroups && Array.isArray(user.groupIds) && user.groupIds.length) {
       const groups = await GroupRepository.findMany({
         query: {
           _id: {
@@ -61,23 +58,18 @@ class Security extends ServiceContainer {
         },
       }).then(c => c.toArray());
 
-      groupsPermissions = groups.reduce(
-        (acc, group) => [...acc, ...group.permissions],
-        [],
-      );
+      groupsPermissions = groups.reduce((acc, group) => [...acc, ...group.permissions], []);
     }
 
     return [...user.permissions, ...groupsPermissions];
   }
 
-  @service()
-  @withSchema({
-    userId: Joi.any().required(),
-    groups: Joi.array().items(Joi.string()).required(),
-  })
-  async setUserGroups({ userId, groups }, { extract }) {
-    const UserRepository = extract('UserRepository');
-    const GroupRepository = extract('GroupRepository');
+  async setUserGroups({ userId, groups }) {
+    invariant(userId, 'User id is required!');
+    invariant(groups && Array.isArray(groups), 'Groups array is required!');
+
+    const { UserRepository, GroupRepository } = this;
+
     const user = await UserRepository.findOne({
       query: {
         userId,
