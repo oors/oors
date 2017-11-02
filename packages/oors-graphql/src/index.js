@@ -352,10 +352,9 @@ class Gql extends Module {
           loaders: this.loaders.build(),
         },
         formatError: err => {
-          if (err.originalError && err.originalError.isJoi) {
+          if (err.originalError && err.originalError.code === 'VALIDATION_ERROR') {
             Object.assign(err, {
-              details: err.originalError.details,
-              message: err.originalError.details.map(({ message }) => message).join('\n'),
+              errors: err.originalError.errors,
             });
           }
 
