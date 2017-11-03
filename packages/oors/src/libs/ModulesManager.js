@@ -26,8 +26,12 @@ class ModulesManager extends EventEmitter {
     ajvKeywords(this.ajv, 'instanceof');
   }
 
+  compileSchema(schema) {
+    return this.ajv.compile(schema);
+  }
+
   parseModuleConfig(config, schema = {}) {
-    const validate = this.ajv.compile({
+    const validate = this.compileSchema({
       type: 'object',
       ...schema,
       properties: {
