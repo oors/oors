@@ -2,7 +2,8 @@ import { Module } from 'oors';
 import File from './services/File';
 import FileRepository from './repositories/File';
 import router from './router';
-import uploadMiddleware from './middlewares/upload';
+import createUploadMiddleware from './middlewares/upload';
+import uploadSchema from './schemas/upload';
 
 class FileStorage extends Module {
   static configSchema = {
@@ -18,12 +19,16 @@ class FileStorage extends Module {
   name = 'oors.fileStorage';
 
   initialize({ uploadDir }) {
-    this.uploadMiddleware = uploadMiddleware({
+    this.uploadMiddleware = createUploadMiddleware({
       dest: uploadDir,
     });
 
     this.router = router({
       uploadMiddleware: this.uploadMiddleware,
+    });
+
+    this.export({
+      createUploadMiddleware,
     });
   }
 
@@ -34,6 +39,7 @@ class FileStorage extends Module {
     const file = new File({
       uploadDir: this.getConfig('uploadDir'),
       FileRepository: fileRepository,
+      validateUpload: this.manager.compileSchema(uploadSchema),
     });
     fileRepository.File = file;
 

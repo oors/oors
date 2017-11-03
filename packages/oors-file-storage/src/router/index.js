@@ -39,15 +39,7 @@ export default ({ uploadMiddleware }) => {
   router.post(
     '/files/upload',
     uploadMiddleware.single('file'),
-    wrapHandler(req =>
-      req.services.File.createFromUpload({
-        filename: req.file.originalname,
-        path: req.file.path,
-        size: req.file.size,
-        mimeType: req.file.mimetype,
-        uploadDir: req.file.destination,
-      }),
-    ),
+    wrapHandler(req => req.services.File.createFromUpload(req.file)),
   );
 
   router.get('/files/:id/download', async (req, res, next) => {
