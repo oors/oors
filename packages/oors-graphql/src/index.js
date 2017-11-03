@@ -19,7 +19,7 @@ import { express as playgroundMiddleware } from 'graphql-playground/middleware';
 import mainResolvers from './graphql/resolvers';
 import modulesResolvers from './graphql/modulesResolvers';
 import LoadersMap from './libs/LoadersMap';
-import * as decorators from './libs/decorators';
+import * as decorators from './decorators';
 
 class Gql extends Module {
   static configSchema = {

@@ -37,3 +37,16 @@ export const loadResolvers = async dirPath => {
 
   return map;
 };
+
+export const resolver = definition => (target, propr, descriptor) => {
+  Object.assign(descriptor, {
+    enumerable: true,
+  });
+
+  Object.assign(descriptor.value, {
+    isResolver: true,
+    definition,
+  });
+
+  return descriptor;
+};
