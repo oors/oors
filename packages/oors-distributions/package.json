@@ -1,0 +1,30 @@
+{
+  "name": "oors-distributions",
+  "version": "0.1.0",
+  "description": "oors distributions",
+  "main": "build/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/viczam/oors/tree/master/packages/oors-distributions"
+  },
+  "author": "Victor Zamfir <zamfir.victor@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/viczam/oors/issues"
+  },
+  "homepage": "https://github.com/viczam/oors#readme",
+  "dependencies": {
+    "chalk": "2.1.0",
+    "express-react-views": "0.10.4",
+    "node-notifier": "5.1.2",
+    "oors": "*",
+    "oors-file-storage": "*",
+    "oors-graphql": "*",
+    "oors-health": "*",
+    "oors-logger": "*",
+    "oors-mailer": "*",
+    "oors-mongodb": "*",
+    "oors-router": "*",
+    "oors-user": "*"
+  }
+}

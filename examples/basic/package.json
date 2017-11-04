@@ -9,18 +9,11 @@
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "chalk": "2.1.0",
     "dotenv": "4.0.0",
-    "express": "4.16.2",
-    "fs-extra": "^4.0.2",
     "lodash": "4.17.4",
     "moment": "2.19.1",
-    "mongodb": "2.2.33",
-    "mongodb-migrate": "2.0.2",
-    "node-notifier": "5.1.2",
     "prop-types": "^15.6.0",
     "randomstring": "1.1.5",
-    "raven": "2.2.1",
     "react": "16.0.0",
     "react-dom": "16.0.0"
   },
