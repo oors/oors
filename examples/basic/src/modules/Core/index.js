@@ -1,30 +1,17 @@
 import { Module } from '../../../../../packages/oors/src/index';
 import { wrapHandler } from '../../../../../packages/oors-router/src/libs/helpers';
+import ProductRepositoryClass from './repositories/Product';
 
 class CoreModule extends Module {
   name = 'core';
 
   async setup() {
-    const [{ createRepository }, { router }] = await this.dependencies([
+    const [{ bindRepository }, { router }] = await this.dependencies([
       'oors.mongoDb',
       'oors.router',
     ]);
 
-    const ProductRepository = createRepository({
-      collectionName: 'Product',
-      schema: {
-        type: 'object',
-        properties: {
-          name: {
-            type: 'string',
-          },
-          price: {
-            type: 'number',
-          },
-        },
-        required: ['name'],
-      },
-    });
+    const ProductRepository = bindRepository(new ProductRepositoryClass());
 
     router.get('/products', wrapHandler(() => ProductRepository.findMany().then(c => c.toArray())));
 
