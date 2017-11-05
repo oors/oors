@@ -49,14 +49,17 @@ export const createCRUDResolvers = ({ getRepository, getLoaders }) => ({
 
 export const createLoaders = Repository => ({
   findById: {
-    loader: ids =>
-      Repository.findMany({
+    loader: async ids => {
+      const items = await Repository.findMany({
         query: {
           _id: {
             $in: ids.map(objectId),
           },
         },
-      }).then(fromMongoCursor),
+      }).then(fromMongoCursor);
+
+      return ids.map(id => items.find(item => item.id.toString() === id.toString()) || null);
+    },
     options: {
       cacheKeyFn: key => key.toString(),
     },
