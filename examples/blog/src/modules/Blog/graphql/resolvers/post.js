@@ -132,10 +132,15 @@ export default {
           },
         },
       }),
-    comments: (post, args, { loaders }) =>
+    comments: (post, { offset = 0, limit = 10 }, { loaders }) =>
       loaders.blog.comments.findMany.load({
         query: {
           postId: post._id,
+        },
+        skip: parseInt(offset, 10) || 0,
+        limit: Math.max(parseInt(limit, 10) || 10, 20),
+        orderBy: {
+          createdAt: 'desc',
         },
       }),
   },

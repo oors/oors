@@ -32,7 +32,7 @@ type BlogPost {
   category: BlogCategory!
   tags: [String!]!
   related: [BlogPost!]!
-  comments: [BlogComment!]!
+  comments(offset: Int, limit: Int): [BlogComment!]!
   createdAt: DateTime
   updatedAt: DateTime
 }
