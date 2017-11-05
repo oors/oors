@@ -25,4 +25,5 @@ While this structure can work well for POC-s and small projects, it's recommende
 The Blog module
 --------------------
 `index.js` is the entry point of the module (the module file). Here we register the repositories from the `repositories` directory, and we create the GraphQL Dataloaders.
+
 Right now the repositories are just extending the base Repository class provided by the oors-mongodb module and define a schema for the data we want to store, but as you progress with specific business logic code, you can put it here initially (and move it to specialized services objects later on if it makes sense). Don't put your business logic code inside GraphQL resolvers or route handler!!!
