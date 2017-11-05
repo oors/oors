@@ -28,9 +28,10 @@ export default parser => resolver => async (_, args, ctx, info) => {
     },
   });
 
-  const values = await Promise.all(promises);
-
-  replaceValues(finalArgs, keys, values);
+  if (promises.length) {
+    const values = await Promise.all(promises);
+    replaceValues(finalArgs, keys, values);
+  }
 
   return resolver(_, finalArgs, ctx, info);
 };
