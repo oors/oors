@@ -1,0 +1,100 @@
+extend type Query {
+  blogPosts(query: BlogPostsQuery): [BlogPost]
+  blogPost(id: ID!): BlogPost
+  blogCategories: [BlogCategory!]!
+  blogCategory(id: ID!): BlogCategory
+}
+
+extend type User {
+  blogPosts: [BlogPost!]!
+}
+
+extend type Mutation {
+  createBlogPost(input: CreateBlogPostInput!): BlogPost
+  updateBlogPost(id: ID!, input: UpdateBlogPostInput!): BlogPost
+  deleteBlogPost(id: ID!): BlogPost
+  createBlogComment(input: CreateBlogCommentInput!): BlogComment
+  updateBlogComment(id: ID!, input: UpdateBlogCommentInput!): BlogComment
+  createBlogCategory(input: BlogCategoryInput!): BlogCategory
+  updateBlogCategory(id: ID!, input: BlogCategoryInput!): BlogCategory
+  deleteBlogCategory(id: ID!): BlogCategory
+}
+
+type BlogPost {
+  id: ID!
+  title: String!
+  slug: String!
+  excerpt: String
+  body: String
+  status: BlogPostStatus
+  author: User
+  updatedBy: User
+  category: BlogCategory!
+  tags: [String!]!
+  related: [BlogPost!]!
+  comments: [BlogComment!]!
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type BlogComment {
+  id: ID!
+  parent: BlogComment
+  children: [BlogComment!]!
+  post: BlogPost
+  body: String!
+  author: User
+  isHidden: Boolean
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type BlogCategory {
+  id: ID!
+  name: String
+  posts: [BlogPost!]!
+}
+
+input BlogPostsQuery {
+  categoryIds: [ID!]
+  searchQuery: String
+  offset: Int
+  limit: Int!
+  tags: [String!]
+}
+
+input CreateBlogPostInput {
+  title: String!
+  body: String
+  tags: [String!]
+  status: BlogPostStatus
+  categoryId: ID!
+}
+
+input UpdateBlogPostInput {
+  title: String
+  body: String
+  tags: [String!]
+  status: BlogPostStatus
+  categoryId: ID
+}
+
+input CreateBlogCommentInput {
+  parentId: ID
+  postId: ID!
+  body: String!
+}
+
+input UpdateBlogCommentInput {
+  body: String!
+  isHidden: Boolean
+}
+
+input BlogCategoryInput {
+  name: String!
+}
+
+enum BlogPostStatus {
+  PUBLISHED
+  DRAFT
+}
