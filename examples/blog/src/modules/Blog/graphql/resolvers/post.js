@@ -1,3 +1,4 @@
+import set from 'lodash/set';
 import {
   withArgs,
   withSchema,
@@ -9,6 +10,68 @@ import PostRepository from '../../repositories/Post';
 const resolvers = createCRUDResolvers({
   getRepository: ({ app }) => app.modules.get('oors.blog').PostRepository,
   getLoaders: ({ loaders }) => loaders.blog.posts,
+  findManyQuery: ({ query: { categoryIds, offset, limit, searchQuery } }) => {
+    const query = {
+      orderBy: {
+        createdAt: 'desc',
+      },
+    };
+
+    if (categoryIds && categoryIds.length) {
+      set(query, 'query.categoryId', {
+        $in: categoryIds,
+      });
+    }
+
+    if (offset) {
+      query.skip = parseInt(offset, 10);
+    }
+
+    if (limit) {
+      query.limit = parseInt(limit, 10);
+    }
+
+    if (searchQuery) {
+      set(query, 'query.$text.$search', searchQuery);
+    }
+
+    return query;
+  },
+  // you can only delete and update your own posts posts
+  canUpdate: (user, item) => user._id.toString() === item.createdBy.toString(),
+  canDelete: (user, item) => user._id.toString() === item.createdBy.toString(),
+});
+
+const validateFindQuery = withSchema({
+  type: 'object',
+  properties: {
+    query: {
+      type: 'object',
+      properties: {
+        categoryIds: {
+          type: 'array',
+          items: {
+            isId: true,
+          },
+        },
+        searchQuery: {
+          type: 'string',
+        },
+        offset: {
+          type: 'integer',
+          minimum: 0,
+          default: 0,
+        },
+        limit: {
+          type: 'integer',
+          minimum: 1,
+          maximum: 20,
+          default: 10,
+        },
+      },
+      default: {},
+    },
+  },
 });
 
 // validating the properties for which GraphQL schema validation is insufficient
@@ -33,7 +96,7 @@ const validatePostInput = withSchema({
 });
 
 const parsePostInput = withArgs(
-  ({ input, id }, { user = {}, loaders: { blog: { categories } } }, { resolve }) => ({
+  ({ input, id }, { user, loaders: { blog: { categories } } }, { resolve }) => ({
     input: {
       ...input,
       [id ? 'updatedBy' : 'createdBy']: user._id, // user stamps
@@ -54,7 +117,7 @@ const validateReferences = withSchema({
 
 export default {
   Query: {
-    blogPosts: resolvers.findMany,
+    blogPosts: compose(validateFindQuery)(resolvers.findMany),
     blogPost: resolvers.findOne,
   },
   BlogPost: {

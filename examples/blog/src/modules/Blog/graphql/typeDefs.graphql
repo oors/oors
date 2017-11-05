@@ -59,7 +59,7 @@ input BlogPostsQuery {
   categoryIds: [ID!]
   searchQuery: String
   offset: Int
-  limit: Int!
+  limit: Int
   tags: [String!]
 }
 

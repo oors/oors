@@ -8,6 +8,8 @@ import {
 const resolvers = createCRUDResolvers({
   getRepository: ({ app }) => app.modules.get('oors.blog').CommentRepository,
   getLoaders: ({ loaders }) => loaders.blog.comments,
+  canUpdate: (user, item) => user._id.toString() === item.createdBy.toString(),
+  canDelete: (user, item) => user._id.toString() === item.createdBy.toString(),
 });
 
 const validateCreateCommentInput = withSchema({
