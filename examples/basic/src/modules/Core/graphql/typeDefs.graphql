@@ -1,8 +1,0 @@
-extend type Query {
-  products: [Product]
-}
-
-type Product {
-  name: String
-  price: Float
-}

@@ -9,7 +9,7 @@ const config = new Config();
 
 config.addStore(
   new MemoryStore({
-    rootDir: __dirname,
+    rootDir: path.resolve(__dirname, '..'),
     rootURL: 'http://localhost:3000',
     isDev: process.env.NODE_ENV === 'development',
     port: 3000,

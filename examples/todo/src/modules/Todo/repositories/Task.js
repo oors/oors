@@ -1,28 +1,27 @@
 import Repository from '../../../../../../packages/oors-mongodb/src/Repository';
 
-class ProductRepository extends Repository {
+class TaskRepository extends Repository {
   static schema = {
     type: 'object',
     properties: {
-      name: {
+      title: {
         type: 'string',
       },
-      price: {
-        type: 'number',
+      isChecked: {
+        type: 'boolean',
+        default: false,
       },
     },
-    required: ['name'],
+    required: ['title'],
   };
 
-  findAllExpensive() {
+  findChecked(isChecked = true) {
     return this.findMany({
       query: {
-        price: {
-          $gt: 1000,
-        },
+        isChecked,
       },
     });
   }
 }
 
-export default ProductRepository;
+export default TaskRepository;
