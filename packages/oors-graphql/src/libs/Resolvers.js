@@ -1,3 +1,4 @@
+// Experimental! Don't use it yet.
 /* eslint-disable no-underscore-dangle */
 import invariant from 'invariant';
 import set from 'lodash/set';

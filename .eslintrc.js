@@ -1,9 +1,10 @@
 module.exports = {
   parser: 'babel-eslint',
-  extends: ['airbnb'],
+  extends: ['airbnb', 'prettier'],
   globals: {
     __DEV__: true,
   },
+  plugins: ['prettier'],
   rules: {
     'no-underscore-dangle': ['error', { allow: ['_id'] }],
     'arrow-parens': 0,
