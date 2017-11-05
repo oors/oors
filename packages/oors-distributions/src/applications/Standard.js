@@ -10,7 +10,7 @@ import notifier from 'node-notifier';
 import chalk from 'chalk';
 import expressReactViews from 'express-react-views';
 import Application from 'oors/build/libs/Application';
-import * as middlewares from 'oors/build/middlewares';
+import * as middlewares from '../middlewares';
 
 class StandardApplication extends Application {
   static async loadMiddlewares(config) {
