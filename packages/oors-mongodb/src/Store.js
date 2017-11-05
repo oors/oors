@@ -61,7 +61,19 @@ class Store {
     let cursor = await this.collection.find(query, selectedFields);
 
     if (orderBy) {
-      cursor = cursor.sort(orderBy);
+      cursor = cursor.sort(
+        Object.keys(orderBy).reduce(
+          (acc, field) => ({
+            ...acc,
+            [field]:
+              orderBy[field] === 1 ||
+              (typeof orderBy[field] === 'string' && orderBy[field].toLowerCase() === 'asc')
+                ? 1
+                : -1,
+          }),
+          {},
+        ),
+      );
     }
 
     if (skip) {

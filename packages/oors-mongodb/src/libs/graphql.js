@@ -2,16 +2,26 @@ import { ObjectID as objectId } from 'mongodb';
 import omit from 'lodash/omit';
 import { fromMongoCursor, fromMongo } from './helpers';
 
-export const createCRUDResolvers = ({ getRepository, getLoaders }) => ({
+export const createCRUDResolvers = ({
+  getRepository,
+  getLoaders,
+  canDelete = () => true,
+  canUpdate = () => true,
+  findManyQuery = () => ({}),
+}) => ({
   findOne: (_, { id }, ctx) => getLoaders(ctx).findById.load(id),
-  findMany: (_, args, ctx) => getLoaders(ctx).findMany.load({}),
+  findMany: (_, args, ctx) => getLoaders(ctx).findMany.load(findManyQuery(args, ctx)),
   createOne: async (_, { input }, ctx) => fromMongo(await getRepository(ctx).createOne(input)),
-  updateOne: async (_, { id, input }, ctx) => {
+  updateOne: async (_, { id, input, item: loadedItem }, ctx) => {
     const Repository = getRepository(ctx);
-    const item = await Repository.findById(objectId(id));
+    const item = loadedItem || (await Repository.findById(objectId(id)));
 
     if (!item) {
       throw new Error(`Unable to find item with id: ${id}!`);
+    }
+
+    if (!canUpdate(ctx.user, item)) {
+      throw new Error('Not Allowed!');
     }
 
     await Repository.validate(
@@ -35,12 +45,16 @@ export const createCRUDResolvers = ({ getRepository, getLoaders }) => ({
       }),
     );
   },
-  deleteOne: async (_, { id }, ctx) => {
+  deleteOne: async (_, { id, item: loadedItem }, ctx) => {
     const Repository = getRepository(ctx);
-    const item = await Repository.findById(objectId(id));
+    const item = loadedItem || (await Repository.findById(objectId(id)));
 
     if (!item) {
       throw new Error(`Unable to find item with id: ${id}!`);
+    }
+
+    if (!canDelete(ctx.user, item)) {
+      throw new Error('Not Allowed!');
     }
 
     return fromMongo(await Repository.deleteOne({ query: { _id: item._id } }));
