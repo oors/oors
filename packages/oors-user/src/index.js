@@ -16,7 +16,7 @@ import ForgotPasswordTemplate from './mailerTemplates/ForgotPassword';
 import UserSignupTemplate from './mailerTemplates/UserSignup';
 
 class UserModule extends Module {
-  static configSchema = {
+  static schema = {
     type: 'object',
     properties: {
       jwtSecret: {

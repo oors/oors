@@ -8,7 +8,7 @@ import * as helpers from './libs/helpers';
 import idValidator from './libs/idValidator';
 
 class MongoDB extends Module {
-  static configSchema = {
+  static schema = {
     type: 'object',
     properties: {
       connections: {
@@ -21,6 +21,10 @@ class MongoDB extends Module {
             },
             url: {
               type: 'string',
+            },
+            options: {
+              type: 'object',
+              default: {},
             },
           },
           required: ['name', 'url'],
@@ -85,10 +89,10 @@ class MongoDB extends Module {
     return repository;
   };
 
-  createConnection = async options => {
-    const { name, url } = options;
+  createConnection = async connectionOptions => {
+    const { name, url, options } = connectionOptions;
 
-    this.connections[name] = await MongoClient.connect(url);
+    this.connections[name] = await MongoClient.connect(url, options);
 
     return this.connections[name];
   };

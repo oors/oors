@@ -6,7 +6,7 @@ import createUploadMiddleware from './middlewares/upload';
 import uploadSchema from './schemas/upload';
 
 class FileStorage extends Module {
-  static configSchema = {
+  static schema = {
     type: 'object',
     properties: {
       uploadDir: {

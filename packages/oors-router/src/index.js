@@ -2,14 +2,13 @@ import { Module } from 'oors';
 import path from 'path';
 import { Router as ExpressRouter } from 'express';
 import pivotSchema from 'oors/build/schemas/pivot';
-import { validate } from 'oors/build/helpers';
 import BaseRouter from './libs/Router';
 import * as helpers from './libs/helpers';
 import generateRESTRouter from './libs/generateRESTRouter';
 import validatorMiddleware from './middlewares/validator';
 
 class Router extends Module {
-  static configSchema = {
+  static schema = {
     type: 'object',
     properties: {
       middlewarePivot: pivotSchema,
@@ -26,7 +25,7 @@ class Router extends Module {
     },
   };
 
-  static moduleConfigSchema = {
+  static moduleSchema = {
     type: 'object',
     properties: {
       autoload: {
@@ -41,6 +40,10 @@ class Router extends Module {
   };
 
   name = 'oors.router';
+
+  initialize() {
+    this.validateModule = this.manager.compileSchema(this.constructor.moduleSchema);
+  }
 
   addRouter = (...args) => {
     if (args.length === 2) {
@@ -57,16 +60,21 @@ class Router extends Module {
   };
 
   loadModuleRouter = module => {
-    const { autoload, prefixPath } = validate(
-      module.getConfig('router', {}),
-      Router.moduleConfigSchema,
-    );
+    const moduleConfig = module.getConfig('router', {});
+
+    if (!this.validateModule(moduleConfig)) {
+      throw new Error(
+        `Invalid module router configuration:\n${JSON.stringify(this.validateModule.errors)}!`,
+      );
+    }
+
+    const { autoload, prefixPath } = moduleConfig;
 
     if (!autoload) {
       return;
     }
 
-    let router = module.router;
+    let { router } = module;
 
     if (!router) {
       const routerPath = path.resolve(path.dirname(module.filePath), 'router');

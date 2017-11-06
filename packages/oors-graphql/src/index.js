@@ -22,7 +22,7 @@ import LoadersMap from './libs/LoadersMap';
 import * as decorators from './decorators';
 
 class Gql extends Module {
-  static configSchema = {
+  static schema = {
     type: 'object',
     properties: {
       graphiql: {

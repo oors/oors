@@ -6,7 +6,7 @@ import path from 'path';
 import { Logger, transports as loggerTransports } from 'winston';
 
 class LoggerModule extends Module {
-  static configSchema = {
+  static schema = {
     type: 'object',
     properties: {
       logsDir: {

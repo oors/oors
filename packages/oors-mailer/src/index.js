@@ -7,7 +7,7 @@ import pivotSchema from 'oors/build/schemas/pivot';
 import MailService from './services/Mail';
 
 class Mailer extends Module {
-  static configSchema = {
+  static schema = {
     type: 'object',
     properties: {
       transport: {

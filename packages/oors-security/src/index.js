@@ -7,7 +7,7 @@ import * as schemas from './schemas';
 import SecurityServiceContainer from './services/Security';
 
 class Security extends Module {
-  static configSchema = {
+  static schema = {
     extractUserPermissions: Joi.func(),
   };
 
@@ -23,19 +23,17 @@ class Security extends Module {
   buildExtractor(extractors) {
     return async user => {
       const permissionsLists = await Promise.all(
-        extractors
-          .filter(extractor => extractor)
-          .map(extractor => extractor(user)),
+        extractors.filter(extractor => extractor).map(extractor => extractor(user)),
       );
       return flatten(permissionsLists);
     };
   }
 
   async setup() {
-    const [
-      { createRepository },
-      { registerServices },
-    ] = await this.dependencies(['oors.mongoDb', 'oors.octobus']);
+    const [{ createRepository }, { registerServices }] = await this.dependencies([
+      'oors.mongoDb',
+      'oors.octobus',
+    ]);
 
     const services = registerServices(this, {
       GroupRepository: createRepository({
@@ -53,10 +51,7 @@ class Security extends Module {
       'createPermissionsExtractor',
       // eslint-disable-next-line consistent-return
       module => {
-        const permissionsExtractor = get(
-          module,
-          'security.permissionsExtractor',
-        );
+        const permissionsExtractor = get(module, 'security.permissionsExtractor');
         if (permissionsExtractor) {
           return permissionsExtractor({
             security: services.Security,
@@ -78,10 +73,7 @@ class Security extends Module {
         const modulePermissions = get(module, 'security.permissions');
         if (modulePermissions) {
           Object.keys(modulePermissions).forEach(permission => {
-            permissionsManager.define(
-              permission,
-              modulePermissions[permission],
-            );
+            permissionsManager.define(permission, modulePermissions[permission]);
           });
         }
       },
