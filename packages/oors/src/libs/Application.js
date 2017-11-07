@@ -3,13 +3,14 @@ import ExpressApplication from './ExpressApplication';
 import ModulesManager from './ModulesManager';
 
 class Application extends ExpressApplication {
-  constructor(settings = {}) {
+  constructor(context = {}, settings = {}) {
     super();
     this.merge(settings);
     this.isDev = this.get('env') === 'development';
     this.middlewares = new OrderedList();
     this.disable('x-powered-by');
     this.modules = new ModulesManager({
+      ...context,
       app: this,
     });
   }
@@ -23,16 +24,14 @@ class Application extends ExpressApplication {
 
   async applyMiddlewares() {
     const middlewares = await Promise.all(
-      this.middlewares
-        .reject({ enabled: false })
-        .map(async ({ factory, params, path }) => {
-          const args = Array.isArray(params) ? params : [params];
-          const middleware = await Promise.resolve(factory(...args));
-          return {
-            path,
-            middleware,
-          };
-        }),
+      this.middlewares.reject({ enabled: false }).map(async ({ factory, params, path }) => {
+        const args = Array.isArray(params) ? params : [params];
+        const middleware = await Promise.resolve(factory(...args));
+        return {
+          path,
+          middleware,
+        };
+      }),
     );
 
     middlewares.forEach(({ middleware, path }) => {

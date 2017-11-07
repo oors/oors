@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import getPath from 'lodash/get';
+import setPath from 'lodash/set';
 import camelCase from 'lodash/camelCase';
 
 class Module {
@@ -17,6 +18,10 @@ class Module {
 
   initialize(config, manager) {} // eslint-disable-line
   setup(config, manager) {} // eslint-disable-line
+
+  setConfig(key, value) {
+    setPath(this.config, key, value);
+  }
 
   getConfig(key, defaultValue) {
     return key ? getPath(this.config, key, defaultValue) : this.config;

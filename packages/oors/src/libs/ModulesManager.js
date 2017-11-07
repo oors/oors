@@ -15,9 +15,12 @@ class ModulesManager extends EventEmitter {
     this.loads = {};
     this.modules = {};
     this.exportMap = {};
+    this.createValidator();
+  }
+
+  createValidator() {
     this.ajv = new Ajv({
       allErrors: true,
-      // verbose: true,
       async: 'es7',
       coerceTypes: 'array',
       useDefaults: true,
@@ -38,6 +41,10 @@ class ModulesManager extends EventEmitter {
         ...(schema.properties || {}),
         name: {
           type: 'string',
+        },
+        enabled: {
+          type: 'boolean',
+          default: true,
         },
       },
     });
@@ -77,7 +84,7 @@ class ModulesManager extends EventEmitter {
         resolve(this.exportMap[name]);
       });
     });
-    module.config = this.parseModuleConfig(module.config, module.constructor.configSchema); // eslint-disable-line
+    module.config = this.parseModuleConfig(module.config, module.constructor.schema); // eslint-disable-line
     module.connect(this);
     return this;
   }
