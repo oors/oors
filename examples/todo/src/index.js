@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import './env';
-import Application from '../../../packages/oors-distributions/src/applications/Standard';
+import Application from '../../../packages/oors-presets/src/applications/Standard';
 import TodoModule from './modules/Todo';
 
 const app = new Application();

@@ -1,11 +1,11 @@
 {
-  "name": "oors-distributions",
+  "name": "oors-presets",
   "version": "0.1.0",
-  "description": "oors distributions",
+  "description": "oors presets",
   "main": "build/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/viczam/oors/tree/master/packages/oors-distributions"
+    "url": "https://github.com/viczam/oors/tree/master/packages/oors-presets"
   },
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "MIT",
