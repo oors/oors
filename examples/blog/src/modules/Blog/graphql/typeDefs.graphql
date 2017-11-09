@@ -10,14 +10,14 @@ extend type User {
 }
 
 extend type Mutation {
-  createBlogPost(input: CreateBlogPostInput!): BlogPost
-  updateBlogPost(id: ID!, input: UpdateBlogPostInput!): BlogPost
-  deleteBlogPost(id: ID!): BlogPost
-  createBlogComment(input: CreateBlogCommentInput!): BlogComment
-  updateBlogComment(id: ID!, input: UpdateBlogCommentInput!): BlogComment
-  createBlogCategory(input: BlogCategoryInput!): BlogCategory
-  updateBlogCategory(id: ID!, input: BlogCategoryInput!): BlogCategory
-  deleteBlogCategory(id: ID!): BlogCategory
+  createBlogPost(input: CreateBlogPostInput!): BlogPost!
+  updateBlogPost(id: ID!, input: UpdateBlogPostInput!): BlogPost!
+  deleteBlogPost(id: ID!): BlogPost!
+  createBlogComment(input: CreateBlogCommentInput!): BlogComment!
+  updateBlogComment(id: ID!, input: UpdateBlogCommentInput!): BlogComment!
+  createBlogCategory(input: BlogCategoryInput!): BlogCategory!
+  updateBlogCategory(id: ID!, input: BlogCategoryInput!): BlogCategory!
+  deleteBlogCategory(id: ID!): BlogCategory!
 }
 
 type BlogPost {

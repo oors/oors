@@ -81,14 +81,12 @@ const validatePostInput = withSchema({
     input: {
       type: 'object',
       properties: {
-        tags: {
-          status: {
-            type: 'string',
-            enum: PostRepository.statuses, // making sure we only accept valid statuses
-          },
-          categoryId: {
-            isId: true,
-          },
+        status: {
+          type: 'string',
+          enum: PostRepository.statuses, // making sure we only accept valid statuses
+        },
+        categoryId: {
+          isId: true,
         },
       },
     },
