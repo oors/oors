@@ -1,5 +1,5 @@
 import Env from './Env';
 import Memory from './Memory';
-import Alias from './Alias';
+import Reference from './Reference';
 
-export { Env, Memory, Alias };
+export { Env, Memory, Reference };

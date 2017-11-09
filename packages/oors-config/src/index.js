@@ -5,7 +5,7 @@ import * as stores from './stores';
 import * as caches from './cache';
 
 class Config {
-  static notFoundValue = () => {};
+  static notFoundValue = Symbol('Not Found!');
 
   constructor(cache = new MemoryCache()) {
     this.stores = [];
@@ -18,26 +18,26 @@ class Config {
     };
 
     this.stores.unshift({
-      get: key => store.get(key, nextStore),
+      get: key => store.get(key, nextStore, this),
     });
+
+    return this.stores[0];
   }
 
-  async multiGet(keys, ttl) {
-    invariant(
-      Array.isArray(keys),
-      'Config.multiGet requires an array of keys!',
-    );
-    return Promise.all(keys.map(key => this.get(key, undefined, ttl)));
+  multiGet(keys, ttl) {
+    invariant(Array.isArray(keys), 'Config.multiGet requires an array of keys!');
+    return keys.map(key => this.get(key, undefined, ttl));
   }
 
-  async get(key, defaultValue, ttl) {
+  get = (key, defaultValue, ttl) => {
+    invariant(this.stores.length, 'You need to add a store first!');
     invariant(key, 'Key is required!');
 
     if (this.cache.has(key)) {
       return this.cache.get(key);
     }
 
-    const value = await this.stores[0].get(key);
+    const value = this.stores[0].get(key);
 
     if (value === this.constructor.notFoundValue) {
       return defaultValue;
@@ -46,7 +46,7 @@ class Config {
     this.cache.set(key, value, ttl);
 
     return value;
-  }
+  };
 
   clearCache(key) {
     if (key) {

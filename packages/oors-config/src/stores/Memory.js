@@ -11,7 +11,7 @@ class MemoryStore extends BaseStore {
     return _.has(this.backend, key);
   }
 
-  getBackendValue(key) {
+  getBackendValueFor(key) {
     return _.get(this.backend, key);
   }
 

@@ -3,12 +3,6 @@ import isEmpty from 'lodash/isEmpty';
 import BaseStore from './Base';
 
 class EnvStore extends BaseStore {
-  static makeKey = (prefix, key) => {
-    const path = _.toPath(key);
-    const finalPath = path.map(item => _.toUpper(_.snakeCase(item))).join('_');
-    return prefix ? `${prefix}_${finalPath}` : finalPath;
-  };
-
   constructor(prefix) {
     super();
     this.prefix = prefix;
@@ -16,12 +10,19 @@ class EnvStore extends BaseStore {
     this.keys = Object.keys(this.backend);
   }
 
-  has(key) {
-    return this.keys.includes(EnvStore.makeKey(this.prefix, key));
+  makeKey(key) {
+    const finalPath = _.toPath(key)
+      .map(item => _.toUpper(_.snakeCase(item)))
+      .join('_');
+    return this.prefix ? `${this.prefix}_${finalPath}` : finalPath;
   }
 
-  getBackendValue(key) {
-    const value = this.backend[EnvStore.makeKey(this.prefix, key)];
+  has(key) {
+    return this.keys.includes(this.makeKey(key));
+  }
+
+  getBackendValueFor(key) {
+    const value = this.backend[this.makeKey(key)];
 
     try {
       return JSON.parse(value);
@@ -30,8 +31,8 @@ class EnvStore extends BaseStore {
     }
   }
 
-  async get(key, nextStore) {
-    const value = await BaseStore.prototype.get.call(this, key, nextStore);
+  get(key, nextStore) {
+    const value = super.get(key, nextStore);
     const deepValue = this.getDeep(key, value);
 
     if (!this.has(key) && !isEmpty(deepValue)) {
@@ -48,7 +49,7 @@ class EnvStore extends BaseStore {
       if (this.has(fullKey)) {
         return {
           ...acc,
-          [key]: this.getBackendValue(fullKey),
+          [key]: this.getBackendValueFor(fullKey),
         };
       }
 

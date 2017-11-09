@@ -9,22 +9,22 @@ class Base {
   }
 
   // eslint-disable-next-line no-unused-vars
-  getBackendValue(key) {
+  getBackendValueFor(key) {
     throw new Error('Not implemented!');
   }
 
-  async get(key, nextStore) {
+  get(key, nextStore) {
     if (!this.has(key)) {
       return nextStore.get(key);
     }
 
-    const value = await this.getBackendValue(key);
+    const value = this.getBackendValueFor(key);
 
     if (!this.isMergeable(value)) {
       return value;
     }
 
-    const nextValue = await nextStore.get(key);
+    const nextValue = nextStore.get(key);
 
     if (value !== undefined && !this.isMergeable(nextValue)) {
       return value;
