@@ -74,6 +74,11 @@ class ModulesManager extends EventEmitter {
     }
 
     const { name } = module;
+    module.config = this.parseModuleConfig(module.config, module.constructor.schema); // eslint-disable-line
+    if (!module.config.enabled) {
+      return this;
+    }
+
     this.modules[name] = module;
     this.exportMap[name] = {};
     this.dependencyGraph[name] = [];
@@ -84,8 +89,8 @@ class ModulesManager extends EventEmitter {
         resolve(this.exportMap[name]);
       });
     });
-    module.config = this.parseModuleConfig(module.config, module.constructor.schema); // eslint-disable-line
     module.connect(this);
+
     return this;
   }
 
