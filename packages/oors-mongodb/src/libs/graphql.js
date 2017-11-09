@@ -8,8 +8,10 @@ export const createCRUDResolvers = ({
   canDelete = () => true,
   canUpdate = () => true,
   findManyQuery = () => ({}),
+  findOneQuery = ({ id }) => ({ query: { _id: id } }),
 }) => ({
-  findOne: (_, { id }, ctx) => getLoaders(ctx).findById.load(id),
+  findById: (_, { id }, ctx) => getLoaders(ctx).findById.load(id),
+  findOne: (_, args, ctx) => getLoaders(ctx).findOne.load(findOneQuery(args, ctx)),
   findMany: (_, args, ctx) => getLoaders(ctx).findMany.load(findManyQuery(args, ctx)),
   createOne: async (_, { input }, ctx) => fromMongo(await getRepository(ctx).createOne(input)),
   updateOne: async (_, { id, input, item: loadedItem }, ctx) => {
