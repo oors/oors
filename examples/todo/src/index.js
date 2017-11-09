@@ -1,10 +1,9 @@
 /* eslint-disable no-console */
-import Application from '../../../packages/oors-distributions/src/applications/Standard';
 import './env';
+import Application from '../../../packages/oors-distributions/src/applications/Standard';
 import TodoModule from './modules/Todo';
-import config from './config';
 
-const app = new Application(config);
+const app = new Application();
 
 app.addModules(new TodoModule());
 
