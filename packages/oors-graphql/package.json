@@ -22,7 +22,7 @@
     "express": "4.16.2",
     "fs-extra": "^4.0.2",
     "graphql": "^0.11.7",
-    "graphql-playground": "^1.0.33",
+    "graphql-playground-middleware-express": "^1.1.2",
     "graphql-subscriptions": "0.5.4",
     "graphql-tools": "2.6.1",
     "graphql-type-json": "0.1.4",

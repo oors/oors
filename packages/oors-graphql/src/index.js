@@ -15,7 +15,7 @@ import { SubscriptionServer } from 'subscriptions-transport-ws';
 import merge from 'lodash/merge';
 import { makeExecutableSchema } from 'graphql-tools';
 import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
-import { express as playgroundMiddleware } from 'graphql-playground/middleware';
+import playgroundMiddleware from 'graphql-playground-middleware-express';
 import mainResolvers from './graphql/resolvers';
 import modulesResolvers from './graphql/modulesResolvers';
 import LoadersMap from './libs/LoadersMap';
