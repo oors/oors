@@ -360,6 +360,8 @@ class Gql extends Module {
 
           return err;
         },
+        tracing: true,
+        cacheControl: true,
         ...this.getConfig('getServerOptions', () => ({}))(req),
       }),
     };
