@@ -1,5 +1,6 @@
-import _ from 'lodash';
-import isEmpty from 'lodash/isEmpty';
+import toPath from 'lodash/toPath';
+import toUpper from 'lodash/toUpper';
+import snakeCase from 'lodash/snakeCase';
 import BaseStore from './Base';
 
 class EnvStore extends BaseStore {
@@ -11,14 +12,19 @@ class EnvStore extends BaseStore {
   }
 
   makeKey(key) {
-    const finalPath = _.toPath(key)
-      .map(item => _.toUpper(_.snakeCase(item)))
+    const finalPath = toPath(key)
+      .map(item => toUpper(snakeCase(item)))
       .join('_');
     return this.prefix ? `${this.prefix}_${finalPath}` : finalPath;
   }
 
   has(key) {
     return this.keys.includes(this.makeKey(key));
+  }
+
+  hasDeep(key) {
+    const regex = new RegExp(`^${this.makeKey(key)}_`);
+    return !!this.keys.find(ownKey => regex.test(ownKey));
   }
 
   getBackendValueFor(key) {
@@ -33,34 +39,56 @@ class EnvStore extends BaseStore {
 
   get(key, nextStore) {
     const value = super.get(key, nextStore);
-    const deepValue = this.getDeep(key, value);
 
-    if (!this.has(key) && !isEmpty(deepValue)) {
-      return this.merge(value, deepValue);
+    // was already fetched by super.get
+    if (this.has(key)) {
+      return value;
+    }
+
+    // check if it embeds the key
+    if (this.hasDeep(key)) {
+      return this.deepMerge(key, value);
     }
 
     return value;
   }
 
-  getDeep(prefix, value) {
-    return Object.keys(value).reduce((acc, key) => {
-      const fullKey = `${prefix}.${key}`;
+  deepMerge(prefix, value) {
+    if (!this.isMergeable(value)) {
+      return null;
+    }
 
-      if (this.has(fullKey)) {
-        return {
-          ...acc,
-          [key]: this.getBackendValueFor(fullKey),
-        };
+    if (Array.isArray(value)) {
+      return value.map((item, index) => {
+        const key = `${prefix}[${index}]`;
+        if (this.has(key)) {
+          return this.getBackendValueFor(key);
+        }
+
+        if (this.isMergeable(item)) {
+          return this.deepMerge(key, item);
+        }
+
+        return item;
+      });
+    }
+
+    return Object.keys(value).reduce((acc, subKey) => {
+      const key = `${prefix}.${subKey}`;
+      let subValue = value[subKey];
+
+      if (this.has(key)) {
+        subValue = this.getBackendValueFor(key);
       }
 
-      if (_.isPlainObject(value[key])) {
-        return {
-          ...acc,
-          [key]: this.getDeep(fullKey, value[key]),
-        };
+      if (this.isMergeable(value[subKey])) {
+        subValue = this.deepMerge(key, value[subKey]);
       }
 
-      return acc;
+      return {
+        ...acc,
+        [subKey]: subValue,
+      };
     }, {});
   }
 }

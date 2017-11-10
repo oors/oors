@@ -8,11 +8,16 @@ class Config extends BaseConfig {
     super(...args);
     this.refs = {};
     this.memoryStore = new MemoryStore();
+    this.envStore = new ENVStore(envPrefix);
     this.referenceStore = new ReferenceStore(this);
 
     this.addStore(this.memoryStore);
-    this.addStore(new ENVStore(envPrefix));
     this.addStore(this.referenceStore);
+    this.addStore(this.envStore);
+  }
+
+  setENVPrefix(prefix) {
+    this.envStore.prefix = prefix;
   }
 
   ref(pointer) {
@@ -27,7 +32,10 @@ class Config extends BaseConfig {
 
   set(key, value) {
     if (isPlainObject(value)) {
-      this.memoryStore.set(key, {});
+      if (!this.memoryStore.has(key)) {
+        this.memoryStore.set(key, {});
+      }
+
       return Object.keys(value).forEach(subKey => {
         this.set(`${key}.${subKey}`, value[subKey]);
       });

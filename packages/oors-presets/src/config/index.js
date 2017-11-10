@@ -4,6 +4,7 @@ import Config from '../libs/Config';
 const config = new Config({ envPrefix: 'OORS_SERVER_CONFIG' });
 
 config.add({
+  rootDir: __dirname,
   rootURL: 'http://localhost:3000',
   isDev: process.env.NODE_ENV === 'development',
   port: 3000,
@@ -16,7 +17,7 @@ config.add({
       enabled: config.ref('isDev'),
     },
     compression: {
-      enabled: config.ref(({ get }) => !get('isDev')),
+      enabled: config.ref(() => !config.get('isDev')),
     },
     bodyParserJSON: {
       params: { limit: '20mb' },
@@ -74,14 +75,14 @@ config.add({
         jsonTransport: true,
       },
       saveToDisk: true,
-      emailsDir: config.ref(({ get }) => path.resolve(get('rootDir'), './emails')),
+      emailsDir: config.ref(() => path.resolve(config.get('rootDir'), './emails')),
       templatesDir: '',
       middlewarePivot: {
         before: 'isMethod',
       },
     },
     'oors.fileStorage': {
-      uploadDir: config.ref(({ get }) => path.resolve(get('rootDir'), './uploads')),
+      uploadDir: config.ref(() => path.resolve(config.get('rootDir'), './uploads')),
     },
     'oors.gql': {
       graphiql: {
@@ -97,7 +98,7 @@ config.add({
       },
     },
     'oors.logger': {
-      logsDir: config.ref(({ get }) => path.resolve(get('rootDir'), './logs')),
+      logsDir: config.ref(() => path.resolve(config.get('rootDir'), './logs')),
     },
   },
 });
