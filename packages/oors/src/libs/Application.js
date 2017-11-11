@@ -46,7 +46,7 @@ class Application extends ExpressApplication {
   async listen(port) {
     await this.boot();
     return new Promise(resolve => {
-      this.set('startTime', new Date());
+      this.set('startTime', Date.now());
       return ExpressApplication.prototype.listen.call(this, port, resolve);
     });
   }

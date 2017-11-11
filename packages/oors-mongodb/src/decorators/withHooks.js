@@ -1,3 +1,5 @@
+import get from 'lodash/get';
+
 export default (
   repository,
   hooks = {
@@ -21,13 +23,13 @@ export default (
     const previous = repository[method];
     Object.assign(repository, {
       [method]: async (...args) => {
-        if (hooks.before[method]) {
+        if (typeof get(hooks, `before.${method}`) === 'function') {
           await hooks.before[method](...args);
         }
 
         const result = await previous.call(repository, ...args);
 
-        if (hooks.after[method]) {
+        if (typeof get(hooks, `after.${method}`) === 'function') {
           await hooks.after[method](result, ...args);
         }
 

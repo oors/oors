@@ -316,7 +316,7 @@ class Gql extends Module {
     }
 
     const { pubsub } = this;
-    const server = this.app.server;
+    const { server } = this.app;
     const subscriptionServer = new SubscriptionServer(
       {
         execute,

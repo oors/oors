@@ -5,9 +5,10 @@ const config = new Config({ envPrefix: 'OORS_SERVER_CONFIG' });
 
 config.add({
   rootDir: __dirname,
-  rootURL: 'http://localhost:3000',
+  rootURL: config.ref(() => `http://${config.get('hostname')}:${config.get('port')}`),
   isDev: process.env.NODE_ENV === 'development',
   port: 3000,
+  hostname: 'localhost',
   middlewares: {
     useragent: {},
     cors: {},
@@ -84,11 +85,12 @@ config.add({
     'oors.fileStorage': {
       uploadDir: config.ref(() => path.resolve(config.get('rootDir'), './uploads')),
     },
-    'oors.gql': {
+    'oors.graphQL': {
       graphiql: {
-        enabled: true,
         params: {
-          subscriptionsEndpoint: 'ws://localhost:3000/subscriptions',
+          subscriptionsEndpoint: config.ref(
+            () => `ws://${config.get('hostname')}:${config.get('port')}/subscriptions`,
+          ),
         },
       },
     },

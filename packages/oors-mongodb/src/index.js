@@ -6,6 +6,7 @@ import { Module } from 'oors';
 import Repository from './Repository';
 import * as helpers from './libs/helpers';
 import idValidator from './libs/idValidator';
+import * as decorators from './decorators';
 
 class MongoDB extends Module {
   static schema = {
@@ -157,4 +158,4 @@ class MongoDB extends Module {
   }
 }
 
-export { MongoDB as default, Repository, helpers };
+export { MongoDB as default, Repository, helpers, decorators };
