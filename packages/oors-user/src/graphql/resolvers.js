@@ -7,8 +7,7 @@ export default {
     login: async (_, { username, password }, { app, req, fromMongo }) => {
       const { User, UserLoginRepository } = app.modules.get('oors.user');
 
-      const result = await User.login({ username, password });
-      const user = await User.dump(result);
+      const { token, user } = await User.login({ username, password });
 
       await UserLoginRepository.createOne({
         userId: user._id,
@@ -18,7 +17,10 @@ export default {
         platform: req.useragent.platform,
       });
 
-      return fromMongo(user);
+      return {
+        token,
+        user: fromMongo(User.dump(user)),
+      };
     },
   },
 };

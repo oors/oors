@@ -122,13 +122,13 @@ class User {
     });
 
     return {
-      ...updatedUser,
+      user: updatedUser,
       token,
     };
   }
 
-  dump(data) {
-    return pick(data, [
+  dump(userData) {
+    return pick(userData, [
       'accountId',
       'username',
       'firstName',
@@ -137,7 +137,6 @@ class User {
       '_id',
       'updatedAt',
       'createdAt',
-      'token',
       'isActive',
       'lastLogin',
       'roles',

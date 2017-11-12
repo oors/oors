@@ -42,19 +42,24 @@ export default ({ jwtMiddleware }) => {
         throw err;
       }
 
+      const { user, token } = result;
+
       await UserLoginRepository.createOne({
-        userId: result._id,
+        userId: user._id,
         ip: req.ip,
         browser: req.useragent.browser,
         os: req.useragent.os,
         platform: req.useragent.platform,
       });
 
-      res.cookie('authToken', result.token, {
+      res.cookie('authToken', token, {
         httpOnly: true,
       });
 
-      return User.dump(result);
+      return {
+        user: User.dump(user),
+        token,
+      };
     }),
   );
 

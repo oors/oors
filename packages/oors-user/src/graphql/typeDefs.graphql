@@ -17,5 +17,5 @@ type User {
 
 type AuthenticatedUser {
   token: String
-  lastLogin: DateTime
+  user: User
 }
