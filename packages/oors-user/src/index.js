@@ -1,5 +1,6 @@
 import { Module } from 'oors';
 import pivotSchema from 'oors/build/schemas/pivot';
+import { createLoaders } from 'oors-mongodb/build/libs/graphql';
 import UserRepositoryClass from './repositories/User';
 import AccountRepositoryClass from './repositories/Account';
 import UserLoginRepositoryClass from './repositories/UserLogin';
@@ -101,24 +102,6 @@ class UserModule extends Module {
     Object.assign(routerConfig, { passport });
   }
 
-  bindRepositories(bindRepository) {
-    const UserRepository = bindRepository(new UserRepositoryClass());
-    const AccountRepository = bindRepository(new AccountRepositoryClass());
-    const UserLoginRepository = bindRepository(new UserLoginRepositoryClass());
-
-    this.export({
-      UserRepository,
-      AccountRepository,
-      UserLoginRepository,
-    });
-
-    return {
-      UserRepository,
-      AccountRepository,
-      UserLoginRepository,
-    };
-  }
-
   async setup({
     jwtSecret,
     jwtConfig,
@@ -128,19 +111,32 @@ class UserModule extends Module {
     rootURL,
     storageModule,
   }) {
-    const [{ bindRepository }, { addRouter }, { Mail }] = await this.dependencies([
+    const [{ bindRepository }, { addRouter }, { Mail }, { addLoaders }] = await this.dependencies([
       storageModule,
       'oors.router',
       'oors.mailer',
+      'oors.graphQL',
     ]);
 
     const routerConfig = {
       jwtMiddleware: this.jwtMiddleware,
     };
 
-    const { UserRepository, AccountRepository, UserLoginRepository } = this.bindRepositories(
-      bindRepository,
-    );
+    const repositories = {
+      UserRepository: bindRepository(new UserRepositoryClass()),
+      AccountRepository: bindRepository(new AccountRepositoryClass()),
+      UserLoginRepository: bindRepository(new UserLoginRepositoryClass()),
+    };
+
+    await this.createHook('touchRepositories', () => {}, { repositories });
+
+    const { UserRepository, AccountRepository, UserLoginRepository } = repositories;
+
+    const loaders = {
+      users: addLoaders(createLoaders(UserRepository), 'users'),
+      accounts: addLoaders(createLoaders(AccountRepository), 'accounts'),
+      userLogins: addLoaders(createLoaders(UserLoginRepository), 'userLogins'),
+    };
 
     const User = new UserService({
       jwtConfig: {
@@ -153,6 +149,7 @@ class UserModule extends Module {
       AccountRepository,
       Mail,
     });
+
     const Account = new AccountService({
       UserRepository,
       AccountRepository,
@@ -160,9 +157,8 @@ class UserModule extends Module {
     });
 
     this.export({
-      UserRepository,
-      AccountRepository,
-      UserLoginRepository,
+      ...repositories,
+      loaders,
       User,
       Account,
       gqlMiddlewares,

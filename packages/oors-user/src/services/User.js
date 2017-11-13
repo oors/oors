@@ -246,6 +246,7 @@ class User {
     const user = await this.UserRepository.createOne({
       accountId: account._id,
       ...data,
+      isOwner: true,
     });
 
     this.Mail.send({

@@ -6,11 +6,22 @@ extend type Mutation {
   login(username: String!, password: String!): AuthenticatedUser
 }
 
+type Account {
+  id: ID!
+  name: String
+  isActive: Boolean!
+  users: [User!]!
+  owner: User!
+}
+
 type User {
   id: ID!
+  account: Account!
   name: String
   username: String
   email: String
+  isActive: Boolean!
+  roles: [String!]!
   createdAt: DateTime
   lastLogin: DateTime
 }

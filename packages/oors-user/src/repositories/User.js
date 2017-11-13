@@ -31,6 +31,10 @@ class UserRepository extends Repository {
         type: 'boolean',
         default: true,
       },
+      isOwner: {
+        type: 'boolean',
+        default: true,
+      },
       isDeleted: {
         type: 'boolean',
       },
@@ -87,7 +91,7 @@ class UserRepository extends Repository {
         instanceof: 'Date',
       },
     },
-    required: ['username', 'name', 'email', 'password'],
+    required: ['accountId', 'username', 'name', 'email', 'password'],
   };
 
   static collectionName = 'userUser';

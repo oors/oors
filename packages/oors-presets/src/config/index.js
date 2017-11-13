@@ -59,7 +59,7 @@ config.add({
         expiresIn: '1d',
       },
       mockUserMiddlewarePivot: {
-        before: 'isMethod',
+        before: 'graphql',
       },
       passportMiddlewarePivot: 'cookieParser',
       mockUserConfig: {

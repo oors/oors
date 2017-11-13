@@ -23,4 +23,23 @@ export default {
       };
     },
   },
+  User: {
+    account: (user, args, { loaders }) => loaders.accounts.findById.load(user.accountId),
+  },
+  Account: {
+    name: account => account.name || '',
+    owner: (account, args, { loaders }) =>
+      loaders.users.findOne.load({
+        query: {
+          accountId: account._id,
+          isOwner: true,
+        },
+      }),
+    users: (account, args, { loaders }) =>
+      loaders.users.findMany.load({
+        query: {
+          accountId: account._id,
+        },
+      }),
+  },
 };
