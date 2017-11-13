@@ -15,9 +15,9 @@ class BlogModule extends Module {
     ]);
 
     const [PostRepository, CategoryRepository, CommentRepository] = bindRepositories([
-      withTimestamps(new PostRepositoryClass()),
-      withTimestamps(new CategoryRepositoryClass()),
-      withTimestamps(new CommentRepositoryClass()),
+      withTimestamps()(new PostRepositoryClass()),
+      withTimestamps()(new CategoryRepositoryClass()),
+      withTimestamps()(new CommentRepositoryClass()),
     ]);
 
     addLoaders(createLoaders(PostRepository), 'blog.posts');

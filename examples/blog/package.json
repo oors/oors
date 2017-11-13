@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "main": "src/index.js",
   "scripts": {
-    "dev": "nodemon src/index.js --exec babel-node"
+    "dev": "nodemon src/index.js --exec babel-node",
+    "seed": "babel-node scripts/seed"
   },
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "MIT",

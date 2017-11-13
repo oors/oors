@@ -1,57 +1,16 @@
-import { createCRUDResolvers } from '../../../../../../../packages/oors-mongodb/src/libs/graphql';
+import { createCRUDResolvers } from '../../../../../../../../packages/oors-mongodb/src/libs/graphql';
+import { compose } from '../../../../../../../../packages/oors-graphql/src/decorators';
 import {
-  compose,
-  withArgs,
-  withSchema,
-} from '../../../../../../../packages/oors-graphql/src/decorators';
+  validateCreateCommentInput,
+  parseCommentInput,
+  validateCreateCommentReferences,
+} from './decorators';
 
 const resolvers = createCRUDResolvers({
   getRepository: ({ app }) => app.modules.get('oors.blog').CommentRepository,
   getLoaders: ({ loaders }) => loaders.blog.comments,
   canUpdate: (user, item) => user._id.toString() === item.createdBy.toString(),
   canDelete: (user, item) => user._id.toString() === item.createdBy.toString(),
-});
-
-const validateCreateCommentInput = withSchema({
-  type: 'object',
-  properties: {
-    input: {
-      type: 'object',
-      properties: {
-        parentId: {
-          isId: true,
-        },
-        postId: {
-          isId: true,
-        },
-      },
-      required: ['postId'],
-    },
-  },
-});
-
-const parseCommentInput = withArgs(
-  ({ input, id }, { user, loaders: { blog: { posts, comments } } }, { resolve }) => ({
-    input: {
-      ...input,
-      [id ? 'updatedBy' : 'createdBy']: user._id,
-    },
-    parent: input.parentId ? resolve(comments.findById.load(input.parentId)) : null,
-    post: input.postId ? resolve(posts.findById.load(input.postId)) : null,
-  }),
-);
-
-const validateCreateCommentReferences = withSchema({
-  type: 'object',
-  properties: {
-    parent: {
-      type: ['object', 'null'],
-    },
-    post: {
-      type: 'object',
-    },
-  },
-  required: ['post'],
 });
 
 export default {

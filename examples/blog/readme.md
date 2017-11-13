@@ -1,11 +1,12 @@
 Getting started
 - you need to have node.js installed (node >= 8 is recommended)
-- you need to have mongodb running with the database you're planning to use
+- you need to have mongodb running - by default a database named "oors" is going to be used
 
 Installation:
 - clone the repository
 - navigate to the blog example
 - `yarn` or `npm install`
+- `yarn run seed` - this will add seed data
 
 Running the project:
 - `yarn run dev`
@@ -13,14 +14,13 @@ Running the project:
 Files and directory structure:
 - `emails` - when running the project in development you have the option to save the emails to a local directory instead of sending them out through an email server
 - `logs` - well... log files
-- `uploads` - when uploading files, you can save them to a local dir (using a cloud provide is recommended though)
+- `uploads` - when uploading files, you can save them to a local dir (using a cloud provider is recommended though)
 - `src` - the source directory of your code.
   - `modules` - your application split into modules - later on you should move these modules into their own npm modules and have them managed into a monorepo
-  - `config` - your static configuration (more about how to use .env files or database managed configuration below)
-  - `env` - catching uncaught exceptions
+  - `env` - exceptions handling
   - `index.js` - entry point of your application
 
-While this structure can work well for POC-s and small projects, it's recommended that you use a monorepo on a bigger project where more developers are involved (example coming soon, but the oors project is structured into a monorepo).
+While this structure can work well for POC-s and small projects, it's recommended that you use a monorepo on a bigger project, especially when more developers are involved (example coming soon, but the oors project is structured as a monorepo).
 
 The Blog module
 --------------------

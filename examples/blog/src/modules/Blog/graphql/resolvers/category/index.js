@@ -1,5 +1,5 @@
-import { createCRUDResolvers } from '../../../../../../../packages/oors-mongodb/src/libs/graphql';
-import { withArgs } from '../../../../../../../packages/oors-graphql/src/decorators';
+import { createCRUDResolvers } from '../../../../../../../../packages/oors-mongodb/src/libs/graphql';
+import { withArgs } from '../../../../../../../../packages/oors-graphql/src/decorators';
 
 /**
  * Generates a map of crud resolvers that map to the createOne, findOne, findMany, updateOne,
