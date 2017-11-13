@@ -1,26 +1,23 @@
 import EventEmitter from 'events';
 import invariant from 'invariant';
 
-export default (
-  repository,
-  {
-    methods = [
-      'findById',
-      'findOne',
-      'findMany',
-      'createOne',
-      'createMany',
-      'updateOne',
-      'updateMany',
-      'replaceOne',
-      'deleteOne',
-      'deleteMany',
-      'save',
-    ],
-    emitter,
-    prefix = '',
-  },
-) => {
+export default ({
+  methods = [
+    'findById',
+    'findOne',
+    'findMany',
+    'createOne',
+    'createMany',
+    'updateOne',
+    'updateMany',
+    'replaceOne',
+    'deleteOne',
+    'deleteMany',
+    'save',
+  ],
+  emitter,
+  prefix = '',
+}) => repository => {
   invariant(emitter instanceof EventEmitter, 'emitter has to be an instance of EventEmitter!');
 
   methods.forEach(method => {

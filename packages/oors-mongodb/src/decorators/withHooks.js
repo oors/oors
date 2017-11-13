@@ -1,12 +1,13 @@
 import get from 'lodash/get';
 
 export default (
-  repository,
   hooks = {
     before: {},
     after: {},
+    beforeAll: null,
+    afterAll: null,
   },
-) => {
+) => repository => {
   [
     'findById',
     'findOne',
@@ -27,7 +28,15 @@ export default (
           await hooks.before[method](...args);
         }
 
+        if (typeof hooks.beforeAll === 'function') {
+          await hooks.beforeAll(method, ...args);
+        }
+
         const result = await previous.call(repository, ...args);
+
+        if (typeof hooks.afterAll === 'function') {
+          await hooks.afterAll(method, result, ...args);
+        }
 
         if (typeof get(hooks, `after.${method}`) === 'function') {
           await hooks.after[method](result, ...args);

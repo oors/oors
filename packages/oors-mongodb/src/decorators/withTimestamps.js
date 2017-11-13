@@ -15,9 +15,8 @@ const addTsToUpdate = (update, updateProperty) => {
 };
 
 export default (
-  repository,
   { createProperty = 'createdAt', updateProperty = 'updatedAt' } = {},
-) => {
+) => repository => {
   const { createOne, createMany, updateOne, updateMany, replaceOne } = repository;
 
   set(repository, `schema.properties.${createProperty}`, {
@@ -42,9 +41,9 @@ export default (
         repository,
         Array.isArray(data)
           ? data.map(item => {
-            set(item, createProperty, new Date());
-            return item;
-          })
+              set(item, createProperty, new Date());
+              return item;
+            })
           : data,
       );
     },
