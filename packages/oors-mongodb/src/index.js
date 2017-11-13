@@ -110,6 +110,8 @@ class MongoDB extends Module {
     return this.connections[name];
   };
 
+  closeConnection = name => this.getConnection(name).close();
+
   initialize({ connections, defaultConnection }) {
     this.defaultConnectionName = defaultConnection || connections[0].name;
 
@@ -131,6 +133,7 @@ class MongoDB extends Module {
       createRepository,
       bindRepository,
       bindRepositories,
+      closeConnection,
     } = this;
 
     await Promise.all(connections.map(createConnection));
@@ -154,6 +157,7 @@ class MongoDB extends Module {
       bindRepository,
       bindRepositories,
       ajv: this.ajv,
+      closeConnection,
     });
   }
 }
