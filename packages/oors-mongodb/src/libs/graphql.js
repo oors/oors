@@ -89,9 +89,7 @@ export const createLoaders = Repository => ({
     loader: queries =>
       Promise.all(
         queries.map(query =>
-          Repository.findOne({
-            query,
-          }).then(fromMongo),
+          Repository.findOne(query).then(item => (item ? fromMongo(item) : null)),
         ),
       ),
     options: {

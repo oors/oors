@@ -32,7 +32,7 @@ class Store {
     return fn(this.collection);
   }
 
-  aggregate({ pipeline, options } = {}) {
+  async aggregate({ pipeline, options } = {}) {
     invariant(pipeline, 'Pipeline is required!');
     return this.collection.aggregate(pipeline, options);
   }
