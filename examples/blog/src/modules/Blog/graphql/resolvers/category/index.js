@@ -1,5 +1,5 @@
 import { createCRUDResolvers } from '../../../../../../../../packages/oors-mongodb/src/libs/graphql';
-import { withArgs } from '../../../../../../../../packages/oors-graphql/src/decorators';
+import { withUserStamps } from '../../decorators';
 
 /**
  * Generates a map of crud resolvers that map to the createOne, findOne, findMany, updateOne,
@@ -28,20 +28,8 @@ export default {
       }),
   },
   Mutation: {
-    createBlogCategory: withArgs(({ input }, { user }) => ({
-      input: {
-        ...input,
-        createdBy: user._id, // making sure the item is user stamped
-      },
-    }))(resolvers.createOne),
-
-    updateBlogCategory: withArgs(({ input }, { user }) => ({
-      input: {
-        ...input,
-        updatedBy: user._id,
-      },
-    }))(resolvers.updateOne),
-
+    createBlogCategory: withUserStamps(resolvers.createOne),
+    updateBlogCategory: withUserStamps(resolvers.updateOne),
     deleteBlogCategory: resolvers.deleteOne,
   },
 };

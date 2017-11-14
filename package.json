@@ -58,7 +58,7 @@
     "lint-staged": "3.5.1",
     "nodemon": "1.11.0",
     "npm-run-all": "4.0.2",
-    "prettier": "1.7.4"
+    "prettier": "1.8.2"
   },
   "workspaces": ["packages/*"]
 }
