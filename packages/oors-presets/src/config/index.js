@@ -1,5 +1,10 @@
 import path from 'path';
+import dotenv from 'dotenv';
 import Config from '../libs/Config';
+
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+
+dotenv.config();
 
 const config = new Config({ envPrefix: 'OORS_SERVER_CONFIG' });
 
