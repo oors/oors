@@ -1,6 +1,6 @@
 {
   "name": "oors-config",
-  "version": "1.0.4",
+  "version": "2.0.0",
   "description": "oors configuration strategy",
   "main": "build/index.js",
   "scripts": {},
