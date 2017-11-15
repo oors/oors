@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-import './env';
 import config from '../../../packages/oors-presets/src/config';
 import Application from '../../../packages/oors-presets/src/applications/Standard';
 import BlogModule from './modules/Blog';
