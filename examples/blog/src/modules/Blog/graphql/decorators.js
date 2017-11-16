@@ -1,4 +1,4 @@
-import { withArgs } from '../../../../../../packages/oors-graphql/src/decorators';
+import { withArgs } from 'oors-graphql/build/decorators';
 
 export const withUserStamps = withArgs(({ input, id, ...restArgs }, { user }) => ({
   input: {

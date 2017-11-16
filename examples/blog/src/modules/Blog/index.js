@@ -1,6 +1,6 @@
-import { Module } from '../../../../../packages/oors/src/index';
-import { createLoaders } from '../../../../../packages/oors-mongodb/src/libs/graphql';
-import withTimestamps from '../../../../../packages/oors-mongodb/src/decorators/withTimestamps';
+import { Module } from 'oors/build/index';
+import { createLoaders } from 'oors-mongodb/build/libs/graphql';
+import withTimestamps from 'oors-mongodb/build/decorators/withTimestamps';
 import PostRepositoryClass from './repositories/Post';
 import CategoryRepositoryClass from './repositories/Category';
 import CommentRepositoryClass from './repositories/Comment';

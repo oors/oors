@@ -1,6 +1,6 @@
 import set from 'lodash/set';
-import { compose } from '../../../../../../../../packages/oors-graphql/src/decorators';
-import { createCRUDResolvers } from '../../../../../../../../packages/oors-mongodb/src/libs/graphql';
+import { compose } from 'oors-graphql/build/decorators';
+import { createCRUDResolvers } from 'oors-mongodb/build/libs/graphql';
 import {
   validateFindQuery,
   validatePostInput,

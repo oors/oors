@@ -1,5 +1,5 @@
+import { withArgs, withSchema } from 'oors-graphql/build/decorators';
 import PostRepository from '../../../repositories/Post';
-import { withArgs, withSchema } from '../../../../../../../../packages/oors-graphql/src/decorators';
 
 export const validateFindQuery = withSchema({
   type: 'object',

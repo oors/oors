@@ -1,4 +1,4 @@
-import { withArgs, withSchema } from '../../../../../../../../packages/oors-graphql/src/decorators';
+import { withArgs, withSchema } from 'oors-graphql/build/decorators';
 
 export const validateCreateCommentInput = withSchema({
   type: 'object',
