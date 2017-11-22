@@ -1,6 +1,6 @@
 {
   "name": "oors-health",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "oors health module.",
   "main": "build/index.js",
   "repository": {
@@ -15,6 +15,6 @@
   "homepage": "https://github.com/viczam/oors#readme",
   "dependencies": {
     "express": "4.16.2",
-    "oors": "^1.1.0"
+    "oors": "^1.1.1"
   }
 }
