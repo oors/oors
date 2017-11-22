@@ -13,7 +13,7 @@ import { execute, subscribe } from 'graphql';
 import { PubSub } from 'graphql-subscriptions';
 import { SubscriptionServer } from 'subscriptions-transport-ws';
 import merge from 'lodash/merge';
-import { makeExecutableSchema } from 'graphql-tools';
+import { makeExecutableSchema, makeRemoteExecutableSchema, mergeSchemas } from 'graphql-tools';
 import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
 import playgroundMiddleware from 'graphql-playground-middleware-express';
 import mainResolvers from './graphql/resolvers';
@@ -180,18 +180,23 @@ class Gql extends Module {
 
     const schema = this.buildSchema({ logger });
 
-    this.setupSubscriptionServer(schema);
+    const schemas = await this.createHook('getSchema', () => {}, {
+      schema,
+      mergeSchemas,
+      makeExecutableSchema,
+      makeRemoteExecutableSchema,
+    });
 
-    this.app.middlewares.insertBefore(
-      this.getConfig('middlewarePivot'),
-      this.getGraphQLMiddleware(schema),
-      this.getGraphiQLMiddleware(),
-      this.getVoyagerMiddleware(),
-      this.getPlaygroundMiddleware(),
-    );
+    const finalSchema = mergeSchemas({
+      schemas: [schema, ...schemas.filter(s => s)],
+    });
+
+    this.setupSubscriptionServer(finalSchema);
+
+    this.loadMiddlewares(finalSchema);
 
     this.export({
-      schema,
+      schema: finalSchema,
       loaders,
       addMiddleware,
       addLoader,
@@ -335,6 +340,16 @@ class Gql extends Module {
       pubsub,
       subscriptionServer,
     });
+  }
+
+  loadMiddlewares(schema) {
+    this.app.middlewares.insertBefore(
+      this.getConfig('middlewarePivot'),
+      this.getGraphQLMiddleware(schema),
+      this.getGraphiQLMiddleware(),
+      this.getVoyagerMiddleware(),
+      this.getPlaygroundMiddleware(),
+    );
   }
 
   getGraphQLMiddleware(schema) {
