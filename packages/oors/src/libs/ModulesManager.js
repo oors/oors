@@ -105,7 +105,9 @@ class ModulesManager extends EventEmitter {
 
     if (!this.getModuleNames().includes(to)) {
       throw new Error(
-        `Can't find module "${to}" required by "${from}" through the list of registered modules: "${this.getModuleNames()}"!`,
+        `Can't find module "${to}" required by "${
+          from
+        }" through the list of registered modules: "${this.getModuleNames()}"!`,
       );
     }
 

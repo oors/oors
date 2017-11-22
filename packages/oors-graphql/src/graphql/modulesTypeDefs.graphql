@@ -1,5 +1,6 @@
 extend type Query {
-  modules(name: String): [Module]
+  module: [Module!]!
+  module(name: String): Module!
 }
 
 type Module {

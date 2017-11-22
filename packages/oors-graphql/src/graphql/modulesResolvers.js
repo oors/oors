@@ -1,12 +1,12 @@
 export default {
   Query: {
-    modules: (_, { name }, { app }) => {
-      const { dependencyGraph } = app.modules;
-      if (name) {
-        return [{ name }];
+    modules: (_, args, { app }) => app.modules.getModuleNames().map(({ name }) => ({ name })),
+    module: (_, { name }, { app }) => {
+      if (!app.modules.getModuleNames().includes(name)) {
+        throw new Error('Not found!');
       }
 
-      return Object.keys(dependencyGraph).map(module => ({ name: module }));
+      return [{ name }];
     },
   },
   Module: {
