@@ -26,7 +26,10 @@ class StandardApplication extends BaseApplication {
       .toString()
       .split(/\r\n|\n/)[2]
       .match(/\((.*.js)/)[1];
-    this.config.set('rootDir', path.resolve(filePath, '../..'));
+
+    if (!this.config.get('rootDir')) {
+      this.config.set('rootDir', path.resolve(filePath, '../..'));
+    }
 
     this.addMiddlewares(
       middlewares.useragent,

@@ -9,7 +9,7 @@ dotenv.config();
 const config = new Config({ envPrefix: 'OORS_SERVER_CONFIG' });
 
 config.add({
-  rootDir: __dirname,
+  rootDir: '',
   rootURL: config.ref(() => `http://${config.get('hostname')}:${config.get('port')}`),
   isDev: process.env.NODE_ENV === 'development',
   port: 3000,
