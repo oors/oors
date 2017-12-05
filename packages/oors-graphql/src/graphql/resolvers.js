@@ -24,7 +24,7 @@ export default {
 
       return null;
     },
-    serialize: value => value.getTime(),
+    serialize: value => (value instanceof Date ? value.getTime() : Date.parse(value)),
   }),
   JSON: GraphQLJSON,
 };

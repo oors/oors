@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 import random from 'lodash/random';
-import '../src/env';
 import config from '../../../packages/oors-presets/src/config';
 import Application from '../../../packages/oors-presets/src/applications/Standard';
 import BlogModule from '../src/modules/Blog';
