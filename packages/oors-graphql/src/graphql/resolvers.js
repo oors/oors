@@ -24,7 +24,10 @@ export default {
 
       return null;
     },
-    serialize: value => (value instanceof Date ? value.getTime() : Date.parse(value)),
+    serialize: value => {
+      const date = value instanceof Date ? value : new Date(value);
+      return date.toISOString();
+    },
   }),
   JSON: GraphQLJSON,
 };
