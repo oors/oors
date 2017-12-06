@@ -103,4 +103,10 @@ export const createLoaders = Repository => ({
       cacheKeyFn: key => JSON.stringify(key),
     },
   },
+  count: {
+    loader: queries => Promise.all(queries.map((query = {}) => Repository.count(query))),
+    options: {
+      cacheKeyFn: key => JSON.stringify(key),
+    },
+  },
 });
