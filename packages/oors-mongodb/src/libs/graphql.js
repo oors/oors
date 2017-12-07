@@ -8,7 +8,7 @@ export const createCRUDResolvers = ({
   canDelete = () => true,
   canUpdate = () => true,
   findManyQuery = () => ({}),
-  findOneQuery = ({ id }) => ({ query: { _id: id } }),
+  findOneQuery = ({ id }) => ({ query: { _id: objectId(id) } }),
   countQuery = () => ({}),
 }) => ({
   findById: (_, { id }, ctx) => getLoaders(ctx).findById.load(id),
