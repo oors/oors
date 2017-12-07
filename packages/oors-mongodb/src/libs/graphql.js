@@ -19,9 +19,10 @@ export const createCRUDResolvers = ({
       query: countQuery(args, ctx),
     }),
   createOne: async (_, { input }, ctx) => fromMongo(await getRepository(ctx).createOne(input)),
-  updateOne: async (_, { id, input, item: loadedItem }, ctx) => {
+  updateOne: async (_, args, ctx) => {
+    const { id, input, item: loadedItem } = args;
     const Repository = getRepository(ctx);
-    const item = loadedItem || (await Repository.findById(objectId(id)));
+    const item = loadedItem || (await Repository.findOne(findOneQuery(args, ctx)));
 
     if (!item) {
       throw new Error(`Unable to find item with id: ${id}!`);
@@ -52,9 +53,10 @@ export const createCRUDResolvers = ({
       }),
     );
   },
-  deleteOne: async (_, { id, item: loadedItem }, ctx) => {
+  deleteOne: async (_, args, ctx) => {
+    const { id, item: loadedItem } = args;
     const Repository = getRepository(ctx);
-    const item = loadedItem || (await Repository.findById(objectId(id)));
+    const item = loadedItem || (await Repository.findOne(findOneQuery(args, ctx)));
 
     if (!item) {
       throw new Error(`Unable to find item with id: ${id}!`);
