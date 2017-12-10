@@ -108,6 +108,8 @@ class MongoDB extends Module {
       payload.key,
       this.bindRepository(payload.repository, options.connectionName),
     );
+
+    return this.getRepository(payload.key);
   }
 
   getRepository(key) {
@@ -163,6 +165,8 @@ class MongoDB extends Module {
       bindRepository,
       bindRepositories,
       closeConnection,
+      addRepository,
+      getRepository,
     } = this;
 
     await Promise.all(connections.map(createConnection));
@@ -185,6 +189,8 @@ class MongoDB extends Module {
       getConnection,
       bindRepository,
       bindRepositories,
+      addRepository,
+      getRepository,
       ajv: this.ajv,
       closeConnection,
     });
