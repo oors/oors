@@ -1,3 +1,6 @@
+import set from 'lodash/set';
+import get from 'lodash/get';
+import has from 'lodash/has';
 import Ajv from 'ajv';
 import ajvKeywords from 'ajv-keywords';
 import invariant from 'invariant';
@@ -41,6 +44,7 @@ class MongoDB extends Module {
 
   name = 'oors.mongoDb';
   connections = {};
+  repositories = {};
 
   hooks = {
     'oors.graphQL.buildContext': ({ context }) => {
@@ -90,6 +94,30 @@ class MongoDB extends Module {
     return repository;
   };
 
+  addRepository(key, repository, options = {}) {
+    const payload = {
+      key,
+      repository,
+      options,
+    };
+
+    this.emit('repository', payload);
+
+    set(
+      this.repositories,
+      payload.key,
+      this.bindRepository(payload.repository, options.connectionName),
+    );
+  }
+
+  getRepository(key) {
+    if (!has(this.repositories, key)) {
+      throw new Error(`Unable to find "${key}" repository!`);
+    }
+
+    return get(this.repositories, key);
+  }
+
   createConnection = async connectionOptions => {
     const { name, url, options } = connectionOptions;
 
@@ -119,8 +147,9 @@ class MongoDB extends Module {
 
     if (!names.includes(this.defaultConnectionName)) {
       throw new Error(
-        `Default connection name - "(${this
-          .defaultConnectionName})" - can't be found through the list of available connections (${names})`,
+        `Default connection name - "(${
+          this.defaultConnectionName
+        })" - can't be found through the list of available connections (${names})`,
       );
     }
   }
