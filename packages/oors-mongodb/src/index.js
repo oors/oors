@@ -94,7 +94,7 @@ class MongoDB extends Module {
     return repository;
   };
 
-  addRepository(key, repository, options = {}) {
+  addRepository = (key, repository, options = {}) => {
     const payload = {
       key,
       repository,
@@ -110,15 +110,15 @@ class MongoDB extends Module {
     );
 
     return this.getRepository(payload.key);
-  }
+  };
 
-  getRepository(key) {
+  getRepository = key => {
     if (!has(this.repositories, key)) {
       throw new Error(`Unable to find "${key}" repository!`);
     }
 
     return get(this.repositories, key);
-  }
+  };
 
   createConnection = async connectionOptions => {
     const { name, url, options } = connectionOptions;
