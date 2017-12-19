@@ -28,15 +28,15 @@ export default (
   });
 
   Object.assign(repository, {
-    createOne(data) {
+    createOne(data, ...restArgs) {
       if (typeof data === 'object') {
         set(data, createProperty, new Date());
       }
 
-      return createOne.call(repository, data);
+      return createOne.call(repository, data, ...restArgs);
     },
 
-    createMany(data) {
+    createMany(data, ...restArgs) {
       return createMany.call(
         repository,
         Array.isArray(data)
@@ -45,26 +45,35 @@ export default (
               return item;
             })
           : data,
+        ...restArgs,
       );
     },
 
-    updateOne({ update, ...restArgs }) {
-      return updateOne.call(repository, {
+    updateOne({ update, ...restUpdateArgs }, ...restArgs) {
+      return updateOne.call(
+        repository,
+        {
+          ...restUpdateArgs,
+          update: addTsToUpdate(update, updateProperty),
+        },
         ...restArgs,
-        update: addTsToUpdate(update, updateProperty),
-      });
+      );
     },
 
-    updateMany({ update, ...restArgs }) {
-      return updateMany.call(repository, {
+    updateMany({ update, ...restUpdateArgs }, ...restArgs) {
+      return updateMany.call(
+        repository,
+        {
+          ...restUpdateArgs,
+          update: addTsToUpdate(update, updateProperty),
+        },
         ...restArgs,
-        update: addTsToUpdate(update, updateProperty),
-      });
+      );
     },
 
-    replaceOne(query, data) {
+    replaceOne(query, data, ...restArgs) {
       set(data, updateProperty, new Date());
-      return replaceOne.call(repository, query, data);
+      return replaceOne.call(repository, query, data, ...restArgs);
     },
   });
 
