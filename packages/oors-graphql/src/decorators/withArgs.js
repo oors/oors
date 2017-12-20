@@ -6,6 +6,12 @@ const replaceValues = (obj, values, replacers) => {
 
     if (isPlainObject(value)) {
       replaceValues(value, values, replacers);
+    } else if (Array.isArray(value)) {
+      // eslint-disable-next-line no-param-reassign
+      obj[key] = value.map(
+        itemValue =>
+          values.includes(itemValue) ? replacers[values.indexOf(itemValue)] : itemValue,
+      );
     } else {
       const index = values.indexOf(value);
       if (index > -1) {
