@@ -1,4 +1,5 @@
 /* eslint-disable no-underscore-dangle */
+import pick from 'lodash/pick';
 import getPath from 'lodash/get';
 import setPath from 'lodash/set';
 import camelCase from 'lodash/camelCase';
@@ -14,6 +15,7 @@ class Module {
 
     this.hooks = {};
     this.config = config;
+    this.deps = {};
   }
 
   initialize(config, manager) {} // eslint-disable-line
@@ -47,6 +49,10 @@ class Module {
     return Object.assign(this.manager.exportMap[this.name], map);
   }
 
+  exportProperties(props) {
+    this.export(pick(this, props));
+  }
+
   get(key) {
     if (!Object.keys(this.manager.exportMap[this.name]).includes(key)) {
       throw new Error(`Unable to get exported value for "${key}" key in "${this.name}" module!`);
@@ -78,6 +84,14 @@ class Module {
 
   dependencies(dependencies) {
     return Promise.all(dependencies.map(this.dependency.bind(this)));
+  }
+
+  async loadDependency(name) {
+    this.deps[name] = await this.dependency(name);
+  }
+
+  loadDependencies(dependencies) {
+    return Promise.all(dependencies.map(this.loadDependency.bind(this)));
   }
 
   on(...args) {
