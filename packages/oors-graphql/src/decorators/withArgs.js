@@ -1,31 +1,32 @@
 import isPlainObject from 'lodash/isPlainObject';
 
-const replaceValues = (obj, values, replacers) => {
-  Object.keys(obj).forEach(key => {
-    const value = obj[key];
+const replaceValues = (arg, values, replacers) => {
+  if (Array.isArray(arg)) {
+    return arg.map(replaceValues(arg, values, replacers));
+  }
 
-    if (isPlainObject(value)) {
-      replaceValues(value, values, replacers);
-    } else if (Array.isArray(value)) {
-      // eslint-disable-next-line no-param-reassign
-      obj[key] = value.map(
-        itemValue =>
-          values.includes(itemValue) ? replacers[values.indexOf(itemValue)] : itemValue,
-      );
-    } else {
-      const index = values.indexOf(value);
-      if (index > -1) {
-        obj[key] = replacers[index]; // eslint-disable-line no-param-reassign
-      }
-    }
-  });
+  if (isPlainObject(arg)) {
+    return Object.keys(arg).reduce(
+      (acc, key) => ({
+        ...acc,
+        [key]: replaceValues(arg[key], values, replacers),
+      }),
+      {},
+    );
+  }
+
+  if (values.includes(arg)) {
+    return replacers[values.indexOf(arg)];
+  }
+
+  return arg;
 };
 
-export default parser => resolver => async (_, args, ctx, info) => {
+export default transformer => resolver => async (_, args, ctx, info) => {
   const keys = [];
   const promises = [];
 
-  const finalArgs = await parser(args, ctx, {
+  let finalArgs = await transformer(args, ctx, {
     resolve: promise => {
       const key = Symbol(keys.index);
       keys.push(key);
@@ -35,8 +36,7 @@ export default parser => resolver => async (_, args, ctx, info) => {
   });
 
   if (promises.length) {
-    const values = await Promise.all(promises);
-    replaceValues(finalArgs, keys, values);
+    finalArgs = replaceValues(finalArgs, keys, await Promise.all(promises));
   }
 
   return resolver(_, finalArgs, ctx, info);
