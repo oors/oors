@@ -180,16 +180,18 @@ class Gql extends Module {
 
     const schema = this.buildSchema({ logger });
 
-    const schemas = await this.createHook('getSchema', () => {}, {
+    const schemas = (await this.createHook('getSchema', () => {}, {
       schema,
       mergeSchemas,
       makeExecutableSchema,
       makeRemoteExecutableSchema,
-    });
+    })).filter(s => s);
 
-    const finalSchema = mergeSchemas({
-      schemas: [schema, ...schemas.filter(s => s)],
-    });
+    const finalSchema = schemas.length
+      ? mergeSchemas({
+          schemas: [schema, ...schemas],
+        })
+      : schema;
 
     this.setupSubscriptionServer(finalSchema);
 
