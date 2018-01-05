@@ -2,7 +2,7 @@ import isPlainObject from 'lodash/isPlainObject';
 
 const replaceValues = (arg, values, replacers) => {
   if (Array.isArray(arg)) {
-    return arg.map(replaceValues(arg, values, replacers));
+    return arg.map(item => replaceValues(item, values, replacers));
   }
 
   if (isPlainObject(arg)) {
