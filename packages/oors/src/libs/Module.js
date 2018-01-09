@@ -6,8 +6,6 @@ import camelCase from 'lodash/camelCase';
 
 class Module {
   constructor(config = {}) {
-    this.name = config.name || this.name || camelCase(this.constructor.name);
-
     this.filePath = new Error().stack
       .toString()
       .split(/\r\n|\n/)[2]
@@ -16,6 +14,14 @@ class Module {
     this.hooks = {};
     this.config = config;
     this.deps = {};
+  }
+
+  get name() {
+    return this.config.name || this._name || camelCase(this.constructor.name);
+  }
+
+  set name(name) {
+    this._name = name;
   }
 
   initialize(config, manager) {} // eslint-disable-line

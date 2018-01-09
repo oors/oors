@@ -73,11 +73,12 @@ class ModulesManager extends EventEmitter {
       return this;
     }
 
-    const { name } = module;
     module.config = this.parseModuleConfig(module.config, module.constructor.schema); // eslint-disable-line
     if (!module.config.enabled) {
       return this;
     }
+
+    const { name } = module;
 
     this.modules[name] = module;
     this.exportMap[name] = {};
