@@ -46,7 +46,17 @@ class LoggerModule extends Module {
 
     process.on('unhandledRejection', reason => logger.error(reason));
 
-    this.export({ logger });
+    this.export({
+      logger,
+      log: (...args) => logger.log(...args),
+      ...['error', 'warn', 'info', 'verbose', 'debug', 'silly'].reduce(
+        (acc, level) => ({
+          ...acc,
+          [level]: (...args) => logger[level](...args),
+        }),
+        {},
+      ),
+    });
 
     if (printModules) {
       this.printModules();
