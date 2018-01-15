@@ -1,99 +1,11 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { Repository } from 'oors-mongodb';
-import * as constants from '../constants/user';
 import { hashPassword } from '../libs/helpers';
+import schema from '../schemas/user';
 
 class UserRepository extends Repository {
-  static schema = {
-    type: 'object',
-    properties: {
-      accountId: {
-        isId: true,
-      },
-      username: {
-        type: 'string',
-      },
-      name: {
-        type: 'string',
-      },
-      email: {
-        type: 'string',
-        format: 'email',
-      },
-      password: {
-        type: 'string',
-      },
-      salt: {
-        type: 'string',
-      },
-      isActive: {
-        type: 'boolean',
-        default: true,
-      },
-      isOwner: {
-        type: 'boolean',
-        default: true,
-      },
-      isDeleted: {
-        type: 'boolean',
-      },
-      roles: {
-        type: 'array',
-        items: {
-          type: 'string',
-          enum: constants.roles,
-        },
-        default: constants.defaultRoles,
-      },
-      resetPassword: {
-        type: 'object',
-        properties: {
-          token: {
-            type: 'string',
-          },
-          resetAt: {
-            instanceof: 'Date',
-          },
-        },
-        default: {},
-      },
-      lastLogin: {
-        instanceof: 'Date',
-      },
-      socialLogins: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: {
-            id: {
-              type: 'string',
-            },
-            name: {
-              type: 'string',
-            },
-            email: {
-              type: 'string',
-              format: 'email',
-            },
-            token: {
-              type: 'string',
-            },
-            expiresAt: {
-              instanceof: 'Date',
-            },
-          },
-          required: ['id', 'token'],
-        },
-        default: [],
-      },
-      deletedAt: {
-        instanceof: 'Date',
-      },
-    },
-    required: ['accountId', 'username', 'name', 'email', 'password'],
-  };
-
+  static schema = schema;
   static collectionName = 'userUser';
 
   findOneByUsername(username) {
