@@ -8,11 +8,12 @@ class Mail {
   }
 
   async send(options) {
-    const { template, context } = options;
+    const { context } = options;
 
-    const html = await this.options.renderTemplate(template, context);
-
-    Object.assign(options, { html });
+    if (!options.html && options.template) {
+      const html = await this.options.renderTemplate(options.template, context);
+      Object.assign(options, { html });
+    }
 
     return new Promise((resolve, reject) => {
       this.transporter.sendMail(options, (err, info) => {
