@@ -7,4 +7,4 @@ export const wrapHandler = handler => (req, res, next) =>
     })
     .catch(next);
 
-export { toBSON, idPattern, idValidator } from 'oors-mongodb/build/libs/helpers';
+export { toBSON, idPattern } from 'oors-mongodb/build/libs/helpers';

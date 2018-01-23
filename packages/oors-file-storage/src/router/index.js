@@ -1,11 +1,10 @@
 import Boom from 'boom';
-import Joi from 'joi';
 import { ObjectID as objectId } from 'mongodb';
 import { Router } from 'express';
 import { helpers } from 'oors-router';
 import injectServices from '../middlewares/injectServices';
 
-const { wrapHandler, idValidator } = helpers;
+const { wrapHandler } = helpers;
 
 export default ({ uploadMiddleware }) => {
   const router = Router();
@@ -13,13 +12,13 @@ export default ({ uploadMiddleware }) => {
   router.use(injectServices);
 
   router.param('id', async (req, res, next, rawId) => {
-    const { error, value } = Joi.validate(rawId, idValidator);
+    let id;
 
-    if (error) {
-      return next(error);
+    try {
+      id = objectId(rawId);
+    } catch (err) {
+      return next(err);
     }
-
-    const id = objectId(value);
 
     try {
       const file = await req.services.FileRepository.findById(id);

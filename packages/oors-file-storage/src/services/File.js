@@ -9,6 +9,14 @@ class File {
     this.validateUpload = validateUpload;
   }
 
+  removeFiles(files) {
+    return Promise.all(files.map(file => this.removeFile(file)));
+  }
+
+  removeFile(file) {
+    return fs.unlink(this.getPath({ file }));
+  }
+
   async createFromUpload(data) {
     if (!this.validateUpload(data)) {
       throw new ValidationError(this.validateUpload.errors);

@@ -19,16 +19,16 @@ class FileStorage extends Module {
   name = 'oors.fileStorage';
 
   initialize({ uploadDir }) {
-    this.uploadMiddleware = createUploadMiddleware({
+    const uploadMiddleware = createUploadMiddleware({
       dest: uploadDir,
     });
 
     this.router = router({
-      uploadMiddleware: this.uploadMiddleware,
+      uploadMiddleware,
     });
 
     this.export({
-      createUploadMiddleware,
+      uploadMiddleware,
     });
   }
 
@@ -36,15 +36,15 @@ class FileStorage extends Module {
     const [{ bindRepository }] = await this.dependencies(['oors.mongoDb']);
 
     const fileRepository = bindRepository(new FileRepository());
-    const file = new File({
+    const fileService = new File({
       uploadDir: this.getConfig('uploadDir'),
       FileRepository: fileRepository,
       validateUpload: this.manager.compileSchema(uploadSchema),
     });
-    fileRepository.File = file;
+    fileRepository.File = fileService;
 
     this.export({
-      File: file,
+      File: fileService,
       FileRepository: fileRepository,
     });
   }
