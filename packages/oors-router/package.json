@@ -1,6 +1,6 @@
 {
   "name": "oors-router",
-  "version": "1.1.10",
+  "version": "1.1.11",
   "description": "oors module that helps you register routers provided by other modules",
   "main": "build/index.js",
   "repository": {
