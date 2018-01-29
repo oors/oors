@@ -9,7 +9,7 @@ import {
 } from './decorators';
 
 const resolvers = createCRUDResolvers({
-  getRepository: ({ app }) => app.modules.get('oors.blog').PostRepository,
+  getRepository: ({ app }) => app.modules.get('oors.mongoDb').getRepository('Post'),
   getLoaders: ({ loaders }) => loaders.blog.posts,
   findManyQuery: ({ query: { categoryIds, offset, limit, searchQuery } }) => {
     const query = {

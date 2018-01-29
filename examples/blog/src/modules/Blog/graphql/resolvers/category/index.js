@@ -10,7 +10,7 @@ import { withUserStamps } from '../../decorators';
  *   the bootstrap file of the module
  */
 const resolvers = createCRUDResolvers({
-  getRepository: ({ app }) => app.modules.get('oors.blog').CategoryRepository,
+  getRepository: ({ app }) => app.modules.get('oors.mongoDb').getRepository('blogCategory'),
   getLoaders: ({ loaders }) => loaders.blog.categories,
 });
 

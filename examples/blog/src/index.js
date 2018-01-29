@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
-import config from 'oors-presets/build/config';
-import Application from 'oors-presets/build/applications/Standard';
+import config from '../../../packages/oors-presets/build/config';
+// import Application from 'oors-presets/build/applications/Standard';
+import Application from '../../../packages/oors-presets/build/applications/Standard';
 import BlogModule from './modules/Blog';
 
 config.set(

@@ -1,34 +1,26 @@
 import { Module } from 'oors/build/index';
 import { createLoaders } from 'oors-mongodb/build/libs/graphql';
 import withTimestamps from 'oors-mongodb/build/decorators/withTimestamps';
-import PostRepositoryClass from './repositories/Post';
-import CategoryRepositoryClass from './repositories/Category';
-import CommentRepositoryClass from './repositories/Comment';
+import PostRepository from './repositories/Post';
+import CategoryRepository from './repositories/Category';
+import CommentRepository from './repositories/Comment';
 
 class BlogModule extends Module {
   name = 'oors.blog';
 
   async setup() {
-    const [{ bindRepositories }, { addLoaders }] = await this.dependencies([
+    const [{ addRepository }, { addLoaders }] = await this.dependencies([
       'oors.mongoDb',
       'oors.graphQL',
     ]);
 
-    const [PostRepository, CategoryRepository, CommentRepository] = bindRepositories([
-      withTimestamps()(new PostRepositoryClass()),
-      withTimestamps()(new CategoryRepositoryClass()),
-      withTimestamps()(new CommentRepositoryClass()),
-    ]);
+    const Post = addRepository('blogPost', withTimestamps()(new PostRepository()));
+    const Category = addRepository('blogCategory', withTimestamps()(new CategoryRepository()));
+    const Comment = addRepository('blogComment', withTimestamps()(new CommentRepository()));
 
-    addLoaders(createLoaders(PostRepository), 'blog.posts');
-    addLoaders(createLoaders(CategoryRepository), 'blog.categories');
-    addLoaders(createLoaders(CommentRepository), 'blog.comments');
-
-    this.export({
-      PostRepository,
-      CategoryRepository,
-      CommentRepository,
-    });
+    addLoaders(createLoaders(Post), 'blog.posts');
+    addLoaders(createLoaders(Category), 'blog.categories');
+    addLoaders(createLoaders(Comment), 'blog.comments');
   }
 }
 
