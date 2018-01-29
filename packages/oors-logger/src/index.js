@@ -2,7 +2,7 @@
 import Table from 'cli-table';
 import { inspect } from 'util';
 import { Module } from 'oors';
-import * as winston from 'winston';
+import { Logger, transports } from 'winston';
 
 class LoggerModule extends Module {
   static schema = {
@@ -31,9 +31,15 @@ class LoggerModule extends Module {
   initialize({ printModules, printDependencyGraph, printMiddlewares, logger }) {
     this.logger =
       logger ||
-      winston.createLogger({
-        format: winston.format.combine(winston.format.timestamp(), winston.format.prettyPrint()),
-        transports: [new winston.transports.Console()],
+      new Logger({
+        transports: [
+          new transports.Console({
+            colorize: true,
+            timestamp: true,
+            prettyPrint: true,
+            humanReadableUnhandledException: true,
+          }),
+        ],
       });
 
     process.on('unhandledRejection', reason => this.logger.error(reason));
