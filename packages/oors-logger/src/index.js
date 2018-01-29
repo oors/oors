@@ -2,7 +2,7 @@
 import Table from 'cli-table';
 import { inspect } from 'util';
 import { Module } from 'oors';
-import winston from 'winston';
+import * as winston from 'winston';
 
 class LoggerModule extends Module {
   static schema = {
