@@ -32,16 +32,8 @@ class LoggerModule extends Module {
     this.logger =
       logger ||
       winston.createLogger({
-        transports: [
-          new winston.transports.Console({
-            colorize: true,
-            handleExceptions: true,
-            humanReadableUnhandledException: true,
-            json: true,
-            prettyPrint: true,
-            timestamp: true,
-          }),
-        ],
+        format: winston.format.combine(winston.format.timestamp(), winston.format.prettyPrint()),
+        transports: [new winston.transports.Console()],
       });
 
     process.on('unhandledRejection', reason => this.logger.error(reason));
