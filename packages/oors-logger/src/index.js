@@ -2,16 +2,12 @@
 import Table from 'cli-table';
 import { inspect } from 'util';
 import { Module } from 'oors';
-import path from 'path';
-import { Logger, transports as loggerTransports } from 'winston';
+import winston from 'winston';
 
 class LoggerModule extends Module {
   static schema = {
     type: 'object',
     properties: {
-      logsDir: {
-        type: 'string',
-      },
       printModules: {
         type: 'boolean',
         default: true,
@@ -24,35 +20,38 @@ class LoggerModule extends Module {
         type: 'boolean',
         default: true,
       },
+      logger: {
+        type: 'object',
+      },
     },
-    required: ['logsDir'],
+    required: [],
   };
   name = 'oors.logger';
 
-  initialize({ logsDir, printModules, printDependencyGraph, printMiddlewares }) {
-    const logger = new Logger({
-      transports: [
-        new loggerTransports.Console({
-          colorize: true,
-        }),
-        new loggerTransports.File({
-          filename: path.join(logsDir, 'logs.log'),
-          level: 'error',
-          handleExceptions: true,
-          humanReadableUnhandledException: true,
-        }),
-      ],
-    });
+  initialize({ printModules, printDependencyGraph, printMiddlewares, logger }) {
+    this.logger =
+      logger ||
+      winston.createLogger({
+        transports: [
+          new winston.transports.Console({
+            colorize: true,
+            handleExceptions: true,
+            humanReadableUnhandledException: true,
+            json: true,
+            prettyPrint: true,
+          }),
+        ],
+      });
 
-    process.on('unhandledRejection', reason => logger.error(reason));
+    process.on('unhandledRejection', reason => this.logger.error(reason));
 
     this.export({
-      logger,
-      log: (...args) => logger.log(...args),
+      logger: this.logger,
+      log: (...args) => this.logger.log(...args),
       ...['error', 'warn', 'info', 'verbose', 'debug', 'silly'].reduce(
         (acc, level) => ({
           ...acc,
-          [level]: (...args) => logger[level](...args),
+          [level]: (...args) => this.logger[level](...args),
         }),
         {},
       ),
@@ -81,7 +80,7 @@ class LoggerModule extends Module {
     });
 
     this.app.once('after:boot', () => {
-      console.log(modulesTable.toString());
+      this.logger.info(modulesTable.toString());
     });
   }
 
