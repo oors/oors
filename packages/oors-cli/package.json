@@ -1,6 +1,6 @@
 {
   "name": "oors-cli",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "oors command line utilities.",
   "main": "build/index.js",
   "scripts": {},
@@ -20,7 +20,7 @@
   "url": "https://github.com/viczam/oors/tree/master/packages/oors-cli/readme.md",
   "dependencies": {
     "ajv": "6.1.0",
-    "babel-core": "~6.26.1",
+    "babel-core": "~6.26.0",
     "chokidar": "2.0.0",
     "dotenv": "~4.0.0",
     "fs-extra": "^5.0.0",
