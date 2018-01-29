@@ -39,6 +39,7 @@ class LoggerModule extends Module {
             humanReadableUnhandledException: true,
             json: true,
             prettyPrint: true,
+            timestamp: true,
           }),
         ],
       });
@@ -80,7 +81,7 @@ class LoggerModule extends Module {
     });
 
     this.app.once('after:boot', () => {
-      this.logger.info(modulesTable.toString());
+      console.log(modulesTable.toString());
     });
   }
 

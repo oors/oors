@@ -15,12 +15,12 @@
   },
   "homepage": "https://github.com/viczam/oors#readme",
   "dependencies": {
-    "boom": "5.1.0",
+    "boom": "7.1.1",
     "express": "4.16.2",
     "invariant": "2.2.2",
     "joi": "10.5.1",
     "lodash": "4.17.4",
-    "mongodb": "2.2.27",
+    "mongodb": "3.0.1",
     "oors": "^1.1.3",
     "oors-mongodb": "^2.0.10"
   }

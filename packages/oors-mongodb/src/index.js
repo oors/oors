@@ -23,6 +23,9 @@ class MongoDB extends Module {
             name: {
               type: 'string',
             },
+            database: {
+              type: 'string',
+            },
             url: {
               type: 'string',
             },
@@ -120,11 +123,10 @@ class MongoDB extends Module {
     return get(this.repositories, key);
   };
 
-  createConnection = async connectionOptions => {
-    const { name, url, options } = connectionOptions;
-
-    this.connections[name] = await MongoClient.connect(url, options);
-
+  createConnection = async ({ name, url, options, database }) => {
+    this.connections[name] = (await MongoClient.connect(url, options)).db(
+      database || url.substr(url.lastIndexOf('/') + 1),
+    );
     return this.connections[name];
   };
 
