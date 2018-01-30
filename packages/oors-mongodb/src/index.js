@@ -86,10 +86,8 @@ class MongoDB extends Module {
       `Missing repository collection name - ${repository.constructor.name}!`,
     );
 
-    const db = this.getConnection(connectionName);
-
     Object.assign(repository, {
-      collection: db.collection(repository.collectionName),
+      collection: this.getConnectionDb(connectionName).collection(repository.collectionName),
       ajv: this.ajv,
       validate: this.ajv.compile(repository.schema),
     });
@@ -123,12 +121,18 @@ class MongoDB extends Module {
     return get(this.repositories, key);
   };
 
-  createConnection = async ({ name, url, options, database }) => {
-    this.connections[name] = (await MongoClient.connect(url, options)).db(
-      database || url.substr(url.lastIndexOf('/') + 1),
-    );
+  createConnection = async ({ name, url, options }) => {
+    this.connections[name] = await MongoClient.connect(url, options);
     return this.connections[name];
   };
+
+  getConnectionDb(name = this.defaultConnectionName) {
+    const connection = this.getConnection(name);
+    const { database, url } = this.getConfig('connections').find(
+      ({ name: _name }) => _name === name,
+    );
+    return connection.db(database || url.substr(url.lastIndexOf('/') + 1));
+  }
 
   getConnection = name => {
     if (!name) {
@@ -142,7 +146,7 @@ class MongoDB extends Module {
     return this.connections[name];
   };
 
-  closeConnection = name => MongoClient.close(this.getConnection(name));
+  closeConnection = name => this.getConnection(name).close();
 
   initialize({ connections, defaultConnection }) {
     this.defaultConnectionName = defaultConnection || connections[0].name;
