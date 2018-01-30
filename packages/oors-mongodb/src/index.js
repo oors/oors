@@ -126,13 +126,13 @@ class MongoDB extends Module {
     return this.connections[name];
   };
 
-  getConnectionDb(name = this.defaultConnectionName) {
+  getConnectionDb = (name = this.defaultConnectionName) => {
     const connection = this.getConnection(name);
     const { database, url } = this.getConfig('connections').find(
       ({ name: _name }) => _name === name,
     );
     return connection.db(database || url.substr(url.lastIndexOf('/') + 1));
-  }
+  };
 
   getConnection = name => {
     if (!name) {
@@ -173,6 +173,7 @@ class MongoDB extends Module {
       closeConnection,
       addRepository,
       getRepository,
+      getConnectionDb,
     } = this;
 
     await Promise.all(connections.map(createConnection));
@@ -193,6 +194,7 @@ class MongoDB extends Module {
       createRepository,
       createConnection,
       getConnection,
+      getConnectionDb,
       bindRepository,
       bindRepositories,
       addRepository,
