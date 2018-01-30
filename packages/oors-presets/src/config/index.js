@@ -104,7 +104,9 @@ config.add({
         after: 'isMethod',
       },
     },
-    'oors.logger': {},
+    'oors.logger': {
+      logsDir: config.ref(() => path.resolve(config.get('rootDir'), './logs')),
+    },
   },
 });
 

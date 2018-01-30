@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import path from 'path';
 import Table from 'cli-table';
 import { inspect } from 'util';
 import { Module } from 'oors';
@@ -23,12 +24,15 @@ class LoggerModule extends Module {
       logger: {
         type: 'object',
       },
+      logsDir: {
+        type: 'string',
+      },
     },
-    required: [],
+    required: ['logsDir'],
   };
   name = 'oors.logger';
 
-  initialize({ printModules, printDependencyGraph, printMiddlewares, logger }) {
+  initialize({ printModules, printDependencyGraph, printMiddlewares, logger, logsDir }) {
     this.logger =
       logger ||
       new Logger({
@@ -38,6 +42,15 @@ class LoggerModule extends Module {
             timestamp: true,
             prettyPrint: true,
             humanReadableUnhandledException: true,
+          }),
+          new transports.File({
+            name: 'errors',
+            filename: path.join(logsDir, 'logs.log'),
+            level: 'error',
+            handleExceptions: true,
+            humanReadableUnhandledException: true,
+            timestamp: true,
+            maxsize: 100000,
           }),
         ],
       });
