@@ -142,7 +142,7 @@ class MongoDB extends Module {
     return this.connections[name];
   };
 
-  closeConnection = name => this.getConnection(name).close();
+  closeConnection = name => MongoClient.close(this.getConnection(name));
 
   initialize({ connections, defaultConnection }) {
     this.defaultConnectionName = defaultConnection || connections[0].name;
