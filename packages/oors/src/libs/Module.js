@@ -112,7 +112,7 @@ class Module {
     return this.manager.emit(`module:${this.name}:${event}`, ...args.concat([this]));
   }
 
-  createHook(hook, handler, context) {
+  runHook(hook, handler, context) {
     return this.manager.run(`${this.name}.${hook}`, handler, context);
   }
 

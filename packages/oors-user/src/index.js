@@ -128,7 +128,7 @@ class UserModule extends Module {
       UserLoginRepository: bindRepository(new UserLoginRepositoryClass()),
     };
 
-    await this.createHook('touchRepositories', () => {}, { repositories });
+    await this.runHook('touchRepositories', () => {}, { repositories });
 
     const { UserRepository, AccountRepository, UserLoginRepository } = repositories;
 

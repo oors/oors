@@ -47,7 +47,7 @@ class Security extends Module {
       Security: new SecurityServiceContainer(),
     });
 
-    const extractors = await this.createHook(
+    const extractors = await this.runHook(
       'createPermissionsExtractor',
       // eslint-disable-next-line consistent-return
       module => {
@@ -67,7 +67,7 @@ class Security extends Module {
       extractor: this.buildExtractor(extractors),
     });
 
-    await this.createHook(
+    await this.runHook(
       'definePermissions',
       module => {
         const modulePermissions = get(module, 'security.permissions');

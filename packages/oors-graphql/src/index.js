@@ -113,6 +113,10 @@ class Gql extends Module {
           createPubSub: {
             instanceof: 'Function',
           },
+          serverOptions: {
+            type: 'object',
+            default: {},
+          },
         },
         default: {},
       },
@@ -160,7 +164,7 @@ class Gql extends Module {
       addLoaders,
     } = this;
 
-    await this.createHook('load', collectFromModule, {
+    await this.runHook('load', collectFromModule, {
       pubsub: this.pubsub,
       addTypeDefs,
       addTypeDefsByPath,
@@ -174,13 +178,13 @@ class Gql extends Module {
       await this.addTypeDefsByPath(path.resolve(__dirname, './graphql/modulesTypeDefs.graphql'));
     }
 
-    await this.createHook('buildContext', () => {}, {
+    await this.runHook('buildContext', () => {}, {
       context: this.gqlContext,
     });
 
     const schema = this.buildSchema({ logger });
 
-    const schemas = (await this.createHook('getSchema', () => {}, {
+    const schemas = (await this.runHook('getSchema', () => {}, {
       schema,
       mergeSchemas,
       makeExecutableSchema,
@@ -329,6 +333,9 @@ class Gql extends Module {
         execute,
         subscribe,
         schema,
+        onConnect: connectionParams => ({ ...connectionParams }),
+        onOperation: (message, params) => ({ ...params, context: this.gqlContext }),
+        ...this.getConfig('subscriptions.serverOptions'),
       },
       {
         server,

@@ -94,7 +94,7 @@ class Router extends Module {
     const router = ExpressRouter();
 
     if (autoload) {
-      await this.createHook('load', this.loadModuleRouter, {
+      await this.runHook('load', this.loadModuleRouter, {
         addRouter,
         router,
       });
