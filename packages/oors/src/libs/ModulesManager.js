@@ -149,12 +149,10 @@ class ModulesManager extends EventEmitter {
   async run(commandName, command, context) {
     await this.invoke(`before:${commandName}`, context);
     const results = await Promise.all(
-      this.getModules().map(module => {
-        if (module.hooks[commandName]) {
-          return module.hooks[commandName](context);
-        }
-        return command(module, context);
-      }),
+      this.getModules().map(
+        module =>
+          module.hooks[commandName] ? module.hooks[commandName](context) : command(module, context),
+      ),
     );
     await this.invoke(`after:${commandName}`, context);
     return results;
