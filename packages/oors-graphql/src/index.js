@@ -334,7 +334,13 @@ class Gql extends Module {
         subscribe,
         schema,
         onConnect: connectionParams => ({ ...connectionParams }),
-        onOperation: (message, params) => ({ ...params, context: this.gqlContext }),
+        onOperation: (message, params) => ({
+          ...params,
+          context: {
+            ...this.gqlContext,
+            ...(params.context || {}),
+          },
+        }),
         ...this.getConfig('subscriptions.serverOptions'),
       },
       {
