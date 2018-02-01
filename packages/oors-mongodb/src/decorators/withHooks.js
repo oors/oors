@@ -20,6 +20,8 @@ export default (
     'deleteOne',
     'deleteMany',
     'save',
+    'count',
+    'query',
   ].forEach(method => {
     const previous = repository[method];
     Object.assign(repository, {

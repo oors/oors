@@ -14,6 +14,8 @@ export default ({
     'deleteOne',
     'deleteMany',
     'save',
+    'count',
+    'query',
   ],
   emitter,
   prefix = '',
