@@ -50,7 +50,7 @@ class LoggerModule extends Module {
             handleExceptions: true,
             humanReadableUnhandledException: true,
             timestamp: true,
-            maxsize: 100000,
+            maxsize: 5000000,
           }),
         ],
       });
