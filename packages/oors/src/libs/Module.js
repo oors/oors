@@ -94,18 +94,21 @@ class Module {
 
   async loadDependency(name) {
     this.deps[name] = await this.dependency(name);
+    return this.deps[name];
   }
 
   loadDependencies(dependencies) {
     return Promise.all(dependencies.map(this.loadDependency.bind(this)));
   }
 
-  on(...args) {
-    this.manager.on(...args);
+  on(event, listener) {
+    this.manager.on(event, listener);
+    return () => this.manager.removeListener(event, listener);
   }
 
-  once(...args) {
-    this.manager.once(...args);
+  once(event, listener) {
+    this.manager.once(event, listener);
+    return () => this.manager.removeListener(event, listener);
   }
 
   emit(event, ...args) {
@@ -118,6 +121,7 @@ class Module {
 
   addHook(moduleName, hook, handler = () => {}) {
     this.hooks[`${moduleName}.${hook}`] = handler;
+    return this;
   }
 }
 
