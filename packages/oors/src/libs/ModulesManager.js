@@ -157,6 +157,16 @@ class ModulesManager extends EventEmitter {
     await this.invoke(`after:${commandName}`, context);
     return results;
   }
+
+  on(event, listener) {
+    super.on(event, listener);
+    return () => this.removeListener(event, listener);
+  }
+
+  once(event, listener) {
+    super.once(event, listener);
+    return () => this.removeListener(event, listener);
+  }
 }
 
 export default ModulesManager;

@@ -102,13 +102,11 @@ class Module {
   }
 
   on(event, listener) {
-    this.manager.on(event, listener);
-    return () => this.manager.removeListener(event, listener);
+    return this.manager.on(event, listener);
   }
 
   once(event, listener) {
-    this.manager.once(event, listener);
-    return () => this.manager.removeListener(event, listener);
+    return this.manager.once(event, listener);
   }
 
   emit(event, ...args) {
