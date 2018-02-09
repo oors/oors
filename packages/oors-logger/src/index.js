@@ -51,6 +51,7 @@ class LoggerModule extends Module {
             humanReadableUnhandledException: true,
             timestamp: true,
             maxsize: 5000000,
+            tailable: true,
           }),
         ],
       });
