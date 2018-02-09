@@ -101,12 +101,12 @@ class Module {
     return Promise.all(dependencies.map(this.loadDependency.bind(this)));
   }
 
-  on(event, listener) {
-    return this.manager.on(event, listener);
+  on(...args) {
+    return this.manager.on(...args);
   }
 
-  once(event, listener) {
-    return this.manager.once(event, listener);
+  once(...args) {
+    return this.manager.once(...args);
   }
 
   emit(event, ...args) {
