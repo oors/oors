@@ -16,6 +16,7 @@ import merge from 'lodash/merge';
 import { makeExecutableSchema, makeRemoteExecutableSchema, mergeSchemas } from 'graphql-tools';
 import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
 import playgroundMiddleware from 'graphql-playground-middleware-express';
+import { importSchema } from 'graphql-import';
 import mainResolvers from './graphql/resolvers';
 import modulesResolvers from './graphql/modulesResolvers';
 import LoadersMap from './libs/LoadersMap';
@@ -207,6 +208,7 @@ class Gql extends Module {
       addMiddleware,
       addLoader,
       addLoaders,
+      importSchema: this.importSchema,
     });
   }
 
@@ -237,6 +239,10 @@ class Gql extends Module {
 
   addTypeDefsByPath = async filePath => {
     this.addTypeDefs(await fse.readFile(filePath, 'utf8'));
+  };
+
+  importSchema = schemaPath => {
+    this.addTypeDefs(importSchema(schemaPath));
   };
 
   async loadFromDir(dirPath) {
