@@ -1,6 +1,6 @@
 import Repository from 'oors-mongodb/build/Repository';
 
-const statuses = ['draft', 'published'];
+const statuses = ['DRAFT', 'PUBLISHED'];
 
 class PostRepository extends Repository {
   static statuses = statuses;
@@ -17,7 +17,7 @@ class PostRepository extends Repository {
       status: {
         type: 'string',
         enum: statuses,
-        default: 'draft',
+        default: 'DRAFT',
       },
       excerpt: {
         type: 'string',
