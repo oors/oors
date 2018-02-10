@@ -26,7 +26,9 @@ const data = {
     posts: [
       {
         title: 'First Blog Post',
+        slug: 'first-blog-post',
         category: 'First Category',
+        body: 'Hello, world!',
       },
     ],
     comments: [
@@ -87,8 +89,10 @@ const createBlogComments = async ({ CommentRepository, posts, users }) =>
 app
   .boot()
   .then(async () => {
-    const { closeConnection } = app.modules.get('oors.mongoDb');
-    const { PostRepository, CategoryRepository, CommentRepository } = app.modules.get('oors.blog');
+    const { closeConnection, getRepository } = app.modules.get('oors.mongoDb');
+    const PostRepository = getRepository('blogPost');
+    const CategoryRepository = getRepository('blogCategory');
+    const CommentRepository = getRepository('blogComment');
     const { User, Account } = app.modules.get('oors.user');
 
     const users = await createUsers({ User, Account });
