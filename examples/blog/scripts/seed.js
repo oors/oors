@@ -29,6 +29,8 @@ const data = {
         slug: 'first-blog-post',
         category: 'First Category',
         body: 'Hello, world!',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     ],
     comments: [
