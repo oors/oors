@@ -17,6 +17,7 @@ import { makeExecutableSchema, makeRemoteExecutableSchema, mergeSchemas } from '
 import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
 import playgroundMiddleware from 'graphql-playground-middleware-express';
 import { importSchema } from 'graphql-import';
+import { Binding } from 'graphql-binding';
 import mainResolvers from './graphql/resolvers';
 import modulesResolvers from './graphql/modulesResolvers';
 import LoadersMap from './libs/LoadersMap';
@@ -163,6 +164,7 @@ class Gql extends Module {
       addMiddleware,
       addLoader,
       addLoaders,
+      bindSchema,
     } = this;
 
     await this.runHook('load', collectFromModule, {
@@ -209,8 +211,16 @@ class Gql extends Module {
       addLoader,
       addLoaders,
       importSchema: this.importSchema,
+      bindSchema,
+      binding: this.bindSchema(finalSchema),
     });
   }
+
+  bindSchema = (schema, options = {}) =>
+    new Binding({
+      schema,
+      ...options,
+    });
 
   addTypeDefs = typeDefs => {
     this.typeDefs.push(typeDefs);
