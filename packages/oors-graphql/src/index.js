@@ -353,6 +353,7 @@ class Gql extends Module {
         onOperation: (message, params) => ({
           ...params,
           context: {
+            loaders: this.loaders.build(),
             ...this.gqlContext,
             ...(params.context || {}),
           },
