@@ -14,7 +14,7 @@ class BaseApplication extends Application {
   setupViews() {
     this.set('views', `${__dirname}/../views`);
     this.set('view engine', 'js');
-    this.engine('jsx', expressReactViews.createEngine());
+    this.engine('js', expressReactViews.createEngine());
   }
 
   addMiddlewares(...middlewares) {
