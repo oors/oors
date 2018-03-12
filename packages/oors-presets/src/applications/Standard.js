@@ -32,8 +32,8 @@ class StandardApplication extends BaseApplication {
     }
 
     this.addMiddlewares(
-      middlewares.useragent,
       middlewares.cors,
+      middlewares.useragent,
       middlewares.helmet,
       middlewares.morgan,
       middlewares.compression,
