@@ -1,6 +1,6 @@
 {
   "name": "oors-presets",
-  "version": "1.5.9",
+  "version": "1.5.10",
   "description": "oors presets",
   "main": "build/index.js",
   "repository": {
