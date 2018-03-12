@@ -20,7 +20,7 @@
     "invariant": "2.2.2",
     "joi": "10.5.1",
     "lodash": "4.17.4",
-    "mongodb": "3.0.1",
+    "mongodb": "3.0.4",
     "oors": "^1.3.2",
     "oors-mongodb": "^2.2.3"
   }
