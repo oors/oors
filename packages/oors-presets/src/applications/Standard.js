@@ -40,7 +40,6 @@ class StandardApplication extends BaseApplication {
       middlewares.bodyParserJSON,
       middlewares.bodyParserURLEncoded,
       middlewares.cookieParser,
-      middlewares.statusMonitor,
       middlewares.isMethod,
       middlewares.validationErrorHandler,
       middlewares.boomErrorHandler,

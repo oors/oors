@@ -34,7 +34,6 @@ config.add({
         secret: 'THIS_IS_MY_SECRET',
       },
     },
-    statusMonitor: {},
     isMethod: {},
     validationErrorHandler: {},
     boomErrorHandler: {

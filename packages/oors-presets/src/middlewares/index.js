@@ -4,7 +4,6 @@ import compression from './compression';
 import session from './session';
 import helmet from './helmet';
 import morgan from './morgan';
-import statusMonitor from './statusMonitor';
 import useragent from './useragent';
 import isMethod from './isMethod';
 import cors from './cors';
@@ -20,7 +19,6 @@ export {
   session,
   helmet,
   morgan,
-  statusMonitor,
   useragent,
   isMethod,
   cors,
