@@ -6,3 +6,4 @@ lerna-debug.log
 packages/*/build
 build
 .env
+yarn-error.log

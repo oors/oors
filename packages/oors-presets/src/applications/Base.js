@@ -48,7 +48,7 @@ class BaseApplication extends Application {
       });
     }
 
-    console.log(chalk.bgBlue.white(message));
+    console.log(chalk.bgBlue.white(message)); // eslint-disable-line no-console
 
     return result;
   }
