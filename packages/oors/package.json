@@ -1,6 +1,6 @@
 {
   "name": "oors",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Highly scalable and modular node.js web framework built on top of express.js",
   "main": "build/index.js",
   "scripts": {},
