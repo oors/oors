@@ -47,16 +47,7 @@ class Application extends ExpressApplication {
     await this.boot();
     return new Promise(resolve => {
       this.set('startTime', Date.now());
-      const server = ExpressApplication.prototype.listen.call(this, port, resolve);
-
-      process.on('SIGINT', () => {
-        server.close(() => {
-          this.emit('close', server);
-          process.exit();
-        });
-      });
-
-      return server;
+      return ExpressApplication.prototype.listen.call(this, port, resolve);
     });
   }
 
