@@ -13,7 +13,13 @@ import { execute, subscribe } from 'graphql';
 import { PubSub } from 'graphql-subscriptions';
 import { SubscriptionServer } from 'subscriptions-transport-ws';
 import merge from 'lodash/merge';
-import { makeExecutableSchema, makeRemoteExecutableSchema, mergeSchemas } from 'graphql-tools';
+import {
+  makeExecutableSchema,
+  makeRemoteExecutableSchema,
+  mergeSchemas,
+  addResolveFunctionsToSchema,
+  addSchemaLevelResolveFunction,
+} from 'graphql-tools';
 import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
 import playgroundMiddleware from 'graphql-playground-middleware-express';
 import { importSchema } from 'graphql-import';
@@ -213,6 +219,9 @@ class Gql extends Module {
       importSchema: this.importSchema,
       bindSchema,
       binding: this.bindSchema(finalSchema),
+      addResolvers: resolversMap => addResolveFunctionsToSchema(finalSchema, resolversMap),
+      addSchemaResolvers: rootResolveFunction =>
+        addSchemaLevelResolveFunction(finalSchema, rootResolveFunction),
     });
   }
 
