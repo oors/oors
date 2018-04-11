@@ -24,6 +24,7 @@ import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
 import playgroundMiddleware from 'graphql-playground-middleware-express';
 import { importSchema } from 'graphql-import';
 import { Binding } from 'graphql-binding';
+import { ApolloEngine } from 'apollo-engine';
 import mainResolvers from './graphql/resolvers';
 import modulesResolvers from './graphql/modulesResolvers';
 import LoadersMap from './libs/LoadersMap';
@@ -89,6 +90,26 @@ class Gql extends Module {
               endpointURL: {
                 type: 'string',
                 default: '/graphql',
+              },
+            },
+            default: {},
+          },
+        },
+        default: {},
+      },
+      apolloEngine: {
+        type: 'object',
+        properties: {
+          enabled: {
+            type: 'boolean',
+            default: false,
+          },
+          // https://www.apollographql.com/docs/engine/setup-node.html#api-apollo-engine
+          params: {
+            type: 'object',
+            properties: {
+              apiKey: {
+                type: 'string',
               },
             },
             default: {},
@@ -209,6 +230,10 @@ class Gql extends Module {
     this.setupSubscriptionServer(finalSchema);
 
     this.loadMiddlewares(finalSchema);
+
+    if (this.getConfig('apolloEngine.enabled')) {
+      this.setupApolloEngine();
+    }
 
     this.export({
       schema: finalSchema,
@@ -391,6 +416,29 @@ class Gql extends Module {
       this.getVoyagerMiddleware(),
       this.getPlaygroundMiddleware(),
     );
+  }
+
+  setupApolloEngine() {
+    const { params } = this.getConfig('apolloEngine');
+    const { listen } = this.app.server;
+
+    this.apolloEngine = new ApolloEngine(params);
+
+    this.app.server.listen = (port, cb) => {
+      this.apolloEngine.listen(
+        {
+          port,
+          httpServer: Object.assign(this.app.server, {
+            listen,
+          }),
+        },
+        cb,
+      );
+    };
+
+    this.export({
+      apolloEngine: this.apolloEngine,
+    });
   }
 
   getGraphQLMiddleware(schema) {

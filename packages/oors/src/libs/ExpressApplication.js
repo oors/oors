@@ -1,5 +1,5 @@
 import { application, request, response } from 'express';
-import { createServer } from 'http';
+import { Server } from 'http';
 import mixin from 'merge-descriptors';
 import EventEmitter from 'events';
 import omit from 'lodash/omit';
@@ -18,7 +18,7 @@ class ExpressApplication extends EventEmitter {
 
   get server() {
     if (!this.httpServer) {
-      this.httpServer = createServer(this.handle.bind(this));
+      this.httpServer = new Server(this.handle.bind(this));
     }
 
     return this.httpServer;
