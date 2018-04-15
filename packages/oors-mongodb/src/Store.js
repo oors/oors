@@ -46,19 +46,26 @@ class Store {
     return this.collection.findOne(query, options);
   }
 
-  async findMany({ query = {}, orderBy, limit, skip, fields } = {}) {
-    let selectedFields = fields;
-    if (Array.isArray(fields)) {
-      selectedFields = fields.reduce(
-        (acc, field) => ({
-          ...acc,
-          [field]: 1,
-        }),
-        {},
-      );
+  async findMany({ query = {}, orderBy, limit, skip, fields, ...options } = {}) {
+    if (fields) {
+      if (Array.isArray(fields)) {
+        Object.assign(options, {
+          projection: fields.reduce(
+            (acc, field) => ({
+              ...acc,
+              [field]: 1,
+            }),
+            {},
+          ),
+        });
+      } else {
+        Object.assign(options, {
+          projection: fields,
+        });
+      }
     }
 
-    let cursor = await this.collection.find(query, selectedFields);
+    let cursor = await this.collection.find(query, options);
 
     if (orderBy) {
       cursor = cursor.sort(
