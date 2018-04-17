@@ -343,7 +343,10 @@ class Gql extends Module {
         typeDefs: this.typeDefs,
         resolvers,
         logger: {
-          log: err => logger.error(err),
+          log: err => {
+            logger.error(err);
+            this.emit('error', err);
+          },
         },
         allowUndefinedInResolve: false,
       }),
