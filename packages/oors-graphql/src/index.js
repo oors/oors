@@ -181,7 +181,6 @@ class Gql extends Module {
       this.pubsub = await createPubSub(manager);
     }
 
-    const { logger } = await this.dependency('oors.logger');
     const {
       loaders,
       collectFromModule,
@@ -212,7 +211,7 @@ class Gql extends Module {
       context: this.gqlContext,
     });
 
-    const schema = this.buildSchema({ logger });
+    const schema = this.buildSchema();
 
     const schemas = (await this.runHook('getSchema', () => {}, {
       schema,
@@ -333,7 +332,7 @@ class Gql extends Module {
     } catch (err) {}
   };
 
-  buildSchema({ logger }) {
+  buildSchema() {
     const resolvers = this.resolvers;
 
     this.applyMiddlewares(resolvers);
@@ -344,7 +343,6 @@ class Gql extends Module {
         resolvers,
         logger: {
           log: err => {
-            logger.error(err);
             this.emit('error', err);
           },
         },
