@@ -8,6 +8,8 @@ type Mutation {
 
 scalar DateTime
 
+scalar Date
+
 scalar JSON
 
 enum MutationType {
