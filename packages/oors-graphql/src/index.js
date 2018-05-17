@@ -4,6 +4,8 @@ import fse from 'fs-extra';
 import get from 'lodash/get';
 import set from 'lodash/set';
 import has from 'lodash/has';
+import isPlainObject from 'lodash/isPlainObject';
+import invariant from 'invariant';
 import Ajv from 'ajv';
 import ajvKeywords from 'ajv-keywords';
 import identity from 'lodash/identity';
@@ -169,6 +171,7 @@ class Gql extends Module {
   };
   pubsub = undefined;
   loaders = new LoadersMap();
+  contextExtenders = [];
 
   initialize() {
     ajvKeywords(this.gqlContext.ajv, 'instanceof');
@@ -235,6 +238,8 @@ class Gql extends Module {
     }
 
     this.export({
+      context: this.gqlContext,
+      extendContext: this.extendContext,
       schema: finalSchema,
       loaders,
       addMiddleware,
@@ -249,9 +254,16 @@ class Gql extends Module {
     });
   }
 
+  extendContext = extender => {
+    invariant(typeof extender === 'function' || isPlainObject(extender));
+    this.contextExtenders.push(extender);
+    return this.contextExtenders;
+  };
+
   bindSchema = (schema, options = {}) =>
     new Binding({
       schema,
+      context: this.gqlContext,
       ...options,
     });
 
@@ -451,6 +463,13 @@ class Gql extends Module {
         schema,
         context: {
           ...this.gqlContext,
+          ...this.contextExtenders.reduce(
+            (acc, extender) => ({
+              ...acc,
+              ...(typeof extender === 'function' ? extender(req, this.gqlContext) : extender),
+            }),
+            {},
+          ),
           req,
           app: req.app,
           user: req.user,
