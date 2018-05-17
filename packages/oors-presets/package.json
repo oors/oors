@@ -1,6 +1,6 @@
 {
   "name": "oors-presets",
-  "version": "1.8.4",
+  "version": "1.8.5",
   "description": "oors presets",
   "main": "build/index.js",
   "repository": {
@@ -31,7 +31,7 @@
     "oors": "^1.4.2",
     "oors-config": "^2.1.0",
     "oors-file-storage": "^1.4.3",
-    "oors-graphql": "^1.8.3",
+    "oors-graphql": "^1.8.4",
     "oors-health": "^1.5.2",
     "oors-logger": "^1.6.2",
     "oors-mailer": "^1.4.2",
