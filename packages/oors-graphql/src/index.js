@@ -237,6 +237,8 @@ class Gql extends Module {
       this.setupApolloEngine();
     }
 
+    const binding = this.bindSchema(finalSchema);
+
     this.export({
       context: this.gqlContext,
       extendContext: this.extendContext,
@@ -247,10 +249,17 @@ class Gql extends Module {
       addLoaders,
       importSchema: this.importSchema,
       bindSchema,
-      binding: this.bindSchema(finalSchema),
+      binding,
       addResolvers: resolversMap => addResolveFunctionsToSchema(finalSchema, resolversMap),
       addSchemaResolvers: rootResolveFunction =>
         addSchemaLevelResolveFunction(finalSchema, rootResolveFunction),
+    });
+
+    this.on('after:setup', () => {
+      Object.assign(this.gqlContext, {
+        loaders: this.loaders.build(),
+        binding,
+      });
     });
   }
 
@@ -263,7 +272,6 @@ class Gql extends Module {
   bindSchema = (schema, options = {}) =>
     new Binding({
       schema,
-      context: this.gqlContext,
       ...options,
     });
 
@@ -473,7 +481,6 @@ class Gql extends Module {
           req,
           app: req.app,
           user: req.user,
-          loaders: this.loaders.build(),
         },
         formatError: err => {
           if (err.originalError && err.originalError.code === 'VALIDATION_ERROR') {
