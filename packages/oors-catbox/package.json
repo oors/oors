@@ -1,0 +1,15 @@
+{
+  "name": "oors-cache",
+  "version": "0.1.1",
+  "private": true,
+  "main": "build/index.js",
+  "author": "Victor Zamfir <zamfir.victor@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "catbox": "10.0.2",
+    "catbox-memory": "3.1.2",
+    "catbox-mongodb": "4.2.0",
+    "lodash": "4.17.5",
+    "oors": "^1.4.3"
+  }
+}
