@@ -9,8 +9,8 @@
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "oors": "1.1.0",
-    "oors-presets": "1.1.0"
+    "oors": "1.4.2",
+    "oors-presets": "1.8.5"
   },
   "devDependencies": {
     "babel-cli": "6.24.1",
