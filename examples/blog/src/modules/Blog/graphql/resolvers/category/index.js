@@ -1,4 +1,4 @@
-import { createCRUDResolvers } from 'oors-mongodb/build/libs/graphql';
+import { createCRUDResolvers } from '../../../../../../../../packages/oors-mongodb/build/libs/graphql';
 import { withUserStamps } from '../../decorators';
 
 /**

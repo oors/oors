@@ -1,13 +1,11 @@
 /* eslint-disable no-console */
+import Application from '../../../packages/oors-presets/src/applications/Standard';
 import config from '../../../packages/oors-presets/build/config';
-// import Application from 'oors-presets/build/applications/Standard';
-import Application from '../../../packages/oors-presets/build/applications/Standard';
 import BlogModule from './modules/Blog';
 
 config.set(
   'modules.oors.graphQL.graphiql.params.query',
-  `
-{
+  `{
   blogPosts {
     id
     title

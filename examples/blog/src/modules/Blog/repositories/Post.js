@@ -1,4 +1,4 @@
-import Repository from 'oors-mongodb/build/Repository';
+import Repository from '../../../../../../packages/oors-mongodb/build/Repository';
 
 const statuses = ['DRAFT', 'PUBLISHED'];
 
