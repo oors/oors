@@ -95,8 +95,10 @@ class ModulesManager extends EventEmitter {
     return this;
   }
 
-  setup() {
-    return Promise.all(Object.keys(this.modules).map(name => this.modules[name].load()));
+  async setup() {
+    await this.asyncEmit('before:setup');
+    await Promise.all(Object.keys(this.modules).map(name => this.modules[name].load()));
+    await this.asyncEmit('after:setup');
   }
 
   addDependency(from, to) {
@@ -166,6 +168,10 @@ class ModulesManager extends EventEmitter {
   once(event, listener) {
     super.once(event, listener);
     return () => this.removeListener(event, listener);
+  }
+
+  asyncEmit(event, ...args) {
+    return Promise.all(this.listeners(event).map(listener => listener(...args)));
   }
 }
 

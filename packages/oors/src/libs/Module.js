@@ -75,9 +75,9 @@ class Module {
   }
 
   async load() {
-    this.emit('before:setup');
+    this.asyncEmit('before:setup');
     await this.setup(this.config, this.manager);
-    this.emit('after:setup');
+    this.asyncEmit('after:setup');
   }
 
   dependency(dependency) {
@@ -105,12 +105,20 @@ class Module {
     return this.manager.on(...args);
   }
 
+  onModule(module, event, handler) {
+    return this.manager.on(`module:${module}:${event}`, handler);
+  }
+
   once(...args) {
     return this.manager.once(...args);
   }
 
   emit(event, ...args) {
     return this.manager.emit(`module:${this.name}:${event}`, ...args.concat([this]));
+  }
+
+  asyncEmit(event, ...args) {
+    return this.manager.asyncEmit(`module:${this.name}:${event}`, ...args.concat([this]));
   }
 
   runHook(hook, handler, context) {
