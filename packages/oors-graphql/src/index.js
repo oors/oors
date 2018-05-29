@@ -257,7 +257,6 @@ class Gql extends Module {
 
     this.on('after:setup', () => {
       Object.assign(this.gqlContext, {
-        loaders: this.loaders.build(),
         binding,
       });
     });
@@ -481,6 +480,7 @@ class Gql extends Module {
           req,
           app: req.app,
           user: req.user,
+          loaders: this.loaders.build(),
         },
         formatError: err => {
           if (err.originalError && err.originalError.code === 'VALIDATION_ERROR') {
