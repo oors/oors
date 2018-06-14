@@ -9,6 +9,7 @@ import ValidationError from '../errors/ValidationError';
 class ModulesManager extends EventEmitter {
   constructor(context = {}) {
     super();
+    this.setMaxListeners(Infinity);
     this.context = context;
     this.dependencyGraph = {};
     this.expandedDependencyGraph = {};
