@@ -2,18 +2,13 @@
 import path from 'path';
 import fse from 'fs-extra';
 import get from 'lodash/get';
-import set from 'lodash/set';
 import has from 'lodash/has';
+import pick from 'lodash/pick';
 import isPlainObject from 'lodash/isPlainObject';
 import invariant from 'invariant';
-import Ajv from 'ajv';
-import ajvKeywords from 'ajv-keywords';
 import identity from 'lodash/identity';
 import { Module } from 'oors';
-import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
-import { execute, subscribe } from 'graphql';
 import { PubSub } from 'graphql-subscriptions';
-import { SubscriptionServer } from 'subscriptions-transport-ws';
 import merge from 'lodash/merge';
 import {
   makeExecutableSchema,
@@ -23,42 +18,18 @@ import {
   addSchemaLevelResolveFunction,
 } from 'graphql-tools';
 import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
-import playgroundMiddleware from 'graphql-playground-middleware-express';
 import { importSchema } from 'graphql-import';
 import { Binding } from 'graphql-binding';
-import { ApolloEngine } from 'apollo-engine';
 import mainResolvers from './graphql/resolvers';
 import modulesResolvers from './graphql/modulesResolvers';
 import LoadersMap from './libs/LoadersMap';
 import * as decorators from './decorators';
+import Server from './libs/Server';
 
 class Gql extends Module {
   static schema = {
     type: 'object',
     properties: {
-      graphiql: {
-        type: 'object',
-        properties: {
-          enabled: {
-            type: 'boolean',
-            default: true,
-          },
-          params: {
-            type: 'object',
-            properties: {
-              endpointURL: {
-                type: 'string',
-                default: '/graphql',
-              },
-              subscriptionsEndpoint: {
-                type: 'string',
-              },
-            },
-            default: {},
-          },
-        },
-        default: {},
-      },
       voyager: {
         type: 'object',
         properties: {
@@ -79,46 +50,6 @@ class Gql extends Module {
         },
         default: {},
       },
-      playground: {
-        type: 'object',
-        properties: {
-          enabled: {
-            type: 'boolean',
-            default: true,
-          },
-          params: {
-            type: 'object',
-            properties: {
-              endpointURL: {
-                type: 'string',
-                default: '/graphql',
-              },
-            },
-            default: {},
-          },
-        },
-        default: {},
-      },
-      apolloEngine: {
-        type: 'object',
-        properties: {
-          enabled: {
-            type: 'boolean',
-            default: false,
-          },
-          // https://www.apollographql.com/docs/engine/setup-node.html#api-apollo-engine
-          params: {
-            type: 'object',
-            properties: {
-              apiKey: {
-                type: 'string',
-              },
-            },
-            default: {},
-          },
-        },
-        default: {},
-      },
       middlewarePivot: {
         type: 'string',
         default: 'isMethod',
@@ -130,29 +61,12 @@ class Gql extends Module {
         type: 'boolean',
         default: true,
       },
-      subscriptions: {
+      serverOptions: {
         type: 'object',
-        properties: {
-          enabled: {
-            type: 'boolean',
-            default: true,
-          },
-          path: {
-            type: 'string',
-            default: '/subscriptions',
-          },
-          createPubSub: {
-            instanceof: 'Function',
-          },
-          serverOptions: {
-            type: 'object',
-            default: {},
-          },
-        },
         default: {},
       },
-      getServerOptions: {
-        instanceof: 'Function',
+      pubsub: {
+        type: 'object',
       },
     },
   };
@@ -160,52 +74,38 @@ class Gql extends Module {
   name = 'oors.graphQL';
   typeDefs = [];
   resolvers = mainResolvers;
-  middlewares = []; // for resolvers
-  gqlContext = {
-    ajv: new Ajv({
-      allErrors: true,
-      verbose: true,
-      async: 'es7',
-      useDefaults: true,
-    }),
-  };
+  resolverMiddlewares = [];
+  gqlContext = {};
   pubsub = undefined;
   loaders = new LoadersMap();
   contextExtenders = [];
+  formatters = {
+    params: [],
+    error: [],
+    response: [],
+  };
 
-  initialize() {
-    ajvKeywords(this.gqlContext.ajv, 'instanceof');
-  }
+  async setup() {
+    this.pubsub = this.getConfig('pubsub', new PubSub());
 
-  async setup({ exposeModules, subscriptions }, manager) {
-    const createPubSub = this.getConfig('subscriptions.createPubSub', () => new PubSub());
-
-    if (subscriptions.enabled) {
-      this.pubsub = await createPubSub(manager);
-    }
-
-    const {
-      loaders,
-      collectFromModule,
-      addTypeDefs,
-      addTypeDefsByPath,
-      addResolvers,
-      addMiddleware,
-      addLoader,
-      addLoaders,
-      bindSchema,
-    } = this;
-
-    await this.runHook('load', collectFromModule, {
+    Object.assign(this.gqlContext, {
       pubsub: this.pubsub,
-      addTypeDefs,
-      addTypeDefsByPath,
-      addResolvers,
-      addMiddleware,
-      addLoader,
     });
 
-    if (exposeModules) {
+    await this.runHook(
+      'load',
+      this.collectFromModule,
+      pick(this, [
+        'pubsub',
+        'addTypeDefs',
+        'addTypeDefsByPath',
+        'addResolvers',
+        'addResolverMiddleware',
+        'addLoader',
+      ]),
+    );
+
+    if (this.getConfig('exposeModules')) {
       this.addResolvers(modulesResolvers);
       await this.addTypeDefsByPath(path.resolve(__dirname, './graphql/modulesTypeDefs.graphql'));
     }
@@ -214,45 +114,33 @@ class Gql extends Module {
       context: this.gqlContext,
     });
 
-    const schema = this.buildSchema();
+    this.schema = await this.buildSchema();
+    this.server = this.buildServer();
 
-    const schemas = (await this.runHook('getSchema', () => {}, {
-      schema,
-      mergeSchemas,
-      makeExecutableSchema,
-      makeRemoteExecutableSchema,
-    })).filter(s => s);
+    this.applyMiddlewares(this.server);
 
-    const finalSchema = schemas.length
-      ? mergeSchemas({
-          schemas: [schema, ...schemas],
-        })
-      : schema;
+    const binding = this.bindSchema(this.schema);
 
-    this.setupSubscriptionServer(finalSchema);
-
-    this.loadMiddlewares(finalSchema);
-
-    if (this.getConfig('apolloEngine.enabled')) {
-      this.setupApolloEngine();
-    }
-
-    const binding = this.bindSchema(finalSchema);
+    this.exportProperties([
+      'extendContext',
+      'schema',
+      'server',
+      'loaders',
+      'addResolverMiddleware',
+      'addLoader',
+      'addLoaders',
+      'addResolvers',
+      'importSchema',
+      'bindSchema',
+      'binding',
+      'setupListen',
+      'pubsub',
+    ]);
 
     this.export({
       context: this.gqlContext,
-      extendContext: this.extendContext,
-      schema: finalSchema,
-      loaders,
-      addMiddleware,
-      addLoader,
-      addLoaders,
-      importSchema: this.importSchema,
-      bindSchema,
-      binding,
-      addResolvers: resolversMap => addResolveFunctionsToSchema(finalSchema, resolversMap),
       addSchemaResolvers: rootResolveFunction =>
-        addSchemaLevelResolveFunction(finalSchema, rootResolveFunction),
+        addSchemaLevelResolveFunction(this.schema, rootResolveFunction),
     });
 
     this.on('after:setup', () => {
@@ -279,11 +167,15 @@ class Gql extends Module {
   };
 
   addResolvers = resolvers => {
-    merge(this.resolvers, resolvers);
+    if (this.schema) {
+      addResolveFunctionsToSchema({ schema: this.schema, resolvers });
+    } else {
+      merge(this.resolvers, resolvers);
+    }
   };
 
-  addMiddleware = (matcher, middleware) => {
-    this.middlewares.push({
+  addResolverMiddleware = (matcher, middleware) => {
+    this.resolverMiddlewares.push({
       matcher: typeof matcher === 'string' ? new RegExp(`^${matcher}$`) : matcher,
       middleware,
     });
@@ -351,15 +243,11 @@ class Gql extends Module {
     } catch (err) {}
   };
 
-  buildSchema() {
-    const resolvers = this.resolvers;
-
-    this.applyMiddlewares(resolvers);
-
-    return makeExecutableSchema(
+  buildSchema = async () => {
+    const schema = makeExecutableSchema(
       this.getConfig('configureSchema', identity)({
         typeDefs: this.typeDefs,
-        resolvers,
+        resolvers: this.applyResolversMiddlewares(this.resolvers),
         logger: {
           log: err => {
             this.emit('error', err);
@@ -368,143 +256,133 @@ class Gql extends Module {
         allowUndefinedInResolve: false,
       }),
     );
-  }
 
-  applyMiddlewares(resolvers) {
-    Object.keys(resolvers).forEach(type => {
-      Object.keys(resolvers[type]).forEach(field => {
-        const branch = `${type}.${field}`;
-        const middlewares = this.middlewares.filter(({ matcher }) => matcher.test(branch));
-        if (!middlewares.length) {
-          return;
-        }
+    const schemas = (await this.runHook('getSchema', () => {}, {
+      schema,
+      mergeSchemas,
+      makeExecutableSchema,
+      makeRemoteExecutableSchema,
+    })).filter(s => s);
 
-        const resolver = [...middlewares]
-          .reverse()
-          .reduce(
-            (acc, { middleware }) => (...args) => middleware(...args, acc),
-            get(resolvers, branch),
-          );
+    return schemas.length
+      ? mergeSchemas({
+          schemas: [schema, ...schemas],
+        })
+      : schema;
+  };
 
-        set(resolvers, branch, resolver);
-      });
-    });
-  }
+  buildServer = (options = {}) => {
+    const config = {
+      context: this.buildContext,
+      formatError: this.formatError,
+      schema: this.schema,
+      debug: true,
+      tracing: true,
+      cacheControl: true,
+      subscriptions: true,
+      introspection: true,
+      mocks: false,
+      persistedQueries: true,
+      ...this.getConfig('serverOptions'),
+      ...options,
+    };
 
-  setupSubscriptionServer(schema) {
-    if (!this.getConfig('subscriptions.enabled')) {
-      return;
+    const server = new Server(config);
+
+    if (config.subscriptions) {
+      server.installSubscriptionHandlers(this.app.server);
     }
 
-    const { pubsub } = this;
-    const { server } = this.app;
-    const subscriptionServer = new SubscriptionServer(
-      {
-        execute,
-        subscribe,
-        schema,
-        onConnect: connectionParams => ({ ...connectionParams }),
-        onOperation: (message, params) => ({
-          ...params,
-          context: {
-            loaders: this.loaders.build(),
-            ...this.gqlContext,
-            ...(params.context || {}),
-          },
-        }),
-        ...this.getConfig('subscriptions.serverOptions'),
-      },
-      {
-        server,
-        path: this.getConfig('subscriptions.path'),
-      },
-    );
+    return server;
+  };
 
-    this.gqlContext.pubsub = pubsub;
-
-    this.export({
-      pubsub,
-      subscriptionServer,
-    });
-  }
-
-  loadMiddlewares(schema) {
-    this.app.middlewares.insertBefore(
-      this.getConfig('middlewarePivot'),
-      this.getGraphQLMiddleware(schema),
-      this.getGraphiQLMiddleware(),
-      this.getVoyagerMiddleware(),
-      this.getPlaygroundMiddleware(),
-    );
-  }
-
-  setupApolloEngine() {
-    const { params } = this.getConfig('apolloEngine');
-    const { listen } = this.app.server;
-
-    this.apolloEngine = new ApolloEngine(params);
-
-    this.app.server.listen = (port, cb) => {
-      this.apolloEngine.listen(
-        {
-          port,
-          httpServer: Object.assign(this.app.server, {
-            listen,
-          }),
-        },
-        cb,
-      );
+  buildContext = async ({ req, connection }) => {
+    const context = {
+      ...this.gqlContext,
+      loaders: this.loaders.build(),
     };
 
-    this.export({
-      apolloEngine: this.apolloEngine,
-    });
-  }
+    if (req) {
+      Object.assign(context, {
+        ...this.contextExtenders.reduce(
+          (acc, extender) => ({
+            ...acc,
+            ...(typeof extender === 'function'
+              ? extender({ req, connection }, this.context)
+              : extender),
+          }),
+          {},
+        ),
+        req,
+        app: req.app,
+        user: req.user,
+      });
+    }
 
-  getGraphQLMiddleware(schema) {
-    return {
-      id: 'graphql',
-      path: '/graphql',
-      factory: graphqlExpress,
-      params: req => ({
-        schema,
-        context: {
-          ...this.gqlContext,
-          ...this.contextExtenders.reduce(
-            (acc, extender) => ({
-              ...acc,
-              ...(typeof extender === 'function' ? extender(req, this.gqlContext) : extender),
-            }),
-            {},
-          ),
-          req,
-          app: req.app,
-          user: req.user,
-          loaders: this.loaders.build(),
-        },
-        formatError: err => {
-          if (err.originalError && err.originalError.code === 'VALIDATION_ERROR') {
-            Object.assign(err, {
-              errors: err.originalError.errors,
-            });
+    return context;
+  };
+
+  applyResolversMiddlewares(resolvers) {
+    if (!this.resolverMiddlewares.length) {
+      return resolvers;
+    }
+
+    return Object.keys(resolvers).reduce(
+      (resolversAcc, type) => ({
+        ...resolversAcc,
+        [type]: Object.keys(resolvers[type]).reduce((typeAcc, field) => {
+          let resolver = resolvers[type][field];
+          const branch = `${type}.${field}`;
+          const middlewares = this.resolverMiddlewares.filter(({ matcher }) =>
+            matcher.test(branch),
+          );
+
+          if (middlewares.length) {
+            resolver = [...middlewares]
+              .reverse()
+              .reduce((acc, { middleware }) => (...args) => middleware(...args, acc), resolver);
           }
 
-          return err;
-        },
-        tracing: true,
-        cacheControl: true,
-        ...this.getConfig('getServerOptions', () => ({}))(req),
+          return {
+            ...typeAcc,
+            [field]: resolver,
+          };
+        }, {}),
       }),
-    };
+      {},
+    );
   }
 
-  getGraphiQLMiddleware() {
+  applyMiddlewares(server) {
+    this.app.middlewares.insertBefore(
+      this.getConfig('middlewarePivot'),
+      this.getApolloServerMiddlewares(server),
+      this.getVoyagerMiddleware(),
+    );
+  }
+
+  formatError = err => {
+    if (err.originalError && err.originalError.code === 'VALIDATION_ERROR') {
+      Object.assign(err, {
+        errors: err.originalError.errors,
+      });
+    }
+
+    return err;
+  };
+
+  // eslint-disable-next-line class-methods-use-this
+  getApolloServerMiddlewares(server) {
     return {
-      id: 'graphiql',
-      path: '/graphiql',
-      factory: graphiqlExpress,
-      params: this.getConfig('graphiql.params'),
-      enabled: this.getConfig('graphiql.enabled'),
+      id: 'apolloServer',
+      apply: ({ app }) => {
+        server.applyMiddleware({
+          app,
+          cors: false,
+          bodyParserConfig: false,
+          onHealthCheck: req => this.asyncEmit('healthCheck', req),
+        });
+      },
     };
   }
 
@@ -515,16 +393,6 @@ class Gql extends Module {
       factory: ({ endpointURL }) => voyagerMiddleware({ endpointUrl: endpointURL }),
       params: this.getConfig('voyager.params'),
       enabled: this.getConfig('voyager.enabled'),
-    };
-  }
-
-  getPlaygroundMiddleware() {
-    return {
-      id: 'playground',
-      path: '/playground',
-      factory: ({ endpointURL }) => playgroundMiddleware({ endpoint: endpointURL }),
-      params: this.getConfig('playground.params'),
-      enabled: this.getConfig('playground.enabled'),
     };
   }
 }

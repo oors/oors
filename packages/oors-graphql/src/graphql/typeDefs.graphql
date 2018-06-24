@@ -12,6 +12,8 @@ scalar Date
 
 scalar JSON
 
+scalar Upload
+
 enum MutationType {
   CREATED
   UPDATED
