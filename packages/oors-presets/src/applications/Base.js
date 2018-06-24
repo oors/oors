@@ -35,9 +35,7 @@ class BaseApplication extends Application {
   async listen(port) {
     const startTime = Date.now();
     const finalPort = port || this.config.get('port');
-
     const result = await Application.prototype.listen.call(this, finalPort);
-
     const message = `Server started on port ${finalPort} in ${Date.now() - startTime}ms!`;
 
     if (this.isDev) {

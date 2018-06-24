@@ -63,7 +63,7 @@ config.add({
         expiresIn: '1d',
       },
       mockUserMiddlewarePivot: {
-        before: 'graphql',
+        before: 'apolloServer',
       },
       passportMiddlewarePivot: 'cookieParser',
       mockUserConfig: {
@@ -89,15 +89,7 @@ config.add({
     'oors.fileStorage': {
       uploadDir: config.ref(() => path.resolve(config.get('rootDir'), './uploads')),
     },
-    'oors.graphQL': {
-      graphiql: {
-        params: {
-          subscriptionsEndpoint: config.ref(
-            () => `ws://${config.get('hostname')}:${config.get('port')}/subscriptions`,
-          ),
-        },
-      },
-    },
+    'oors.graphQL': {},
     'oors.router': {
       middlewarePivot: {
         after: 'isMethod',
