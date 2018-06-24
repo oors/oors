@@ -320,6 +320,10 @@ class Gql extends Module {
         req,
         user: req.user,
       });
+    } else {
+      Object.assign(context, {
+        connection,
+      });
     }
 
     return context;
