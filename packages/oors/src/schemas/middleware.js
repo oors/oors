@@ -11,6 +11,9 @@ export default {
     factory: {
       instanceof: 'Function',
     },
+    apply: {
+      instanceof: 'Function',
+    },
     params: {
       default: {},
     },
@@ -19,5 +22,5 @@ export default {
       default: true,
     },
   },
-  required: ['id', 'factory'],
+  required: ['id'],
 };

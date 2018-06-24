@@ -24,18 +24,24 @@ class Application extends ExpressApplication {
 
   async applyMiddlewares() {
     const middlewares = await Promise.all(
-      this.middlewares.reject({ enabled: false }).map(async ({ factory, params, path }) => {
-        const args = Array.isArray(params) ? params : [params];
-        const middleware = await Promise.resolve(factory(...args));
-        return {
-          path,
-          middleware,
-        };
-      }),
+      this.middlewares
+        .reject({ enabled: false })
+        .map(async ({ factory, params = [], path, apply }) => {
+          const args = Array.isArray(params) ? params : [params];
+          const middleware = factory ? await Promise.resolve(factory(...args)) : false;
+
+          return {
+            path,
+            middleware,
+            apply,
+          };
+        }),
     );
 
-    middlewares.forEach(({ middleware, path }) => {
-      if (path) {
+    middlewares.forEach(({ middleware, path, apply }) => {
+      if (apply) {
+        apply({ app: this, path, middleware });
+      } else if (path) {
         this.use(path, middleware);
       } else {
         this.use(middleware);
