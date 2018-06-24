@@ -20,8 +20,6 @@ import {
 import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
 import { importSchema } from 'graphql-import';
 import { Binding } from 'graphql-binding';
-import Ajv from 'ajv';
-import ajvKeywords from 'ajv-keywords';
 import mainResolvers from './graphql/resolvers';
 import modulesResolvers from './graphql/modulesResolvers';
 import LoadersMap from './libs/LoadersMap';
@@ -86,21 +84,6 @@ class Gql extends Module {
     error: [],
     response: [],
   };
-
-  initialize() {
-    const ajv = new Ajv({
-      allErrors: true,
-      verbose: true,
-      async: 'es7',
-      useDefaults: true,
-    });
-
-    ajvKeywords(ajv, 'instanceof');
-
-    Object.assign(this.gqlContext, {
-      ajv,
-    });
-  }
 
   async setup() {
     this.pubsub = this.getConfig('pubsub', new PubSub());
