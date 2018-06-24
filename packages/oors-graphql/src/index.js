@@ -135,6 +135,7 @@ class Gql extends Module {
       'binding',
       'setupListen',
       'pubsub',
+      'formatters',
     ]);
 
     this.export({
@@ -278,6 +279,13 @@ class Gql extends Module {
     const config = {
       context: this.buildContext,
       formatError: this.formatError,
+      formatParams: params =>
+        this.formatters.params.reduce((paramsAcc, formatter) => formatter(paramsAcc), params),
+      formatResponse: response =>
+        this.formatters.response.reduce(
+          (responseAcc, formatter) => formatter(responseAcc),
+          response,
+        ),
       schema: this.schema,
       debug: true,
       tracing: true,
@@ -375,7 +383,7 @@ class Gql extends Module {
       });
     }
 
-    return err;
+    return this.formatters.error.reduce((errAcc, formatter) => formatter(errAcc), err);
   };
 
   // eslint-disable-next-line class-methods-use-this
