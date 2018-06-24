@@ -301,6 +301,7 @@ class Gql extends Module {
 
   buildContext = async ({ req, connection }) => {
     const context = {
+      app: this.app,
       ...this.gqlContext,
       loaders: this.loaders.build(),
     };
@@ -317,7 +318,6 @@ class Gql extends Module {
           {},
         ),
         req,
-        app: req.app,
         user: req.user,
       });
     }
