@@ -86,6 +86,16 @@ class Gql extends Module {
   };
 
   async setup() {
+    this.formatters.error = err => {
+      if (err.originalError && err.originalError.code === 'VALIDATION_ERROR') {
+        Object.assign(err, {
+          errors: err.originalError.errors,
+        });
+      }
+
+      return err;
+    };
+
     this.pubsub = this.getConfig('pubsub', new PubSub());
 
     Object.assign(this.gqlContext, {
@@ -278,7 +288,8 @@ class Gql extends Module {
   buildServer = (options = {}) => {
     const config = {
       context: this.buildContext,
-      formatError: this.formatError,
+      formatError: err =>
+        this.formatters.error.reduce((errAcc, formatter) => formatter(errAcc), err),
       formatParams: params =>
         this.formatters.params.reduce((paramsAcc, formatter) => formatter(paramsAcc), params),
       formatResponse: response =>
@@ -375,16 +386,6 @@ class Gql extends Module {
       this.getVoyagerMiddleware(),
     );
   }
-
-  formatError = err => {
-    if (err.originalError && err.originalError.code === 'VALIDATION_ERROR') {
-      Object.assign(err, {
-        errors: err.originalError.errors,
-      });
-    }
-
-    return this.formatters.error.reduce((errAcc, formatter) => formatter(errAcc), err);
-  };
 
   // eslint-disable-next-line class-methods-use-this
   getApolloServerMiddlewares(server) {
