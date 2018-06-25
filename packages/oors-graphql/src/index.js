@@ -72,36 +72,35 @@ class Gql extends Module {
   };
 
   name = 'oors.graphQL';
-  typeDefs = [];
-  resolvers = mainResolvers;
-  resolverMiddlewares = [];
-  gqlContext = {};
-  pubsub = undefined;
-  loaders = new LoadersMap();
-  contextExtenders = [];
-  formatters = {
-    params: [],
-    error: [],
-    response: [],
-  };
+
+  initialize() {
+    this.typeDefs = [];
+    this.resolvers = mainResolvers;
+    this.resolverMiddlewares = [];
+    this.pubsub = this.getConfig('pubsub', new PubSub());
+    this.gqlContext = {
+      pubsub: this.pubsub,
+    };
+    this.loaders = new LoadersMap();
+    this.contextExtenders = [];
+    this.formatters = {
+      params: [],
+      error: [
+        err => {
+          if (err.originalError && err.originalError.code === 'VALIDATION_ERROR') {
+            Object.assign(err, {
+              errors: err.originalError.errors,
+            });
+          }
+
+          return err;
+        },
+      ],
+      response: [],
+    };
+  }
 
   async setup() {
-    this.formatters.error = err => {
-      if (err.originalError && err.originalError.code === 'VALIDATION_ERROR') {
-        Object.assign(err, {
-          errors: err.originalError.errors,
-        });
-      }
-
-      return err;
-    };
-
-    this.pubsub = this.getConfig('pubsub', new PubSub());
-
-    Object.assign(this.gqlContext, {
-      pubsub: this.pubsub,
-    });
-
     await this.runHook(
       'load',
       this.collectFromModule,
