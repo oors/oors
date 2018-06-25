@@ -287,15 +287,9 @@ class Gql extends Module {
   buildServer = (options = {}) => {
     const config = {
       context: this.buildContext,
-      formatError: err =>
-        this.formatters.error.reduce((errAcc, formatter) => formatter(errAcc), err),
-      formatParams: params =>
-        this.formatters.params.reduce((paramsAcc, formatter) => formatter(paramsAcc), params),
-      formatResponse: response =>
-        this.formatters.response.reduce(
-          (responseAcc, formatter) => formatter(responseAcc),
-          response,
-        ),
+      formatError: this.format('error'),
+      formatParams: this.format('params'),
+      formatResponse: this.format('response'),
       schema: this.schema,
       debug: true,
       tracing: true,
@@ -410,6 +404,11 @@ class Gql extends Module {
       enabled: this.getConfig('voyager.enabled'),
     };
   }
+
+  format = type => {
+    invariant(Array.isArray(this.formatters[type]), `Unknown formatter type - ${type}!`);
+    return arg => this.formatters[type].reduce((acc, formatter) => formatter(acc), arg);
+  };
 }
 
 export { Gql as default, decorators };
