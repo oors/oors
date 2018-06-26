@@ -1,50 +1,62 @@
 /* eslint-disable no-case-declarations */
+import invariant from 'invariant';
 import identity from 'lodash/identity';
 import update from 'lodash/update';
 import omit from 'lodash/omit';
 import withSchema from 'oors-graphql/build/decorators/withSchema';
 import QueryBuilder from './QueryBuilder';
 
-const validateFindQuery = withSchema({
-  type: 'object',
-  properties: {
-    skip: {
-      type: 'integer',
-      minimum: 0,
-      default: 0,
-    },
-    after: {
-      type: 'string',
-    },
-    before: {
-      type: 'string',
-    },
-    first: {
-      type: 'integer',
-      minimum: 1,
-      maximum: 20,
-      default: 10,
-    },
-    last: {
-      type: 'integer',
-      minimum: 1,
-      maximum: 20,
-    },
-    where: {
-      type: 'object',
-      default: {},
-    },
+const createPaginationSchema = ({ maxPerPage, defaultPerPage } = {}) => ({
+  skip: {
+    type: 'integer',
+    minimum: 0,
+    default: 0,
+  },
+  after: {
+    type: 'string',
+  },
+  before: {
+    type: 'string',
+  },
+  first: {
+    type: 'integer',
+    minimum: 1,
+    maximum: maxPerPage,
+    default: defaultPerPage,
+  },
+  last: {
+    type: 'integer',
+    minimum: 1,
+    maximum: maxPerPage,
+    default: defaultPerPage,
   },
 });
 
 export default config => {
-  const { queryBuilder, getLoaders, canDelete, canUpdate, wrapQuery } = {
+  const { queryBuilder, getLoaders, canDelete, canUpdate, wrapQuery, pagination } = {
     queryBuilder: new QueryBuilder(),
     wrapQuery: () => identity,
     canDelete: () => true,
     canUpdate: () => true,
     ...config,
+    pagination: {
+      maxPerPage: 20,
+      defaultPerPage: 10,
+      ...(config.pagination || {}),
+    },
   };
+
+  invariant(
+    typeof config.getRepository === 'string' || typeof config.getRepository === 'function',
+    `Invalid required getRepository parameter (needs to be a repository name or a function that 
+      will receive a resolver context as argument)`,
+  );
+
+  invariant(
+    typeof getLoaders === 'function',
+    `Invalid required getLoaders parameter (needs to be a function that will receive a resolver 
+      context as argument and returns DataLoader instances)`,
+  );
 
   const findManyQuery = (...args) =>
     update(queryBuilder.toQuery(...args), 'query', wrapQuery(...args));
@@ -69,7 +81,16 @@ export default config => {
       },
       required: ['where'],
     })((_, args, ctx) => getLoaders(ctx).findOne.load(findOneQuery(args, ctx))),
-    findMany: validateFindQuery(async (_, args, ctx) => {
+    findMany: withSchema({
+      type: 'object',
+      properties: {
+        ...createPaginationSchema(pagination),
+        where: {
+          type: 'object',
+          default: {},
+        },
+      },
+    })(async (_, args, ctx) => {
       const pivot = args.before || args.after;
 
       if (pivot) {

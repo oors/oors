@@ -1,3 +1,4 @@
+// @TODO: deprecate this and use createCRUDResolvers instead
 import { ObjectID as objectId } from 'mongodb';
 import omit from 'lodash/omit';
 import { fromMongoCursor, fromMongo } from './helpers';
