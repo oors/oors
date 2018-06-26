@@ -41,3 +41,44 @@ export const parseMongoQuery = params => {
 
   return query;
 };
+
+export const buildSort = orderBy =>
+  Object.keys(orderBy).reduce(
+    (acc, field) => ({
+      ...acc,
+      [field]:
+        orderBy[field] === 1 ||
+        (typeof orderBy[field] === 'string' && orderBy[field].toLowerCase() === 'asc')
+          ? 1
+          : -1,
+    }),
+    {},
+  );
+
+export const queryToPipeline = ({ query, orderBy, skip, limit }, pipeline = []) => {
+  if (query) {
+    pipeline.push({
+      $match: query,
+    });
+  }
+
+  if (orderBy) {
+    pipeline.push({
+      $sort: buildSort(orderBy),
+    });
+  }
+
+  if (skip) {
+    pipeline.push({
+      $skip: skip,
+    });
+  }
+
+  if (limit) {
+    pipeline.push({
+      $limit: limit,
+    });
+  }
+
+  return pipeline;
+};
