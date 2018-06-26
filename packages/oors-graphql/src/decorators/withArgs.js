@@ -26,7 +26,7 @@ export default transformer => resolver => async (_, args, ctx, info) => {
   const keys = [];
   const promises = [];
 
-  let finalArgs = await transformer(args, ctx, {
+  let finalArgs = await transformer(_, args, ctx, {
     resolve: promise => {
       const key = Symbol(keys.index);
       keys.push(key);
