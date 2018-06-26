@@ -1,9 +1,6 @@
-export default (log = (...args) => console.log(...args)) => message => resolver => async (
-  _,
-  args,
-  ctx,
-  info,
-) => {
+export default (
+  log = (_, args, ctx, info, data) => console.log(data),
+) => message => resolver => async (_, args, ctx, info) => {
   let data;
   let result;
   let error;
