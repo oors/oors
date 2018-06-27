@@ -73,13 +73,15 @@ class LoggerModule extends Module {
     this.export({
       logger,
       log: (...args) => logger.log(...args),
-      ...['error', 'warn', 'info'].reduce(
-        (acc, level) => ({
-          ...acc,
-          [level]: (...args) => logger[level](...args),
-        }),
-        {},
-      ),
+      ...Object.keys(logger.levels)
+        .filter(level => logger.levels[level] <= logger.levels[logger.level])
+        .reduce(
+          (acc, level) => ({
+            ...acc,
+            [level]: (...args) => logger[level](...args),
+          }),
+          {},
+        ),
     });
 
     if (printModules) {
