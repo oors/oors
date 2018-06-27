@@ -3,7 +3,7 @@ import path from 'path';
 import Table from 'cli-table';
 import { inspect } from 'util';
 import { Module } from 'oors';
-import { Logger, transports } from 'winston';
+import * as winston from 'winston';
 
 class LoggerModule extends Module {
   static schema = {
@@ -30,41 +30,53 @@ class LoggerModule extends Module {
     },
     required: ['logsDir'],
   };
+
   name = 'oors.logger';
 
-  initialize({ printModules, printDependencyGraph, printMiddlewares, logger, logsDir }) {
-    this.logger =
-      logger ||
-      new Logger({
+  initialize({ printModules, printDependencyGraph, printMiddlewares, logsDir }) {
+    const logger = this.getConfig(
+      'logger',
+      winston.createLogger({
+        level: 'info',
         transports: [
-          new transports.Console({
-            colorize: true,
-            timestamp: true,
-            prettyPrint: true,
-            humanReadableUnhandledException: true,
+          new winston.transports.Console({
+            format: winston.format.combine(
+              winston.format.timestamp(),
+              winston.format.colorize(),
+              winston.format.simple(),
+            ),
           }),
-          new transports.File({
-            name: 'errors',
-            filename: path.join(logsDir, 'logs.log'),
+          new winston.transports.File({
             level: 'error',
-            handleExceptions: true,
-            humanReadableUnhandledException: true,
-            timestamp: true,
+            filename: path.join(logsDir, 'errors.log'),
             maxsize: 5000000,
+            maxFiles: 10,
             tailable: true,
+
+            format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
           }),
         ],
-      });
+        exceptionHandlers: [
+          new winston.transports.File({
+            filename: path.join(logsDir, 'exceptions.log'),
+            maxsize: 5000000,
+            maxFiles: 10,
+            tailable: true,
+            format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
+          }),
+        ],
+      }),
+    );
 
-    process.on('unhandledRejection', reason => this.logger.error(reason));
+    process.on('unhandledRejection', reason => logger.error(reason));
 
     this.export({
-      logger: this.logger,
-      log: (...args) => this.logger.log(...args),
-      ...['error', 'warn', 'info', 'verbose', 'debug', 'silly'].reduce(
+      logger,
+      log: (...args) => logger.log(...args),
+      ...['error', 'warn', 'info'].reduce(
         (acc, level) => ({
           ...acc,
-          [level]: (...args) => this.logger[level](...args),
+          [level]: (...args) => logger[level](...args),
         }),
         {},
       ),
@@ -81,6 +93,10 @@ class LoggerModule extends Module {
     if (printMiddlewares) {
       this.printMiddlewares();
     }
+  }
+
+  get logger() {
+    return this.get('logger');
   }
 
   printModules() {
