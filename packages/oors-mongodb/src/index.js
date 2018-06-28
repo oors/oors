@@ -13,6 +13,7 @@ import * as helpers from './libs/helpers';
 import idValidator from './libs/idValidator';
 import * as decorators from './decorators';
 import MigrationRepository from './repositories/Migration';
+import Seeder from './libs/Seeder';
 
 class MongoDB extends Module {
   static schema = {
@@ -184,6 +185,13 @@ class MongoDB extends Module {
 
     this.addRepository('Migration', new MigrationRepository());
 
+    const seeder = new Seeder();
+
+    await this.runHook('configureSeeder', () => {}, {
+      seeder,
+      getRepository: this.getRepository,
+    });
+
     this.exportProperties([
       'createConnection',
       'closeConnection',
@@ -197,6 +205,7 @@ class MongoDB extends Module {
       'getRepository',
       'migrate',
       'ajv',
+      'seeder',
     ]);
   }
 
