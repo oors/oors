@@ -85,17 +85,7 @@ class Gql extends Module {
     this.contextExtenders = [];
     this.formatters = {
       params: [],
-      error: [
-        err => {
-          if (err.originalError && err.originalError.code === 'VALIDATION_ERROR') {
-            Object.assign(err, {
-              errors: err.originalError.errors,
-            });
-          }
-
-          return err;
-        },
-      ],
+      error: [],
       response: [],
     };
   }
