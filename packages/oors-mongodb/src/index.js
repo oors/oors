@@ -5,11 +5,14 @@ import Ajv from 'ajv';
 import ajvKeywords from 'ajv-keywords';
 import invariant from 'invariant';
 import { MongoClient } from 'mongodb';
+import path from 'path';
+import glob from 'glob';
 import { Module } from 'oors';
 import Repository from './Repository';
 import * as helpers from './libs/helpers';
 import idValidator from './libs/idValidator';
 import * as decorators from './decorators';
+import MigrationRepository from './repositories/Migration';
 
 class MongoDB extends Module {
   static schema = {
@@ -39,6 +42,9 @@ class MongoDB extends Module {
         minItems: 1,
       },
       defaultConnection: {
+        type: 'string',
+      },
+      migrationsDir: {
         type: 'string',
       },
     },
@@ -163,20 +169,7 @@ class MongoDB extends Module {
   }
 
   async setup({ connections }) {
-    const {
-      createConnection,
-      getConnection,
-      createStore,
-      createRepository,
-      bindRepository,
-      bindRepositories,
-      closeConnection,
-      addRepository,
-      getRepository,
-      getConnectionDb,
-    } = this;
-
-    await Promise.all(connections.map(createConnection));
+    await Promise.all(connections.map(this.createConnection));
 
     this.ajv = new Ajv({
       allErrors: true,
@@ -189,20 +182,77 @@ class MongoDB extends Module {
 
     this.ajv.addKeyword('isId', idValidator);
 
-    this.export({
-      createStore,
-      createRepository,
-      createConnection,
-      getConnection,
-      getConnectionDb,
-      bindRepository,
-      bindRepositories,
-      addRepository,
-      getRepository,
-      ajv: this.ajv,
-      closeConnection,
-    });
+    this.addRepository('Migration', new MigrationRepository());
+
+    this.exportProperties([
+      'createConnection',
+      'closeConnection',
+      'getConnection',
+      'getConnectionDb',
+      'createStore',
+      'createRepository',
+      'bindRepository',
+      'bindRepositories',
+      'addRepository',
+      'getRepository',
+      'migrate',
+      'ajv',
+    ]);
   }
+
+  migrate = async () => {
+    const migrationsDir = this.getConfig('migrationsDir');
+    if (!migrationsDir) {
+      throw new Error(
+        'Missing migration directory! Please provide a "migrationDir" configuration directive where your migration files are located.',
+      );
+    }
+
+    this.emit('migration:before');
+
+    const db = this.getConnectionDb();
+
+    const migrationFiles = await new Promise((resolve, reject) => {
+      glob(path.join(migrationsDir, '*.js'), (err, files) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(files);
+        }
+      });
+    });
+
+    if (!migrationFiles.length) {
+      throw new Error(
+        `No migration files have been found in the migrations directory ("${migrationsDir}")!`,
+      );
+    }
+
+    const lastDbMigration = await this.getRepository('Migration').findOne({
+      options: {
+        sort: [['timestamp', '-1']],
+      },
+    });
+
+    const lastDbMigrationTimestamp = lastDbMigration ? lastDbMigration.timestamp : 0;
+
+    return migrationFiles
+      .filter(file => helpers.getTimestampFromMigrationFile(file) > lastDbMigrationTimestamp)
+      .reduce((promise, file) => {
+        const timestamp = helpers.getTimestampFromMigrationFile(file);
+        const Migration = require(file).default; // eslint-disable-line import/no-dynamic-require, global-require
+        const migration = new Migration(this.app, db);
+
+        return promise.then(() =>
+          migration.up().then(() =>
+            this.getRepository('Migration').createOne({
+              timestamp,
+              name: migration.name,
+            }),
+          ),
+        );
+      }, Promise.resolve());
+  };
 }
 
 export { MongoDB as default, Repository, helpers, decorators };

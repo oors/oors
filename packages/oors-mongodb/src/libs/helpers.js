@@ -82,3 +82,8 @@ export const queryToPipeline = ({ query, orderBy, skip, limit }, pipeline = []) 
 
   return pipeline;
 };
+
+export const getTimestampFromMigrationFile = file => {
+  const fileName = file.substr(file.lastIndexOf('/') + 1);
+  return fileName.substr(0, fileName.indexOf('_'));
+};
