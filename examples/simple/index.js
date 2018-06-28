@@ -1,5 +1,6 @@
 import Application from '../../packages/oors-presets/src/applications/Standard';
 import Module from '../../packages/oors/src/libs/Module';
+import withSchema from '../../packages/oors-graphql/src/decorators/withSchema';
 
 class SimpleModule extends Module {
   hooks = {
@@ -7,6 +8,10 @@ class SimpleModule extends Module {
       addTypeDefs(`
         extend type Query {
           sayHi(name: String!): String!
+        }
+
+        extend type Mutation {
+          incrementCounter(value: Int!): Int!
         }
 
         type Subscription {
@@ -17,6 +22,7 @@ class SimpleModule extends Module {
   };
 
   async setup() {
+    let counter = 0;
     const { addResolvers, pubsub } = await this.dependency('oors.graphQL');
 
     addResolvers({
@@ -28,9 +34,22 @@ class SimpleModule extends Module {
           subscribe: () => pubsub.asyncIterator('tick'),
         },
       },
+      Mutation: {
+        incrementCounter: withSchema({
+          type: 'object',
+          properties: {
+            value: {
+              type: 'integer',
+              minimum: 0,
+            },
+          },
+        })((_, { value }) => {
+          counter += value;
+          return counter;
+        }),
+      },
     });
 
-    let counter = 0;
     setInterval(() => {
       pubsub.publish('tick', {
         tick: counter,
