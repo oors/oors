@@ -204,7 +204,8 @@ class MongoDB extends Module {
     const migrationsDir = this.getConfig('migrationsDir');
     if (!migrationsDir) {
       throw new Error(
-        'Missing migration directory! Please provide a "migrationDir" configuration directive where your migration files are located.',
+        `Missing migrations directory! Please provide a "migrationsDir" configuration 
+        directive where your migration files are located.`,
       );
     }
 
