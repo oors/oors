@@ -16,6 +16,11 @@ class Repository extends Store {
 
   validate = () => true;
 
+  // eslint-disable-next-line class-methods-use-this
+  getRepository() {
+    throw new Error('Not available! You need to bind the repository first.');
+  }
+
   async parse(data) {
     if (!this.validate(data)) {
       throw new ValidationError(this.validate.errors);

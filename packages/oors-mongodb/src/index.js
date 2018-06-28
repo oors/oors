@@ -97,6 +97,7 @@ class MongoDB extends Module {
       collection: this.getConnectionDb(connectionName).collection(repository.collectionName),
       ajv: this.ajv,
       validate: this.ajv.compile(repository.schema),
+      getRepository: this.getRepository,
     });
 
     return repository;
