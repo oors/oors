@@ -186,11 +186,21 @@ class MongoDB extends Module {
     this.addRepository('Migration', new MigrationRepository());
 
     const seeder = new Seeder();
+    const seeds = {};
 
-    await this.runHook('configureSeeder', () => {}, {
-      seeder,
-      getRepository: this.getRepository,
-    });
+    await Promise.all([
+      this.runHook('configureSeeder', () => {}, {
+        seeder,
+        getRepository: this.getRepository,
+      }),
+      this.runHook('loadseedData', () => {}, {
+        seeds,
+      }),
+    ]);
+
+    if (Object.keys(seeds).length) {
+      await this.seed(seeds);
+    }
 
     this.exportProperties([
       'createConnection',
@@ -206,6 +216,8 @@ class MongoDB extends Module {
       'migrate',
       'ajv',
       'seeder',
+      'seed',
+      'seeds',
     ]);
   }
 
@@ -263,6 +275,8 @@ class MongoDB extends Module {
         );
       }, Promise.resolve());
   };
+
+  seed = data => this.get('seeder').load(data);
 }
 
 export { MongoDB as default, Repository, helpers, decorators };
