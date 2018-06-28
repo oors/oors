@@ -1,4 +1,4 @@
-import ValidationError from 'oors/build/errors/ValidationError';
+import { UserInputError } from 'apollo-server';
 import Ajv from 'ajv';
 import ajvKeywords from 'ajv-keywords';
 
@@ -20,7 +20,9 @@ export default schema => {
     }
 
     if (!validate(args)) {
-      throw new ValidationError(validate.errors);
+      throw new UserInputError('Failed validation!', {
+        errorMessages: validate.errors,
+      });
     }
 
     return resolver(_, args, ctx, info);
