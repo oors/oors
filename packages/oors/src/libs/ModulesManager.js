@@ -107,7 +107,7 @@ class ModulesManager extends EventEmitter {
       throw new Error(`Cyclic dependency detected - module "${from}" waits for itself to load!`);
     }
 
-    if (!this.getModuleNames().includes(to)) {
+    if (!this.hasModule(to)) {
       throw new Error(
         `Can't find module "${to}" required by "${
           from
@@ -140,6 +140,10 @@ class ModulesManager extends EventEmitter {
 
   getModule(name) {
     return this.modules[name];
+  }
+
+  hasModule(name) {
+    return this.getModuleNames().includes(name);
   }
 
   invoke(hookName, context) {
