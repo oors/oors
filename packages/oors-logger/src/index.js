@@ -9,6 +9,10 @@ class LoggerModule extends Module {
   static schema = {
     type: 'object',
     properties: {
+      level: {
+        type: 'string',
+        default: 'info',
+      },
       printModules: {
         type: 'boolean',
         default: true,
@@ -27,17 +31,28 @@ class LoggerModule extends Module {
       logsDir: {
         type: 'string',
       },
+      logGqlErrors: {
+        type: 'boolean',
+        default: true,
+      },
     },
     required: ['logsDir'],
   };
 
   name = 'oors.logger';
 
-  initialize({ printModules, printDependencyGraph, printMiddlewares, logsDir }) {
+  setup({
+    printModules,
+    printDependencyGraph,
+    printMiddlewares,
+    logsDir,
+    level: defaultLevel,
+    logGqlErrors,
+  }) {
     const logger = this.getConfig(
       'logger',
       winston.createLogger({
-        level: 'info',
+        defaultLevel,
         transports: [
           new winston.transports.Console({
             format: winston.format.combine(
@@ -82,6 +97,7 @@ class LoggerModule extends Module {
           }),
           {},
         ),
+      logError: this.logError,
     });
 
     if (printModules) {
@@ -94,6 +110,12 @@ class LoggerModule extends Module {
 
     if (printMiddlewares) {
       this.printMiddlewares();
+    }
+
+    if (logGqlErrors) {
+      this.onModule('oors.graphQL', 'error', error => {
+        this.logError(error);
+      });
     }
   }
 
@@ -134,6 +156,8 @@ class LoggerModule extends Module {
       console.log(table.toString());
     });
   }
+
+  logError = error => this.logger.error(error.message, { error });
 }
 
 export { LoggerModule as default };
