@@ -14,6 +14,8 @@ import idValidator from './libs/idValidator';
 import * as decorators from './decorators';
 import MigrationRepository from './repositories/Migration';
 import Seeder from './libs/Seeder';
+import withLogger from './decorators/withLogger';
+import withTimestamps from './decorators/withTimestamps';
 
 class MongoDB extends Module {
   static schema = {
@@ -48,6 +50,14 @@ class MongoDB extends Module {
       migrationsDir: {
         type: 'string',
       },
+      logQueries: {
+        type: 'boolean',
+        default: true,
+      },
+      addTimestamps: {
+        type: 'boolean',
+        default: true,
+      },
     },
     required: ['connections'],
   };
@@ -68,6 +78,7 @@ class MongoDB extends Module {
         fromMongo,
         fromMongoCursor,
         toMongo,
+        getRepository: this.getRepository,
       });
     },
   };
@@ -170,7 +181,7 @@ class MongoDB extends Module {
     }
   }
 
-  async setup({ connections }) {
+  async setup({ connections, logQueries, addTimestamps }) {
     await Promise.all(connections.map(this.createConnection));
 
     this.ajv = new Ajv({
@@ -202,6 +213,16 @@ class MongoDB extends Module {
     if (Object.keys(seeds).length) {
       await this.seed(seeds);
     }
+
+    this.onModule(this.name, 'repository', ({ repository }) => {
+      if (logQueries) {
+        withLogger()(repository);
+      }
+
+      if (addTimestamps) {
+        withTimestamps()(repository);
+      }
+    });
 
     this.exportProperties([
       'createConnection',
