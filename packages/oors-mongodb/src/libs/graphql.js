@@ -1,75 +1,163 @@
-// @TODO: deprecate this and use createCRUDResolvers instead
-import { ObjectID as objectId } from 'mongodb';
+/* eslint-disable no-case-declarations */
+import invariant from 'invariant';
+import identity from 'lodash/identity';
+import update from 'lodash/update';
 import omit from 'lodash/omit';
+import withSchema from 'oors-graphql/build/decorators/withSchema';
+import { ObjectID as objectId } from 'mongodb';
+import QueryBuilder from './QueryBuilder';
 import { fromMongoCursor, fromMongo } from './helpers';
 
-export const createCRUDResolvers = ({
-  getRepository,
-  getLoaders,
-  canDelete = () => true,
-  canUpdate = () => true,
-  findManyQuery = () => ({}),
-  findOneQuery = ({ id }) => ({ query: { _id: objectId(id) } }),
-  countQuery = () => ({}),
-}) => ({
-  findById: (_, { id }, ctx) => getLoaders(ctx).findById.load(id),
-  findOne: (_, args, ctx) => getLoaders(ctx).findOne.load(findOneQuery(args, ctx)),
-  findMany: (_, args, ctx) => getLoaders(ctx).findMany.load(findManyQuery(args, ctx)),
-  count: (_, args, ctx) =>
-    getRepository(ctx).count({
-      query: countQuery(args, ctx),
-    }),
-  createOne: async (_, { input }, ctx) => fromMongo(await getRepository(ctx).createOne(input)),
-  updateOne: async (_, args, ctx) => {
-    const { id, input, item: loadedItem } = args;
-    const Repository = getRepository(ctx);
-    const item = loadedItem || (await Repository.findOne(findOneQuery(args, ctx)));
-
-    if (!item) {
-      throw new Error(`Unable to find item with id: ${id}!`);
-    }
-
-    if (!canUpdate(ctx.user, item)) {
-      throw new Error('Not Allowed!');
-    }
-
-    await Repository.validate(
-      omit(
-        {
-          ...item,
-          ...input,
-        },
-        ['_id'],
-      ),
-    );
-
-    return fromMongo(
-      await Repository.updateOne({
-        query: {
-          _id: item._id,
-        },
-        update: {
-          $set: input,
-        },
-      }),
-    );
+const createPaginationSchema = ({ maxPerPage, defaultPerPage } = {}) => ({
+  skip: {
+    type: 'integer',
+    minimum: 0,
+    default: 0,
   },
-  deleteOne: async (_, args, ctx) => {
-    const { id, item: loadedItem } = args;
-    const Repository = getRepository(ctx);
-    const item = loadedItem || (await Repository.findOne(findOneQuery(args, ctx)));
-
-    if (!item) {
-      throw new Error(`Unable to find item with id: ${id}!`);
-    }
-
-    if (!canDelete(ctx.user, item)) {
-      throw new Error('Not Allowed!');
-    }
-
-    return fromMongo(await Repository.deleteOne({ query: { _id: item._id } }));
+  after: {
+    type: 'string',
+  },
+  before: {
+    type: 'string',
+  },
+  first: {
+    type: 'integer',
+    minimum: 1,
+    maximum: maxPerPage,
+    default: defaultPerPage,
+  },
+  last: {
+    type: 'integer',
+    minimum: 1,
+    maximum: maxPerPage,
   },
 });
+
+export const createCRUDResolvers = config => {
+  const { queryBuilder, getLoaders, canDelete, canUpdate, wrapQuery, pagination } = {
+    queryBuilder: new QueryBuilder(),
+    wrapQuery: () => identity,
+    canDelete: () => true,
+    canUpdate: () => true,
+    ...config,
+    pagination: {
+      maxPerPage: 20,
+      defaultPerPage: 10,
+      ...(config.pagination || {}),
+    },
+  };
+
+  invariant(
+    typeof config.getRepository === 'string' || typeof config.getRepository === 'function',
+    `Invalid required getRepository parameter (needs to be a repository name or a function that 
+      will receive a resolver context as argument)`,
+  );
+
+  invariant(
+    typeof getLoaders === 'function',
+    `Invalid required getLoaders parameter (needs to be a function that will receive a resolver 
+      context as argument and returns DataLoader instances)`,
+  );
+
+  const findManyQuery = (...args) =>
+    update(queryBuilder.toQuery(...args), 'query', wrapQuery(...args));
+  const findOneQuery = (...args) =>
+    update(queryBuilder.toQuery(...args), 'query', wrapQuery(...args));
+  const countQuery = (...args) =>
+    update(queryBuilder.toQuery(...args), 'query', wrapQuery(...args));
+  const getRepository =
+    typeof config.getRepository === 'string'
+      ? ctx => ctx.getRepository(config.getRepository)
+      : config.getRepository;
+
+  return {
+    findById: (_, { id }, ctx) => getLoaders(ctx).findById.load(id),
+    findOne: withSchema({
+      type: 'object',
+      properties: {
+        where: {
+          type: 'object',
+          default: {},
+        },
+      },
+      required: ['where'],
+    })((_, args, ctx) => getLoaders(ctx).findOne.load(findOneQuery(args, ctx))),
+    findMany: withSchema({
+      type: 'object',
+      properties: {
+        ...createPaginationSchema(pagination),
+        where: {
+          type: 'object',
+          default: {},
+        },
+      },
+    })(async (_, args, ctx) => {
+      const pivot = args.before || args.after;
+
+      if (pivot) {
+        Object.assign(args, {
+          pivot: await getLoaders(ctx).findById.load(pivot),
+        });
+      }
+
+      return getLoaders(ctx).findMany.load(findManyQuery(args, ctx));
+    }),
+    count: (_, args, ctx) => getRepository(ctx).count(countQuery(args, ctx)),
+    createOne: async (_, { input }, ctx) =>
+      ctx.fromMongo(await getRepository(ctx).createOne(input)),
+    createMany: async (_, args, ctx) =>
+      (await getRepository(ctx).createMany(args.input)).map(ctx.fromMongo),
+    updateOne: async (_, args, ctx) => {
+      const { input } = args;
+      const Repository = getRepository(ctx);
+      const item = args.item || (await Repository.findOne(findOneQuery(args, ctx)));
+
+      if (!item) {
+        throw new Error('Unable to find item!');
+      }
+
+      if (!canUpdate(ctx.user, item)) {
+        throw new Error('Not Allowed!');
+      }
+
+      await Repository.validate(
+        omit(
+          {
+            ...item,
+            ...input,
+          },
+          ['_id'],
+        ),
+      );
+
+      return ctx.fromMongo(
+        await Repository.updateOne({
+          query: {
+            _id: item._id,
+          },
+          update: {
+            $set: input,
+          },
+        }),
+      );
+    },
+    deleteOne: async (_, args, ctx) => {
+      const Repository = getRepository(ctx);
+      const item = args.item || (await Repository.findOne(findOneQuery(args, ctx)));
+
+      if (!item) {
+        throw new Error('Unable to find item!');
+      }
+
+      if (!canDelete(ctx.user, item)) {
+        throw new Error('Not Allowed!');
+      }
+
+      return ctx.fromMongo(await Repository.deleteOne({ query: { _id: item._id } }));
+    },
+  };
+  // @TODO: add updateMany, deleteMany
+};
 
 export const createLoaders = Repository => ({
   findById: {
