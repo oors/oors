@@ -22,7 +22,7 @@ export const validateCreateCommentInput = withSchema({
 });
 
 export const parseCommentInput = withArgs(
-  ({ input, id }, { user, loaders: { blog: { posts, comments } } }, { resolve }) => ({
+  (_, { input, id }, { user, loaders: { blog: { posts, comments } } }, { resolve }) => ({
     input: {
       ...input,
       [id ? 'updatedBy' : 'createdBy']: user._id,

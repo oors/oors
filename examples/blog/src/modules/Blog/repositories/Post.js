@@ -1,4 +1,4 @@
-import Repository from '../../../../../../packages/oors-mongodb/build/Repository';
+import Repository from '../../../../../../packages/oors-mongodb/build/RelationalRepository';
 
 const statuses = ['DRAFT', 'PUBLISHED'];
 
@@ -38,6 +38,7 @@ class PostRepository extends Repository {
         items: {
           isId: true,
         },
+        default: [],
       },
       categoryId: {
         isId: true,

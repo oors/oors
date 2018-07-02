@@ -9,15 +9,16 @@ import { withUserStamps } from '../../decorators';
  * - the loaders created for this repository (findById, findOne, findMany) - these were created in
  *   the bootstrap file of the module
  */
+
 const resolvers = createCRUDResolvers({
-  getRepository: ({ app }) => app.modules.get('oors.mongoDb').getRepository('blogCategory'),
+  getRepository: 'blogCategory',
   getLoaders: ({ loaders }) => loaders.blog.categories,
 });
 
 export default {
   Query: {
-    blogCategories: resolvers.findMany,
-    blogCategory: resolvers.findOne,
+    findManyBlogCategories: resolvers.findMany,
+    findOneBlogCategory: resolvers.findOne,
   },
   BlogCategory: {
     posts: (category, args, { loaders }) =>
@@ -28,8 +29,8 @@ export default {
       }),
   },
   Mutation: {
-    createBlogCategory: withUserStamps(resolvers.createOne),
-    updateBlogCategory: withUserStamps(resolvers.updateOne),
-    deleteBlogCategory: resolvers.deleteOne,
+    createOneBlogCategory: withUserStamps(resolvers.createOne),
+    updateOneBlogCategory: withUserStamps(resolvers.updateOne),
+    deleteOneBlogCategory: resolvers.deleteOne,
   },
 };

@@ -7,7 +7,7 @@ import {
 } from './decorators';
 
 const resolvers = createCRUDResolvers({
-  getRepository: ({ app }) => app.modules.get('oors.blog').CommentRepository,
+  getRepository: 'blogComment',
   getLoaders: ({ loaders }) => loaders.blog.comments,
   canUpdate: (user, item) => user._id.toString() === item.createdBy.toString(),
   canDelete: (user, item) => user._id.toString() === item.createdBy.toString(),
@@ -27,12 +27,11 @@ export default {
     author: (comment, args, { loaders }) => loaders.users.findById.load(comment.createdBy),
   },
   Mutation: {
-    createBlogComment: compose(
+    createOneBlogComment: compose(
       validateCreateCommentInput,
       parseCommentInput,
       validateCreateCommentReferences,
     )(resolvers.createOne),
-
-    updateBlogComment: compose(parseCommentInput)(resolvers.updateOne),
+    updateOneBlogComment: compose(parseCommentInput)(resolvers.updateOne),
   },
 };

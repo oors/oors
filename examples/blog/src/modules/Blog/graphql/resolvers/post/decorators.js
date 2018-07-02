@@ -4,38 +4,6 @@ import {
 } from '../../../../../../../../packages/oors-graphql/build/decorators';
 import PostRepository from '../../../repositories/Post';
 
-export const validateFindQuery = withSchema({
-  type: 'object',
-  properties: {
-    query: {
-      type: 'object',
-      properties: {
-        categoryIds: {
-          type: 'array',
-          items: {
-            isId: true,
-          },
-        },
-        searchQuery: {
-          type: 'string',
-        },
-        offset: {
-          type: 'integer',
-          minimum: 0,
-          default: 0,
-        },
-        limit: {
-          type: 'integer',
-          minimum: 1,
-          maximum: 20,
-          default: 10,
-        },
-      },
-      default: {},
-    },
-  },
-});
-
 // validating the properties for which GraphQL schema validation is insufficient
 export const validatePostInput = withSchema({
   type: 'object',
@@ -56,7 +24,7 @@ export const validatePostInput = withSchema({
 });
 
 export const parsePostInput = withArgs(
-  ({ input, id }, { user, loaders: { blog: { categories } } }, { resolve }) => ({
+  (_, { input, id }, { user, loaders: { blog: { categories } } }, { resolve }) => ({
     input: {
       ...input,
       [id ? 'updatedBy' : 'createdBy']: user._id, // user stamps

@@ -1,43 +1,10 @@
-import set from 'lodash/set';
 import { compose } from '../../../../../../../../packages/oors-graphql/build/decorators';
 import { createCRUDResolvers } from '../../../../../../../../packages/oors-mongodb/build/libs/graphql';
-import {
-  validateFindQuery,
-  validatePostInput,
-  parsePostInput,
-  validateReferences,
-} from './decorators';
+import { validatePostInput, parsePostInput, validateReferences } from './decorators';
 
 const resolvers = createCRUDResolvers({
-  getRepository: ({ app }) => app.modules.get('oors.mongoDb').getRepository('Post'),
+  getRepository: 'blogPost',
   getLoaders: ({ loaders }) => loaders.blog.posts,
-  findManyQuery: ({ query: { categoryIds, offset, limit, searchQuery } }) => {
-    const query = {
-      orderBy: {
-        createdAt: 'desc',
-      },
-    };
-
-    if (categoryIds && categoryIds.length) {
-      set(query, 'query.categoryId', {
-        $in: categoryIds,
-      });
-    }
-
-    if (offset) {
-      query.skip = parseInt(offset, 10);
-    }
-
-    if (limit) {
-      query.limit = parseInt(limit, 10);
-    }
-
-    if (searchQuery) {
-      set(query, 'query.$text.$search', searchQuery);
-    }
-
-    return query;
-  },
   // you can only delete and update your own posts posts
   canUpdate: (user, item) => user._id.toString() === item.createdBy.toString(),
   canDelete: (user, item) => user._id.toString() === item.createdBy.toString(),
@@ -45,21 +12,24 @@ const resolvers = createCRUDResolvers({
 
 export default {
   Query: {
-    blogPosts: compose(validateFindQuery)(resolvers.findMany),
-    blogPost: resolvers.findOne,
+    findManyBlogPosts: resolvers.findMany,
+    findOneBlogPost: resolvers.findOne,
   },
   BlogPost: {
     author: (post, args, { loaders }) => loaders.users.findById.load(post.createdBy),
-    updatedBy: (post, args, { loaders }) => loaders.users.findById.load(post.updatedBy),
+    updatedBy: (post, args, { loaders }) =>
+      post.updatedBy ? loaders.users.findById.load(post.updatedBy) : null,
     category: (post, args, { loaders }) => loaders.blog.categories.findById.load(post.categoryId),
     related: (post, args, { loaders }) =>
-      loaders.blog.posts.findMany.load({
-        query: {
-          _id: {
-            $in: post.relatedPostIds,
+      (post.relatedPostIds || []).length
+        ? loaders.blog.posts.findMany.load({
+          query: {
+            _id: {
+              $in: post.relatedPostIds,
+            },
           },
-        },
-      }),
+        })
+        : [],
     comments: (post, { offset = 0, limit = 10 }, { loaders }) =>
       loaders.blog.comments.findMany.load({
         query: {
@@ -81,10 +51,10 @@ export default {
       }),
   },
   Mutation: {
-    createBlogPost: compose(validatePostInput, parsePostInput, validateReferences)(
+    createOneBlogPost: compose(validatePostInput, parsePostInput, validateReferences)(
       resolvers.createOne,
     ),
-    updateBlogPost: compose(validatePostInput, parsePostInput)(resolvers.updateOne),
-    deleteBlogPost: resolvers.deleteOne,
+    updateOneBlogPost: compose(validatePostInput, parsePostInput)(resolvers.updateOne),
+    deleteOneBlogPost: resolvers.deleteOne,
   },
 };

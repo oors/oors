@@ -1,8 +1,24 @@
 extend type Query {
-  blogPosts(query: BlogPostsQuery): [BlogPost]
-  blogPost(id: ID!): BlogPost
-  blogCategories: [BlogCategory!]!
-  blogCategory(id: ID!): BlogCategory
+  findManyBlogPosts(
+    where: BlogPostFilter
+    orderBy: [SortItem!]
+    skip: Int
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): [BlogPost!]!
+  findOneBlogPost(where: BlogPostFilter): BlogPost
+  findManyBlogCategories(
+    where: BlogCategoryFilter
+    orderBy: [SortItem!]
+    skip: Int
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): [BlogCategory!]!
+  findOneBlogCategory(where: BlogCategoryFilter!): BlogCategory
 }
 
 extend type User {
@@ -10,14 +26,14 @@ extend type User {
 }
 
 extend type Mutation {
-  createBlogPost(input: CreateBlogPostInput!): BlogPost!
-  updateBlogPost(id: ID!, input: UpdateBlogPostInput!): BlogPost!
-  deleteBlogPost(id: ID!): BlogPost!
-  createBlogComment(input: CreateBlogCommentInput!): BlogComment!
-  updateBlogComment(id: ID!, input: UpdateBlogCommentInput!): BlogComment!
-  createBlogCategory(input: BlogCategoryInput!): BlogCategory!
-  updateBlogCategory(id: ID!, input: BlogCategoryInput!): BlogCategory!
-  deleteBlogCategory(id: ID!): BlogCategory!
+  createOneBlogPost(input: BlogPostInput!): BlogPost!
+  updateOneBlogPost(where: BlogPostFilter!, input: BlogPostInput!): BlogPost!
+  deleteOneBlogPost(where: BlogPostFilter!): BlogPost!
+  createOneBlogComment(input: CreateBlogCommentInput!): BlogComment!
+  updateOneBlogComment(id: ID!, input: UpdateBlogCommentInput!): BlogComment!
+  createOneBlogCategory(input: BlogCategoryInput!): BlogCategory!
+  updateOneBlogCategory(where: BlogCategoryFilter!, input: BlogCategoryInput!): BlogCategory!
+  deleteOneBlogCategory(where: BlogCategoryFilter!): BlogCategory!
 }
 
 type BlogPost {
@@ -27,56 +43,62 @@ type BlogPost {
   excerpt: String
   body: String
   status: BlogPostStatus
+  tags: [String!]!
+  createdAt: DateTime
+  updatedAt: DateTime
   author: User
   updatedBy: User
   category: BlogCategory!
-  tags: [String!]!
   related: [BlogPost!]!
   comments(offset: Int, limit: Int): [BlogComment!]!
-  createdAt: DateTime
-  updatedAt: DateTime
 }
 
 type BlogComment {
   id: ID!
-  parent: BlogComment
-  children: [BlogComment!]!
   post: BlogPost
   body: String!
-  author: User
   isHidden: Boolean
   createdAt: DateTime
   updatedAt: DateTime
+  author: User
+  parent: BlogComment
+  children: [BlogComment!]!
 }
 
 type BlogCategory {
   id: ID!
   name: String
+  createdAt: DateTime
+  updatedAt: DateTime
   posts: [BlogPost!]!
 }
 
-input BlogPostsQuery {
-  categoryIds: [ID!]
-  searchQuery: String
-  offset: Int
-  limit: Int
-  tags: [String!]
+input BlogPostFilter {
+  AND: [BlogPostFilter!]
+  OR: [BlogPostFilter!]
+  id: ID
+  id_in: [ID!]
+  id_not_in: [ID!]
+  title: String
+  title_contains: String
+  body_contains: String
+  isHidden: Boolean
 }
 
-input CreateBlogPostInput {
+input BlogCategoryFilter {
+  AND: [BlogPostFilter!]
+  OR: [BlogPostFilter!]
+  id: ID
+  id_in: [ID!]
+  id_not_in: [ID!]
+}
+
+input BlogPostInput {
   title: String!
   body: String
   tags: [String!]
   status: BlogPostStatus
   categoryId: ID!
-}
-
-input UpdateBlogPostInput {
-  title: String
-  body: String
-  tags: [String!]
-  status: BlogPostStatus
-  categoryId: ID
 }
 
 input CreateBlogCommentInput {

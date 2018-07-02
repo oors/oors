@@ -1,5 +1,4 @@
 import { createLoaders } from '../../../../../packages/oors-mongodb/build/libs/graphql';
-import withTimestamps from '../../../../../packages/oors-mongodb/build/decorators/withTimestamps';
 import { Module } from '../../../../../packages/oors';
 import PostRepository from './repositories/Post';
 import CategoryRepository from './repositories/Category';
@@ -14,9 +13,9 @@ class BlogModule extends Module {
       'oors.graphQL',
     ]);
 
-    const Post = addRepository('blogPost', withTimestamps()(new PostRepository()));
-    const Category = addRepository('blogCategory', withTimestamps()(new CategoryRepository()));
-    const Comment = addRepository('blogComment', withTimestamps()(new CommentRepository()));
+    const Post = addRepository('blogPost', new PostRepository());
+    const Category = addRepository('blogCategory', new CategoryRepository());
+    const Comment = addRepository('blogComment', new CommentRepository());
 
     addLoaders(createLoaders(Post), 'blog.posts');
     addLoaders(createLoaders(Category), 'blog.categories');

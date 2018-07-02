@@ -1,4 +1,4 @@
-import Repository from '../../../../../../packages/oors-mongodb/build/Repository';
+import Repository from '../../../../../../packages/oors-mongodb/build/RelationalRepository';
 
 class CategoryRepository extends Repository {
   static schema = {
