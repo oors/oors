@@ -55,6 +55,9 @@ config.add({
           url: 'mongodb://localhost:27017/oors',
         },
       ],
+      logQueries: config.ref('isDev'),
+      migrationsDir: config.ref(() => path.resolve(config.get('rootDir'), './migrations')),
+      addTimestamps: true,
     },
     'oors.user': {
       rootURL: config.ref('rootURL'),

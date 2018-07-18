@@ -1,7 +1,8 @@
 {
   "name": "oors-graphql",
   "version": "2.2.0",
-  "description": "oors GraphQL module that integrates apollo and helps you publish a GraphQL API in the fastest way possible.",
+  "description":
+    "oors GraphQL module that integrates apollo and helps you publish a GraphQL API in the fastest way possible.",
   "main": "build/index.js",
   "repository": {
     "type": "git",
@@ -16,16 +17,16 @@
   "dependencies": {
     "ajv": "6.5.1",
     "ajv-keywords": "3.2.0",
-    "apollo-server": "2.0.0-rc.5",
+    "apollo-server": "2.0.0-rc.10",
     "apollo-server-express": "2.0.0-rc.5",
     "apollo-upload-server": "5.0.0",
     "dataloader": "1.4.0",
     "fs-extra": "^6.0.1",
     "graphql": "^0.13.2",
-    "graphql-binding": "2.1.1",
+    "graphql-binding": "2.2.1",
     "graphql-import": "0.6.0",
     "graphql-subscriptions": "0.5.8",
-    "graphql-tools": "3.0.2",
+    "graphql-tools": "3.0.5",
     "graphql-type-json": "0.2.1",
     "graphql-voyager": "1.0.0-rc.19",
     "invariant": "2.2.4",
