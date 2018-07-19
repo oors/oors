@@ -1,7 +1,8 @@
 {
   "name": "oors-graphql",
   "version": "2.2.2",
-  "description": "GraphQL module that integrates apollo-server and helps you build a GraphQL API quickly",
+  "description":
+    "GraphQL module that integrates apollo-server and helps you build a GraphQL API quickly",
   "main": "build/index.js",
   "repository": {
     "type": "git",
@@ -16,8 +17,8 @@
   "dependencies": {
     "ajv": "6.5.1",
     "ajv-keywords": "3.2.0",
-    "apollo-server": "2.0.0-rc.10",
-    "apollo-server-express": "2.0.0-rc.5",
+    "apollo-server": "2.0.0",
+    "apollo-server-express": "2.0.0",
     "apollo-upload-server": "5.0.0",
     "dataloader": "1.4.0",
     "fs-extra": "^6.0.1",
