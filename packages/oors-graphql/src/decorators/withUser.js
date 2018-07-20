@@ -1,16 +1,18 @@
+import { AuthenticationError, ForbiddenError } from 'apollo-server';
+
 export default (
   {
     isValidUser = () => true,
     getUserFromContext = ctx => ctx.user,
     handleError = () => {
-      throw new Error('Restricted access!');
+      throw new ForbiddenError('Restricted access!');
     },
   } = {},
 ) => resolver => async (root, args, ctx, info) => {
   const user = await getUserFromContext(ctx);
 
   if (!user) {
-    throw new Error('Not authenticated!');
+    throw new AuthenticationError('Not authenticated!');
   }
 
   const isValid = await isValidUser(root, args, ctx, info);
