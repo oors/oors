@@ -1,11 +1,11 @@
 {
   "name": "oors-sentry",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "build/index.js",
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "oors": "^1.6.0",
+    "oors": "^1.7.0",
     "raven": "2.6.3"
   }
 }
