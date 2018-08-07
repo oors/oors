@@ -1,7 +1,8 @@
 {
   "name": "oors-mailer",
   "version": "1.4.6",
-  "description": "oors module providing email services: sending emails using nodemailer, saving emails on disk and much more",
+  "description":
+    "oors module providing email services: sending emails using nodemailer, saving emails on disk and much more",
   "main": "build/index.js",
   "repository": {
     "type": "git",
@@ -15,12 +16,12 @@
   "homepage": "https://github.com/viczam/oors#readme",
   "dependencies": {
     "express": "4.16.3",
-    "fs-extra": "^5.0.0",
-    "nodemailer": "4.6.4",
+    "fs-extra": "^7.0.0",
+    "nodemailer": "4.6.7",
     "oors": "^1.6.0",
-    "prop-types": "^15.6.1",
-    "react": "16.3.1",
-    "react-dom": "16.3.1",
+    "prop-types": "^15.6.2",
+    "react": "16.4.2",
+    "react-dom": "16.4.2",
     "serve-index": "1.9.1"
   }
 }

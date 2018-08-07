@@ -8,13 +8,7 @@
     "type": "git",
     "url": "https://github.com/viczam/oors"
   },
-  "keywords": [
-    "oors",
-    "octobus",
-    "express.js",
-    "node.js web framework",
-    "config"
-  ],
+  "keywords": ["oors", "octobus", "express.js", "node.js web framework", "config"],
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "MIT",
   "bugs": {
@@ -23,6 +17,6 @@
   "homepage": "https://github.com/viczam/oors/tree/master/packages/oors/readme.md",
   "dependencies": {
     "invariant": "2.2.4",
-    "lodash": "4.17.5"
+    "lodash": "4.17.10"
   }
 }

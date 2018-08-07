@@ -19,7 +19,7 @@
     "escape-string-regexp": "1.0.5",
     "glob": "7.1.2",
     "invariant": "2.2.4",
-    "lodash": "4.17.5",
+    "lodash": "4.17.10",
     "mongodb": "3.0.10",
     "mongodb-extended-json": "^1.10.0",
     "oors": "^1.6.0",

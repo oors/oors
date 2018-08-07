@@ -1,7 +1,8 @@
 {
   "name": "oors-user",
   "version": "1.4.14",
-  "description": "oors user module providing authentication, authorization, users and accounts management.",
+  "description":
+    "oors user module providing authentication, authorization, users and accounts management.",
   "main": "build/index.js",
   "repository": {
     "type": "git",
@@ -16,21 +17,21 @@
   "dependencies": {
     "bcryptjs": "2.4.3",
     "boom": "7.2.0",
-    "celebrate": "7.0.4",
+    "celebrate": "8.0.1",
     "express": "4.16.3",
     "express-jwt": "5.3.1",
     "invariant": "2.2.4",
-    "jsonwebtoken": "8.2.0",
-    "lodash": "4.17.5",
-    "moment": "2.22.0",
-    "mongodb": "3.0.5",
+    "jsonwebtoken": "8.3.0",
+    "lodash": "4.17.10",
+    "moment": "2.22.2",
+    "mongodb": "3.1.1",
     "oors": "^1.6.0",
     "oors-mongodb": "^2.6.4",
     "oors-router": "^1.4.14",
     "passport": "0.4.0",
     "passport-jwt": "^4.0.0",
     "passport-local": "1.0.0",
-    "prop-types": "^15.6.1",
-    "react": "16.3.1"
+    "prop-types": "^15.6.2",
+    "react": "16.4.2"
   }
 }
