@@ -68,3 +68,31 @@ You can find a list of the decorators oors comes bundled with
 [here](https://github.com/oors/oors/tree/master/packages/oors-graphql/src/decorators) and you can
 see some examples on how to use them in the
 [blog example](https://github.com/oors/oors/tree/master/examples/blog/src/modules/Blog/graphql).
+
+---
+
+`withSchema(argsSchema)` - validates the arguments against a specified JSON schema using
+[ajv](https://github.com/epoberezkin/ajv).
+
+`withArgs(argsTransformer)` - remaps the arguments to the result of `argsTransformer` function. The
+signature of the function is `argsTransformer(parent, args, ctx, { resolve })`. The 4th argument is
+an optional object who's single property is a `resolve` function you can use to call promises.
+
+While you can do something like this:
+
+```js
+withArgs(async (parent, args, ctx) => {
+  args.post = await ctx.findPostById(args.postId);
+  delete args.notNeeded;
+  return args;
+});
+```
+
+This could be more readable and convenient:
+
+```js
+withArgs(parent, { notNeeded, ...args }, ctx) => ({
+  ...args,
+  post: resolve(ctx.findPostById(args.postId))
+}))
+```
