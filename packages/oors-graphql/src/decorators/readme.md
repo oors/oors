@@ -1,4 +1,4 @@
-GraphQL resolver decorators are high order functions that allows you to split responsibilites and
+GraphQL resolver decorators are high order functions that allow you to split responsibilites and
 keep your resolver logic neatly organized.
 
 To see what that means, let's assume we have a mutation to add a comment to a blog post.
