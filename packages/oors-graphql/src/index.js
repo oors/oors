@@ -288,6 +288,11 @@ class Gql extends Module {
       introspection: true,
       mocks: false,
       persistedQueries: true,
+      playground: {
+        settings: {
+          'editor.cursorShape': 'line',
+        },
+      },
       ...this.getConfig('serverOptions'),
       ...options,
     };
