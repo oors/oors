@@ -1,8 +1,7 @@
 {
   "name": "oors-graphql",
-  "version": "2.4.1",
-  "description":
-    "GraphQL module that integrates apollo-server and helps you build a GraphQL API quickly",
+  "version": "2.5.0",
+  "description": "GraphQL module that integrates apollo-server and helps you build a GraphQL API quickly",
   "main": "build/index.js",
   "repository": {
     "type": "git",
@@ -32,6 +31,6 @@
     "invariant": "2.2.4",
     "isomorphic-fetch": "2.2.1",
     "lodash": "4.17.10",
-    "oors": "^1.7.0"
+    "oors": "^1.8.0"
   }
 }
