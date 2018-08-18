@@ -76,12 +76,21 @@ class Gql extends Module {
   name = 'oors.graphQL';
 
   initialize() {
+    this.ajv = new Ajv({
+      allErrors: true,
+      verbose: true,
+      async: 'es7',
+      useDefaults: true,
+    });
+    ajvKeywords(this.ajv, 'instanceof');
+
     this.typeDefs = [];
     this.resolvers = mainResolvers;
     this.resolverMiddlewares = [];
     this.pubsub = this.getConfig('pubsub', new PubSub());
     this.gqlContext = {
       pubsub: this.pubsub,
+      ajv: this.ajv,
     };
     this.loaders = new LoadersMap();
     this.contextExtenders = [];
@@ -90,14 +99,6 @@ class Gql extends Module {
       error: [],
       response: [],
     };
-    this.ajv = new Ajv({
-      allErrors: true,
-      verbose: true,
-      async: 'es7',
-      useDefaults: true,
-    });
-
-    ajvKeywords(this.ajv, 'instanceof');
   }
 
   async setup() {
