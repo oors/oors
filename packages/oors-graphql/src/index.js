@@ -20,6 +20,8 @@ import {
 import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
 import { importSchema } from 'graphql-import';
 import { Binding } from 'graphql-binding';
+import Ajv from 'ajv';
+import ajvKeywords from 'ajv-keywords';
 import mainResolvers from './graphql/resolvers';
 import modulesResolvers from './graphql/modulesResolvers';
 import LoadersMap from './libs/LoadersMap';
@@ -88,6 +90,14 @@ class Gql extends Module {
       error: [],
       response: [],
     };
+    this.ajv = new Ajv({
+      allErrors: true,
+      verbose: true,
+      async: 'es7',
+      useDefaults: true,
+    });
+
+    ajvKeywords(this.ajv, 'instanceof');
   }
 
   async setup() {
@@ -310,6 +320,7 @@ class Gql extends Module {
   buildContext = async ({ req, connection }) => {
     const context = {
       app: this.app,
+      ajv: this.ajv,
       ...this.gqlContext,
       loaders: this.loaders.build(),
     };
