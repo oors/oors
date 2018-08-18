@@ -42,7 +42,8 @@ class Resolvers {
 
     invariant(
       path.length,
-      'Invalid resolver path. You must provide a path as either a "path" option or a "type" and "field"',
+      `Invalid resolver path. You must provide a path as either a "path" option or a "type" 
+      and "field"`,
     );
 
     this.resolvers[resolverPath] = resolver;

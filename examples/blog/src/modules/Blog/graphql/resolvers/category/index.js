@@ -21,12 +21,11 @@ export default {
     findOneBlogCategory: resolvers.findOne,
   },
   BlogCategory: {
-    posts: (category, args, { loaders }) =>
-      loaders.blog.posts.findMany.load({
-        query: {
-          categoryId: category._id,
-        },
-      }),
+    posts: (category, args, { loaders }) => loaders.blog.posts.findMany.load({
+      query: {
+        categoryId: category._id,
+      },
+    }),
   },
   Mutation: {
     createOneBlogCategory: withUserStamps(resolvers.createOne),

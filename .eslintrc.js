@@ -14,6 +14,15 @@ module.exports = {
     'react/no-danger': 0,
     'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx'] }],
     'jsx-a11y/href-no-hash': 0,
+    'react/jsx-one-expression-per-line': 0,
+    'max-len': 0,
+    'prefer-destructuring': [
+      'error',
+      {
+        object: true,
+      },
+    ],
+    'no-console': 0,
   },
   settings: {
     'import/core-modules': [
@@ -22,11 +31,15 @@ module.exports = {
       'oors-config',
       'oors-file-storage',
       'oors-graphql',
+      'oors-health',
+      'oors-logger',
       'oors-mailer',
-      'oors-router',
       'oors-mongodb',
-      'oors-user',
+      'oors-presets',
+      'oors-router',
       'oors-security',
+      'oors-sentry',
+      'oors-user',
     ],
   },
 };

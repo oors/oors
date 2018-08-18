@@ -63,7 +63,9 @@ class MongoDB extends Module {
   };
 
   name = 'oors.mongoDb';
+
   connections = {};
+
   repositories = {};
 
   hooks = {
@@ -141,7 +143,10 @@ class MongoDB extends Module {
   };
 
   createConnection = async ({ name, url, options }) => {
-    this.connections[name] = await MongoClient.connect(url, options);
+    this.connections[name] = await MongoClient.connect(
+      url,
+      options,
+    );
     return this.connections[name];
   };
 

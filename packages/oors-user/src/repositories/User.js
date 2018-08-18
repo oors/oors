@@ -6,6 +6,7 @@ import schema from '../schemas/user';
 
 class UserRepository extends Repository {
   static schema = schema;
+
   static collectionName = 'userUser';
 
   findOneByUsername(username) {

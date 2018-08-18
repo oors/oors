@@ -4,6 +4,7 @@ import schema from '../schemas/file';
 
 class FileRepository extends Repository {
   static schema = schema;
+
   static collectionName = 'oorsFile';
 
   async deleteMany(params) {

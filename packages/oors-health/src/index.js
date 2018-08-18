@@ -15,6 +15,7 @@ class Health extends Module {
   };
 
   name = 'oors.health';
+
   router = router;
 
   initialize({ statusMonitorMiddlewarePivot }) {

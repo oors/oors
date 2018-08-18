@@ -153,7 +153,8 @@ class Gql extends Module {
   extendContext = extender => {
     invariant(
       typeof extender === 'function' || isPlainObject(extender),
-      'Invalid context extender! Needs to be either a function or a an object that will get assigned to the context.',
+      `Invalid context extender! Needs to be either a function or a an object that will get 
+      assigned to the context.`,
     );
     this.contextExtenders.push(extender);
     return this.contextExtenders;

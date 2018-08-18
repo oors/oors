@@ -12,6 +12,7 @@ class Security extends Module {
   };
 
   name = 'oors.security';
+
   hooks = {
     'oors.security.createPermissionsExtractor': ({ security }) => user =>
       security.getUserPermissions({

@@ -15,14 +15,12 @@ const resolvers = createCRUDResolvers({
 
 export default {
   BlogComment: {
-    parent: (comment, args, { loaders }) =>
-      comment.parentId ? loaders.blog.comments.findById.load(comment.parentId) : null,
-    children: (comment, args, { loaders }) =>
-      loaders.blog.comments.findMany.load({
-        query: {
-          parentId: comment.id,
-        },
-      }),
+    parent: (comment, args, { loaders }) => comment.parentId ? loaders.blog.comments.findById.load(comment.parentId) : null,
+    children: (comment, args, { loaders }) => loaders.blog.comments.findMany.load({
+      query: {
+        parentId: comment.id,
+      },
+    }),
     post: (comment, args, { loaders }) => loaders.blog.posts.findById.load(comment.postId),
     author: (comment, args, { loaders }) => loaders.users.findById.load(comment.createdBy),
   },

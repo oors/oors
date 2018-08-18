@@ -17,44 +17,45 @@ export default {
   },
   BlogPost: {
     author: (post, args, { loaders }) => loaders.users.findById.load(post.createdBy),
-    updatedBy: (post, args, { loaders }) =>
-      post.updatedBy ? loaders.users.findById.load(post.updatedBy) : null,
+    updatedBy: (post, args, { loaders }) => post.updatedBy ? loaders.users.findById.load(post.updatedBy) : null,
     category: (post, args, { loaders }) => loaders.blog.categories.findById.load(post.categoryId),
-    related: (post, args, { loaders }) =>
-      (post.relatedPostIds || []).length
-        ? loaders.blog.posts.findMany.load({
-          query: {
-            _id: {
-              $in: post.relatedPostIds,
-            },
-          },
-        })
-        : [],
-    comments: (post, { offset = 0, limit = 10 }, { loaders }) =>
-      loaders.blog.comments.findMany.load({
+    related: (post, args, { loaders }) => (post.relatedPostIds || []).length
+      ? loaders.blog.posts.findMany.load({
         query: {
-          postId: post._id,
+          _id: {
+            $in: post.relatedPostIds,
+          },
         },
-        skip: parseInt(offset, 10) || 0,
-        limit: Math.max(parseInt(limit, 10) || 10, 20),
-        orderBy: {
-          createdAt: 'desc',
-        },
-      }),
+      })
+      : [],
+    comments: (post, { offset = 0, limit = 10 }, { loaders }) => loaders.blog.comments.findMany.load({
+      query: {
+        postId: post._id,
+      },
+      skip: parseInt(offset, 10) || 0,
+      limit: Math.max(parseInt(limit, 10) || 10, 20),
+      orderBy: {
+        createdAt: 'desc',
+      },
+    }),
   },
   User: {
-    blogPosts: (user, args, { loaders }) =>
-      loaders.blog.posts.findMany.load({
-        query: {
-          createdBy: user._id,
-        },
-      }),
+    blogPosts: (user, args, { loaders }) => loaders.blog.posts.findMany.load({
+      query: {
+        createdBy: user._id,
+      },
+    }),
   },
   Mutation: {
-    createOneBlogPost: compose(validatePostInput, parsePostInput, validateReferences)(
-      resolvers.createOne,
-    ),
-    updateOneBlogPost: compose(validatePostInput, parsePostInput)(resolvers.updateOne),
+    createOneBlogPost: compose(
+      validatePostInput,
+      parsePostInput,
+      validateReferences,
+    )(resolvers.createOne),
+    updateOneBlogPost: compose(
+      validatePostInput,
+      parsePostInput,
+    )(resolvers.updateOne),
     deleteOneBlogPost: resolvers.deleteOne,
   },
 };

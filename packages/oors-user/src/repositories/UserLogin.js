@@ -3,6 +3,7 @@ import schema from '../schemas/userLogin';
 
 class UserLoginRepository extends Repository {
   static schema = schema;
+
   static collectionName = 'userUserLogin';
 }
 

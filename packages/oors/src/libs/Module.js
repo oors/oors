@@ -6,7 +6,8 @@ import camelCase from 'lodash/camelCase';
 
 class Module {
   constructor(config = {}) {
-    this.filePath = new Error().stack
+    const { stack } = new Error();
+    this.filePath = stack
       .toString()
       .split(/\r\n|\n/)[2]
       .match(/\((.*.js)/)[1];
