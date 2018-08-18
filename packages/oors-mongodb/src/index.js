@@ -210,7 +210,7 @@ class MongoDB extends Module {
         seeder,
         getRepository: this.getRepository,
       }),
-      this.runHook('loadseedData', () => {}, {
+      this.runHook('loadSeedData', () => {}, {
         seeds,
       }),
     ]);
@@ -229,6 +229,10 @@ class MongoDB extends Module {
       }
     });
 
+    this.export({
+      seeder,
+    });
+
     this.exportProperties([
       'createConnection',
       'closeConnection',
@@ -242,7 +246,6 @@ class MongoDB extends Module {
       'getRepository',
       'migrate',
       'ajv',
-      'seeder',
       'seed',
       'seeds',
     ]);
