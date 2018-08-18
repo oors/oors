@@ -4,9 +4,9 @@
   "npmClient": "yarn",
   "useWorkspaces": true,
   "packages": ["packages/*"],
-  "commands": {
+  "command": {
     "publish": {
-      "ignore": ["src", "*.md", "test/**"]
+      "ignoreChanges": ["src", "*.md", "test/**"]
     }
   }
 }
