@@ -4,6 +4,10 @@ export default schema => {
   let validate;
 
   return resolver => (_, args, ctx, info) => {
+    if (typeof schema === 'function') {
+      validate = ctx.ajv.compile(schema(_, args, ctx, info));
+    }
+
     if (!validate) {
       validate = ctx.ajv.compile(schema);
     }
