@@ -16,6 +16,7 @@ export default ({
     'save',
     'count',
     'query',
+    'aggregate',
   ],
   emitter,
   prefix = '',

@@ -22,6 +22,7 @@ export default (
     'save',
     'count',
     'query',
+    'aggregate',
   ].forEach(method => {
     const previous = repository[method];
     Object.assign(repository, {
