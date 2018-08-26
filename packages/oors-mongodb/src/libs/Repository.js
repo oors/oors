@@ -1,10 +1,7 @@
-/* eslint-disable no-underscore-dangle */
-import set from 'lodash/set';
-import isEmpty from 'lodash/isEmpty';
-import flatten from 'lodash/flatten';
+import invariant from 'invariant';
 import ValidationError from 'oors/build/errors/ValidationError';
 import Store from './Store';
-import { queryToPipeline } from './helpers';
+import AggregationPipeline from './AggregationPipeline';
 
 class Repository extends Store {
   static getCollectionName() {
@@ -38,6 +35,28 @@ class Repository extends Store {
     return Object.keys(this.relations).includes(name);
   }
 
+  addRelation = (name, { repository, collectionName, type, localField, foreignField }) => {
+    invariant(['one', 'many'].includes(type), 'type can only be one of: "one", "many"!');
+    invariant(
+      typeof localField === 'string',
+      '"localField" is a required string - name of the local key!',
+    );
+    invariant(
+      typeof foreignField === 'string',
+      '"foreignField" is a required string - name of the foreign key!',
+    );
+
+    this.relations[name] = {
+      repository,
+      collectionName: collectionName || this.getRepository(repository).collectionName,
+      type,
+      localField,
+      foreignField,
+    };
+
+    return this;
+  };
+
   relationToLookup(name) {
     const { repository, collectionName, localField, foreignField, as } = this.relations[name];
 
@@ -49,177 +68,18 @@ class Repository extends Store {
     };
   }
 
-  async findOneOrCreate(data) {
-    let item = await this.findOne({
-      query: data,
-    });
+  getFields = () => Object.keys(this.schema.properties);
 
-    if (!item) {
-      item = await this.createOne(data);
-    }
+  runBulkOperation = async ({ ordered = false } = {}, callback) => {
+    const bulk = this.collection[`initialize${ordered ? 'Ordered' : 'Unordered'}BulkOp`]();
+    await callback(bulk);
+    return bulk.execute();
+  };
 
-    return item;
-  }
+  aggregate = (callback, options = {}) =>
+    this.collection.aggregate(this.createPipeline(callback), options).toArray();
 
-  async count(args) {
-    const containsLookups = this.getReferencedRelations(args.query || {}).length;
-
-    if (containsLookups) {
-      const count = await this.aggregate({
-        pipeline: [
-          ...this.toPipelineArray(args),
-          {
-            $count: 'total',
-          },
-        ],
-      }).then(c => c.toArray());
-
-      return count.length ? count[0].total : 0;
-    }
-
-    return super.count(args);
-  }
-
-  async findOne(args) {
-    const containsLookups = this.getReferencedRelations(args.query || {}).length;
-    if (containsLookups) {
-      const list = await this.aggregate({
-        pipeline: this.toPipelineArray(args),
-      }).then(c => c.toArray());
-
-      return list.length ? list[0] : null;
-    }
-
-    return super.findOne(args);
-  }
-
-  findMany(args) {
-    const containsLookups = this.getReferencedRelations(args.query || {}).length;
-    if (containsLookups) {
-      return this.aggregate({
-        pipeline: this.toPipelineArray(args),
-      });
-    }
-
-    return super.findMany(args);
-  }
-
-  getReferencedRelations(query) {
-    return Object.keys(query).reduce((acc, field) => {
-      if (['$and', '$or', '$nor'].includes(field.toLowerCase())) {
-        return [
-          ...acc,
-          ...flatten(query[field].map(subQuery => this.getReferencedRelations(subQuery))),
-        ];
-      }
-
-      if (this.hasRelation(field) && !acc.includes(field)) {
-        return [...acc, field];
-      }
-
-      return acc;
-    }, []);
-  }
-
-  buildLookups(query) {
-    const pipeline = [];
-    const relations = this.getReferencedRelations(query);
-
-    relations.forEach(key => {
-      pipeline.push({
-        $lookup: this.relationToLookup(key),
-      });
-    });
-
-    return pipeline;
-  }
-
-  buildMatchers(query) {
-    return Object.keys(query).reduce((acc, field) => {
-      if (['$and', '$or', '$nor'].includes(field.toLowerCase())) {
-        return {
-          ...acc,
-          [field]: query[field].map(subQuery => this.buildMatchers(subQuery)),
-        };
-      }
-
-      if (this.hasRelation(field)) {
-        if (typeof query[field] === 'boolean' && query[field]) {
-          return acc;
-        }
-
-        return {
-          ...acc,
-          [field]: {
-            $elemMatch: query[field],
-          },
-        };
-      }
-
-      return {
-        ...acc,
-        [field]: query[field],
-      };
-    }, {});
-  }
-
-  buildProjections(query) {
-    const projections = {};
-    const relations = this.getReferencedRelations(query);
-
-    if (!relations.length) {
-      return null;
-    }
-
-    // project looked-up type "one" relations
-    relations.forEach(relationName => {
-      if (this.relations[relationName].type === 'one') {
-        set(projections, `${this.relationToLookup(relationName).as}.$arrayElemAt`, [
-          `$${this.relationToLookup(relationName).as}`,
-          0,
-        ]);
-      } else {
-        set(
-          projections,
-          `${this.relationToLookup(relationName).as}`,
-          `$${this.relationToLookup(relationName).as}`,
-        );
-      }
-    });
-
-    // project its own fields
-    Object.keys(this.schema.properties).forEach(propr => {
-      set(projections, propr, `$${propr}`);
-    });
-
-    return projections;
-  }
-
-  toPipelineArray({ query = {}, ...restArgs }) {
-    const pipeline = [];
-
-    pipeline.push(...this.buildLookups(query));
-
-    const match = this.buildMatchers(query);
-
-    if (!isEmpty(match)) {
-      pipeline.push({
-        $match: match,
-      });
-    }
-
-    const projections = this.buildProjections(query);
-
-    if (projections) {
-      pipeline.push({
-        $project: projections,
-      });
-    }
-
-    pipeline.push(...queryToPipeline(restArgs)); // orderBy, skip, limit
-
-    return pipeline;
-  }
+  createPipeline = callback => callback(new AggregationPipeline(this)).toArray();
 }
 
 export default Repository;

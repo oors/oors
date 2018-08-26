@@ -94,6 +94,14 @@ class Store {
     return options.cursor ? cursor : cursor.toArray();
   }
 
+  async findOneOrCreate(data) {
+    return (
+      (await this.findOne({
+        query: data,
+      })) || this.createOne(data)
+    );
+  }
+
   async createOne(data) {
     invariant(typeof data === 'object', 'Data is required!');
     const result = await this.collection.insertOne(await this.parse(data));

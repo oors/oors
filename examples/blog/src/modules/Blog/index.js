@@ -13,8 +13,33 @@ class BlogModule extends Module {
       'oors.graphQL',
     ]);
 
-    const Post = addRepository('blogPost', new PostRepository());
-    const Category = addRepository('blogCategory', new CategoryRepository());
+    const Post = addRepository(
+      'blogPost',
+      new PostRepository({
+        relations: {
+          category: {
+            repository: 'blogCategory',
+            type: 'one',
+            localField: 'categoryId',
+            foreignField: '_id',
+          },
+        },
+      }),
+    );
+
+    const Category = addRepository(
+      'blogCategory',
+      new CategoryRepository({
+        relations: {
+          posts: {
+            repository: 'blogPost',
+            type: 'many',
+            localField: '_id',
+            foreignField: 'categoryId',
+          },
+        },
+      }),
+    );
     const Comment = addRepository('blogComment', new CommentRepository());
 
     addLoaders(createLoaders(Post), 'blog.posts');
