@@ -1,14 +1,37 @@
+/* eslint-disable no-underscore-dangle */
 import set from 'lodash/set';
 import isEmpty from 'lodash/isEmpty';
 import flatten from 'lodash/flatten';
-import MongoRepository from './Repository';
-import { queryToPipeline } from './libs/helpers';
+import ValidationError from 'oors/build/errors/ValidationError';
+import Store from './Store';
+import { queryToPipeline } from './helpers';
 
-class RelationalRepository extends MongoRepository {
-  constructor({ relations = {}, ...restArgs } = {}) {
-    super(restArgs);
+class Repository extends Store {
+  static getCollectionName() {
+    return this.collectionName || this.name.substr(0, this.name.indexOf('Repository'));
+  }
 
+  constructor({ collection, schema, collectionName, relations = {} } = {}) {
+    super(collection);
+
+    this.schema = schema || this.constructor.schema;
+    this.collectionName = collectionName || this.constructor.getCollectionName();
     this.relations = relations;
+  }
+
+  validate = () => true;
+
+  // eslint-disable-next-line class-methods-use-this
+  getRepository() {
+    throw new Error('Not available! You need to bind the repository first.');
+  }
+
+  async parse(data) {
+    if (!this.validate(data)) {
+      throw new ValidationError(this.validate.errors);
+    }
+
+    return data;
   }
 
   hasRelation(name) {
@@ -54,7 +77,7 @@ class RelationalRepository extends MongoRepository {
       return count.length ? count[0].total : 0;
     }
 
-    return MongoRepository.prototype.count.call(this, args);
+    return super.count(args);
   }
 
   async findOne(args) {
@@ -67,7 +90,7 @@ class RelationalRepository extends MongoRepository {
       return list.length ? list[0] : null;
     }
 
-    return MongoRepository.prototype.findOne.call(this, args);
+    return super.findOne(args);
   }
 
   findMany(args) {
@@ -78,7 +101,7 @@ class RelationalRepository extends MongoRepository {
       });
     }
 
-    return MongoRepository.prototype.findMany.call(this, args);
+    return super.findMany(args);
   }
 
   getReferencedRelations(query) {
@@ -199,4 +222,4 @@ class RelationalRepository extends MongoRepository {
   }
 }
 
-export default RelationalRepository;
+export default Repository;

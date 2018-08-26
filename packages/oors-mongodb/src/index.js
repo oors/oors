@@ -8,7 +8,7 @@ import { MongoClient } from 'mongodb';
 import path from 'path';
 import glob from 'glob';
 import { Module } from 'oors';
-import Repository from './Repository';
+import Repository from './libs/Repository';
 import * as helpers from './libs/helpers';
 import idValidator from './libs/idValidator';
 import * as decorators from './decorators';

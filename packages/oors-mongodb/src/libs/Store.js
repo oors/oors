@@ -91,7 +91,7 @@ class Store {
       cursor = cursor.limit(limit);
     }
 
-    return cursor;
+    return options.cursor ? cursor : cursor.toArray();
   }
 
   async createOne(data) {
@@ -122,8 +122,8 @@ class Store {
   async replaceOne(query, data) {
     invariant(query, 'Query is required!');
     invariant(data, 'Data is required!');
-    const { ops } = await this.collection.replaceOne(query, await this.parse(data));
-    return ops[0];
+    const result = await this.collection.findOneAndReplace(query, await this.parse(data));
+    return result.value;
   }
 
   async save(data) {
