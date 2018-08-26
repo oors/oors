@@ -1,5 +1,7 @@
 import get from 'lodash/get';
 
+const isFunction = val => typeof val === 'function';
+
 export default (
   hooks = {
     before: {},
@@ -25,6 +27,18 @@ export default (
     'aggregate',
   ].forEach(method => {
     const previous = repository[method];
+    const hasHooksForMethod =
+      isFunction(hooks.beforeAll) ||
+      isFunction(hooks.afterAll) ||
+      ['before', 'after'].some(
+        hookName =>
+          Object.keys(hooks[hookName]).includes(method) && isFunction(hooks[hookName][method]),
+      );
+
+    if (!hasHooksForMethod) {
+      return;
+    }
+
     Object.assign(repository, {
       [method]: async (...args) => {
         if (typeof get(hooks, `before.${method}`) === 'function') {
