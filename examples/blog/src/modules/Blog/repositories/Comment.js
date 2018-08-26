@@ -1,4 +1,4 @@
-import Repository from '../../../../../../packages/oors-mongodb/build/RelationalRepository';
+import { Repository } from '../../../../../../packages/oors-mongodb';
 
 class CommentRepository extends Repository {
   static schema = {
