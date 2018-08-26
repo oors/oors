@@ -1,4 +1,4 @@
-import Repository from '../Repository';
+import Repository from '../libs/Repository';
 import schema from '../schemas/migration';
 
 class MigrationRepository extends Repository {

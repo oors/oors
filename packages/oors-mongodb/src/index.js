@@ -4,7 +4,7 @@ import has from 'lodash/has';
 import Ajv from 'ajv';
 import ajvKeywords from 'ajv-keywords';
 import invariant from 'invariant';
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectID } from 'mongodb';
 import path from 'path';
 import glob from 'glob';
 import { Module } from 'oors';
@@ -16,6 +16,7 @@ import MigrationRepository from './repositories/Migration';
 import Seeder from './libs/Seeder';
 import withLogger from './decorators/withLogger';
 import withTimestamps from './decorators/withTimestamps';
+import Migration from './libs/Migration';
 
 class MongoDB extends Module {
   static schema = {
@@ -81,6 +82,7 @@ class MongoDB extends Module {
         fromMongoCursor,
         toMongo,
         getRepository: this.getRepository,
+        toOjectId: this.toOjectId,
       });
     },
   };
@@ -248,6 +250,7 @@ class MongoDB extends Module {
       'ajv',
       'seed',
       'seeds',
+      'toOjectId',
     ]);
   }
 
@@ -292,8 +295,8 @@ class MongoDB extends Module {
       .filter(file => helpers.getTimestampFromMigrationFile(file) > lastDbMigrationTimestamp)
       .reduce((promise, file) => {
         const timestamp = helpers.getTimestampFromMigrationFile(file);
-        const Migration = require(file).default; // eslint-disable-line import/no-dynamic-require, global-require
-        const migration = new Migration(this.app, db);
+        const MigrationClass = require(file).default; // eslint-disable-line import/no-dynamic-require, global-require
+        const migration = new MigrationClass(this.app, db);
 
         return promise.then(() =>
           migration.up().then(() =>
@@ -307,6 +310,8 @@ class MongoDB extends Module {
   };
 
   seed = data => this.get('seeder').load(data);
+
+  toOjectId = value => new ObjectID(value);
 }
 
-export { MongoDB as default, Repository, helpers, decorators };
+export { MongoDB as default, Repository, helpers, decorators, Migration };
