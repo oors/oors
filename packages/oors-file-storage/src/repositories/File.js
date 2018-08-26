@@ -12,7 +12,7 @@ class FileRepository extends Repository {
     const files = await this.findMany({
       query,
       fields: ['extension'],
-    }).then(c => c.toArray());
+    });
 
     const result = await Repository.prototype.deleteMany.call(this, params);
 

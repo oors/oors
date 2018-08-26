@@ -21,19 +21,19 @@ class Security {
 
     return user
       ? UserRepository.updateOne({
-        query: {
-          userId,
-        },
-        update: {
-          $set: {
-            permissions,
+          query: {
+            userId,
           },
-        },
-      })
+          update: {
+            $set: {
+              permissions,
+            },
+          },
+        })
       : UserRepository.createOne({
-        userId,
-        permissions,
-      });
+          userId,
+          permissions,
+        });
   }
 
   async getUserPermissions({ userId, includeGroups = false }) {
@@ -56,7 +56,7 @@ class Security {
             $in: user.groupIds,
           },
         },
-      }).then(c => c.toArray());
+      });
 
       groupsPermissions = groups.reduce((acc, group) => [...acc, ...group.permissions], []);
     }
@@ -81,26 +81,26 @@ class Security {
           $in: groups,
         },
       },
-    }).then(c => c.toArray());
+    });
     const groupIds = fetchedGroups.map(({ _id }) => _id);
 
     return user
       ? UserRepository.updateOne({
-        query: {
-          userId,
-        },
-        update: {
-          $set: {
+          query: {
+            userId,
+          },
+          update: {
+            $set: {
+              groupIds,
+            },
+          },
+        })
+      : UserRepository.insertOne({
+          query: {
+            userId,
             groupIds,
           },
-        },
-      })
-      : UserRepository.insertOne({
-        query: {
-          userId,
-          groupIds,
-        },
-      });
+        });
   }
 }
 
