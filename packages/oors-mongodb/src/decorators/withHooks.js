@@ -32,7 +32,9 @@ export default (
       isFunction(hooks.afterAll) ||
       ['before', 'after'].some(
         hookName =>
-          Object.keys(hooks[hookName]).includes(method) && isFunction(hooks[hookName][method]),
+          typeof hooks[hookName] === 'object' &&
+          Object.keys(hooks[hookName]).includes(method) &&
+          isFunction(hooks[hookName][method]),
       );
 
     if (!hasHooksForMethod) {
