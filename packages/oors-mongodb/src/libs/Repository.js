@@ -29,10 +29,6 @@ class Repository extends Store {
     return data;
   }
 
-  hasRelation(name) {
-    return Object.keys(this.relations).includes(name);
-  }
-
   addRelation = (name, options) => {
     const { repositoryName, collectionName, type, localField, foreignField } = options;
     const repository = options.repository || this.getRepository(repositoryName);
