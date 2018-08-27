@@ -18,6 +18,18 @@ class CategoryRepository extends Repository {
   };
 
   static collectionName = 'BlogCategory';
+
+  getAllWithPostsWithCategory() {
+    return this.aggregate(pipeline => pipeline
+      .lookup('posts')
+      .unwind({ path: '$posts', preserveNullAndEmptyArrays: true })
+      .lookup(
+        this.relations.posts.repository.relationToLookup('category', {
+          localField: 'posts.categoryId',
+          as: 'posts.category',
+        }),
+      ));
+  }
 }
 
 export default CategoryRepository;

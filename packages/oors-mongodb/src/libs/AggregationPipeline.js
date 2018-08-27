@@ -14,9 +14,43 @@ this.aggregate(pipeline =>
 import set from 'lodash/set';
 
 class AggregationPipeline {
+  static stages = [
+    'addFields',
+    'bucket',
+    'bucketAuto',
+    'collStats',
+    'count',
+    'currentOp',
+    'facet',
+    'geoNear',
+    'graphLookup',
+    'group',
+    'indexStats',
+    'limit',
+    'listLocalSessions',
+    'listSessions',
+    'lookup',
+    'match',
+    'out',
+    'project',
+    'redact',
+    'replaceRoot',
+    'sample',
+    'skip',
+    'sort',
+    'sortByCount',
+    'unwind',
+  ];
+
   constructor(repository) {
     this.repository = repository;
     this.pipeline = [];
+    // check if using Proxy is a better alternative
+    this.constructor.stages.forEach(stage => {
+      if (!this[stage]) {
+        this[stage] = value => this.push({ [`$${stage}`]: value });
+      }
+    });
   }
 
   push(...operations) {
@@ -31,11 +65,6 @@ class AggregationPipeline {
     return this;
   }
 
-  match = query =>
-    this.push({
-      $match: query,
-    });
-
   project = fields =>
     this.push({
       $project: Array.isArray(fields)
@@ -49,22 +78,17 @@ class AggregationPipeline {
         : fields,
     });
 
-  lookup = (relation, { as = relation, project = true, match = false } = {}) => {
-    const {
-      repository,
-      collectionName,
-      localField,
-      foreignField,
-      type,
-    } = this.repository.relations[relation];
+  lookup = (relation, { as = relation, project = false, match = false } = {}) => {
+    if (typeof relation === 'object') {
+      return this.push({
+        $lookup: relation,
+      });
+    }
+
+    const { type } = this.repository.relations[relation];
 
     this.push({
-      $lookup: {
-        from: collectionName || this.repository.getRepository(repository).collectionName,
-        localField,
-        foreignField,
-        as,
-      },
+      $lookup: this.repository.relationToLookup(relation, { as }),
     });
 
     if (match) {
@@ -108,19 +132,11 @@ class AggregationPipeline {
 
   slice = (start, end) => this.push(this.skip(start), this.limit(end - start));
 
-  skip = value =>
-    this.push({
-      $skip: value,
-    });
-
-  limit = value =>
-    this.push({
-      $limit: value,
-    });
-
   count = (outputField = 'count') => this.push({ $count: outputField });
 
   toArray = () => this.pipeline;
+
+  toJSON = () => this.toArray();
 }
 
 export default AggregationPipeline;

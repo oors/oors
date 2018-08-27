@@ -1,4 +1,3 @@
-import invariant from 'invariant';
 import ValidationError from 'oors/build/errors/ValidationError';
 import Store from './Store';
 import AggregationPipeline from './AggregationPipeline';
@@ -8,12 +7,11 @@ class Repository extends Store {
     return this.collectionName || this.name.substr(0, this.name.indexOf('Repository'));
   }
 
-  constructor({ collection, schema, collectionName, relations = {} } = {}) {
+  constructor({ collection, schema, collectionName } = {}) {
     super(collection);
-
     this.schema = schema || this.constructor.schema;
     this.collectionName = collectionName || this.constructor.getCollectionName();
-    this.relations = relations;
+    this.relations = {};
   }
 
   validate = () => true;
@@ -35,20 +33,14 @@ class Repository extends Store {
     return Object.keys(this.relations).includes(name);
   }
 
-  addRelation = (name, { repository, collectionName, type, localField, foreignField }) => {
-    invariant(['one', 'many'].includes(type), 'type can only be one of: "one", "many"!');
-    invariant(
-      typeof localField === 'string',
-      '"localField" is a required string - name of the local key!',
-    );
-    invariant(
-      typeof foreignField === 'string',
-      '"foreignField" is a required string - name of the foreign key!',
-    );
+  addRelation = (name, options) => {
+    const { repositoryName, collectionName, type, localField, foreignField } = options;
+    const repository = options.repository || this.getRepository(repositoryName);
 
     this.relations[name] = {
+      repositoryName,
       repository,
-      collectionName: collectionName || this.getRepository(repository).collectionName,
+      collectionName: collectionName || repository.collectionName,
       type,
       localField,
       foreignField,
@@ -57,14 +49,15 @@ class Repository extends Store {
     return this;
   };
 
-  relationToLookup(name) {
-    const { repository, collectionName, localField, foreignField, as } = this.relations[name];
+  relationToLookup(name, options = {}) {
+    const { collectionName, localField, foreignField, as } = this.relations[name];
 
     return {
-      from: collectionName || this.getRepository(repository).collectionName,
+      from: collectionName,
       localField,
       foreignField,
       as: as || name,
+      ...options,
     };
   }
 
@@ -76,10 +69,14 @@ class Repository extends Store {
     return bulk.execute();
   };
 
-  aggregate = (callback, options = {}) =>
-    this.collection.aggregate(this.createPipeline(callback), options).toArray();
+  aggregate = (callback, options = {}) => {
+    const result = callback(new AggregationPipeline(this));
+    const pipeline = Array.isArray(result) ? result : result.toArray();
 
-  createPipeline = callback => callback(new AggregationPipeline(this)).toArray();
+    return this.collection.aggregate(pipeline, options).toArray();
+  };
+
+  createPipeline = callback => callback(new AggregationPipeline(this));
 }
 
 export default Repository;
