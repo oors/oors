@@ -69,13 +69,12 @@ class Repository extends Store {
   };
 
   aggregate = (callback, options = {}) => {
-    const result = callback(new AggregationPipeline(this));
+    const result = callback(this.createPipeline());
     const pipeline = Array.isArray(result) ? result : result.toArray();
-
     return this.collection.aggregate(pipeline, options).toArray();
   };
 
-  createPipeline = callback => callback(new AggregationPipeline(this));
+  createPipeline = () => new AggregationPipeline(this);
 }
 
 export default Repository;
