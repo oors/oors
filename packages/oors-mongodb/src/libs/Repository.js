@@ -14,6 +14,9 @@ class Repository extends Store {
     this.relations = {};
   }
 
+  // eslint-disable-next-line
+  configure({ getRepository }) {}
+
   validate = () => true;
 
   // eslint-disable-next-line class-methods-use-this

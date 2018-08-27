@@ -115,6 +115,10 @@ class MongoDB extends Module {
       getRepository: this.getRepository,
     });
 
+    repository.configure({
+      getRepository: this.getRepository,
+    });
+
     return repository;
   };
 
