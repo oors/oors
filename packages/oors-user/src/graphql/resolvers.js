@@ -1,7 +1,10 @@
 export default {
   Query: {
-    users: async (_, args, { app, fromMongoCursor }) =>
-      fromMongoCursor(await app.modules.get('oors.user').UserRepository.findMany()),
+    users: async (_, args, { app, fromMongoArray }) =>
+      app.modules
+        .get('oors.user')
+        .UserRepository.findMany()
+        .then(fromMongoArray),
   },
   Mutation: {
     login: async (_, { username, password }, { app, req, fromMongo }) => {

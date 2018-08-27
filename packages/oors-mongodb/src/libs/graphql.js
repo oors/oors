@@ -6,7 +6,7 @@ import omit from 'lodash/omit';
 import withSchema from 'oors-graphql/build/decorators/withSchema';
 import { ObjectID as objectId } from 'mongodb';
 import QueryBuilder from './QueryBuilder';
-import { fromMongoCursor, fromMongo } from './helpers';
+import { fromMongo, fromMongoArray } from './helpers';
 
 const createPaginationSchema = ({ maxPerPage, defaultPerPage } = {}) => ({
   skip: {
@@ -162,13 +162,15 @@ export const createCRUDResolvers = config => {
 export const createLoaders = Repository => ({
   findById: {
     loader: async ids => {
-      const items = await Repository.findMany({
-        query: {
-          _id: {
-            $in: ids.map(objectId),
+      const items = fromMongoArray(
+        await Repository.findMany({
+          query: {
+            _id: {
+              $in: ids.map(objectId),
+            },
           },
-        },
-      }).then(fromMongoCursor);
+        }),
+      );
 
       return ids.map(id => items.find(item => item.id.toString() === id.toString()) || null);
     },
@@ -189,7 +191,7 @@ export const createLoaders = Repository => ({
   },
   findMany: {
     loader: queries =>
-      Promise.all(queries.map((query = {}) => Repository.findMany(query).then(fromMongoCursor))),
+      Promise.all(queries.map((query = {}) => Repository.findMany(query).then(fromMongoArray))),
     options: {
       cacheKeyFn: key => JSON.stringify(key),
     },

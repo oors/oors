@@ -15,6 +15,8 @@ export const fromMongo = item => ({
 
 export const fromMongoCursor = data => data.map(fromMongo).toArray();
 
+export const fromMongoArray = data => data.map(fromMongo);
+
 export const toMongo = item => ({
   ...item,
   _id: objectId(item.id),

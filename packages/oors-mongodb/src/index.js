@@ -71,7 +71,7 @@ class MongoDB extends Module {
 
   hooks = {
     'oors.graphQL.buildContext': ({ context }) => {
-      const { fromMongo, fromMongoCursor, toMongo } = helpers;
+      const { fromMongo, fromMongoCursor, fromMongoArray, toMongo } = helpers;
 
       if (context.ajv) {
         context.ajv.addKeyword('isId', idValidator);
@@ -80,6 +80,7 @@ class MongoDB extends Module {
       Object.assign(context, {
         fromMongo,
         fromMongoCursor,
+        fromMongoArray,
         toMongo,
         getRepository: this.getRepository,
         toOjectId: this.toOjectId,
