@@ -28,12 +28,12 @@ export const getPackageFiles = ({ pkg, srcDir, globPattern = '**' }) => {
 };
 
 export const getPackgeJSFiles = ({ pkg, srcDir }) =>
-  getPackgeJSFiles({ pkg, srcDir, globPattern: '**/*.js?(x)' });
+  getPackageFiles({ pkg, srcDir, globPattern: '**/*.js?(x)' });
 
 export const isJSFile = file => ['.js', '.jsx'].includes(path.extname(file));
 
 export const getBuildDestinationPath = ({ srcPath, packagesDir, srcDir, buildDir }) => {
-  const pkgName = path.relative(packagesDir, srcPath).split(path.sep)[0];
+  const [pkgName] = path.relative(packagesDir, srcPath).split(path.sep);
   const pkg = path.resolve(packagesDir, pkgName);
   const pkgSrcDir = path.resolve(pkg, srcDir);
   const pkgBuildDir = path.resolve(pkg, buildDir);

@@ -1,0 +1,14 @@
+{
+  "name": "oors-rad",
+  "version": "0.1.0",
+  "private": true,
+  "main": "build/index.js",
+  "author": "Victor Zamfir <zamfir.victor@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "fs-extra": "^7.0.0",
+    "glob": "7.1.3",
+    "lodash": "4.17.10",
+    "oors": "^1.8.0"
+  }
+}
