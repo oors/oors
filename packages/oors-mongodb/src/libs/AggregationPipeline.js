@@ -55,11 +55,7 @@ class AggregationPipeline {
 
   push(...operations) {
     operations.forEach(operation => {
-      if (Array.isArray(operation)) {
-        this.pipeline.push(...operation);
-      } else {
-        this.pipeline.push(operation);
-      }
+      this.pipeline.push(...(Array.isArray(operation) ? operation : [operation]));
     });
 
     return this;

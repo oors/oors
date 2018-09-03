@@ -62,7 +62,7 @@ class Repository extends Store {
 
   getFields = () => Object.keys(this.schema.properties);
 
-  runBulkOperation = async ({ ordered = false } = {}, callback) => {
+  runBulkOperation = async (callback, { ordered = false } = {}) => {
     const bulk = this.collection[`initialize${ordered ? 'Ordered' : 'Unordered'}BulkOp`]();
     await callback(bulk);
     return bulk.execute();
