@@ -2,11 +2,19 @@ import { Module } from 'oors';
 import glob from 'glob';
 import fse from 'fs-extra';
 import path from 'path';
-import set from 'lodash/set';
-import get from 'lodash/get';
 import has from 'lodash/has';
 
 class RADModule extends Module {
+  static schema = {
+    type: 'object',
+    properties: {
+      autoloadEnabled: {
+        type: 'boolean',
+        default: true,
+      },
+    },
+  };
+
   name = 'oors.rad';
 
   services = {};
@@ -26,25 +34,21 @@ class RADModule extends Module {
   }
 
   collectFromModule = async module => {
-    if (!module.getConfig('autoloadServices', false)) {
+    if (!module.getConfig('autoloadServices', this.getConfig('autoloadEnabled'))) {
       return;
     }
 
     try {
       if (has(module, 'services')) {
-        this.registerModuleServices(module.name, module.services);
+        Object.keys(module.services).forEach(serviceName => {
+          this.setService(`${module.name}.${serviceName}`, module.services[serviceName]);
+        });
       } else {
         await this.loadFromModule(module);
       }
     } catch (err) {
       throw err;
     }
-  };
-
-  registerModuleServices = (moduleName, services) => {
-    Object.keys(services).forEach(serviceKey => {
-      this.setService(`${moduleName}.${serviceKey}`, services[serviceKey]);
-    });
   };
 
   async loadFromModule(module) {
@@ -69,13 +73,11 @@ class RADModule extends Module {
 
         files.forEach(file => {
           const Service = require(file).default; // eslint-disable-line global-require, import/no-dynamic-require
-          const service = new Service(this);
-          this.setService(
-            `${module.name}.${service.name}`,
-            Object.assign(service, {
-              getService: this.getService,
-            }),
-          );
+          const service = new Service(module);
+          if (!service.name) {
+            throw new Error(`Unable to register a service without a name! ${service}`);
+          }
+          this.setService(`${module.name}.${service.name}`, service);
         });
 
         resolve(true);
@@ -83,9 +85,13 @@ class RADModule extends Module {
     });
   }
 
-  setService = (servicePath, service) => set(this.services, servicePath, service);
+  setService = (key, service) => {
+    this.services[key] = Object.assign(service, {
+      getService: this.getService,
+    });
+  };
 
-  getService = servicePath => get(this.services, servicePath);
+  getService = key => this.services[key];
 }
 
 export default RADModule;
