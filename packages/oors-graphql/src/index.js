@@ -1,4 +1,5 @@
 /* eslint-disable no-empty */
+import glob from 'glob';
 import path from 'path';
 import fse from 'fs-extra';
 import get from 'lodash/get';
@@ -216,8 +217,8 @@ class Gql extends Module {
 
   async loadFromDir(dirPath) {
     try {
-      const stat = await fse.stat(dirPath);
-      const isDirectory = stat && stat.isDirectory();
+      const stats = await fse.stat(dirPath);
+      const isDirectory = stats && stats.isDirectory();
       if (!isDirectory) {
         return;
       }
@@ -226,8 +227,18 @@ class Gql extends Module {
     }
 
     try {
-      await this.addTypeDefsByPath(path.join(dirPath, 'typeDefs.graphql'));
-    } catch (err) {}
+      const typeDefsDirPath = path.join(dirPath, 'typeDefs');
+      const stats = await fse.stat(typeDefsDirPath);
+      if (stats.isDirectory()) {
+        glob(path.resolve(typeDefsDirPath, '*.graphql'), { nodir: true }, (err, filePaths) =>
+          Promise.all(filePaths.map(filePath => this.addTypeDefsByPath(filePath))),
+        );
+      }
+    } catch {
+      try {
+        await this.addTypeDefsByPath(path.join(dirPath, 'typeDefs.graphql'));
+      } catch {}
+    }
 
     try {
       // eslint-disable-next-line import/no-dynamic-require, global-require
@@ -300,11 +311,6 @@ class Gql extends Module {
       introspection: true,
       mocks: false,
       persistedQueries: true,
-      playground: {
-        settings: {
-          'editor.cursorShape': 'line',
-        },
-      },
       ...this.getConfig('serverOptions'),
       ...options,
     };
