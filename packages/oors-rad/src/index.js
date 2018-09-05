@@ -29,6 +29,7 @@ class RADModule extends Module {
     'oors.graphQL.buildContext': ({ context }) => {
       Object.assign(context, {
         getService: this.getService,
+        getModule: name => this.app.modules.get(name),
       });
     },
   };
