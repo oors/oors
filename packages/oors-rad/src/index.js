@@ -2,7 +2,6 @@ import { Module } from 'oors';
 import glob from 'glob';
 import fse from 'fs-extra';
 import path from 'path';
-import has from 'lodash/has';
 
 class RADModule extends Module {
   static schema = {
@@ -30,25 +29,15 @@ class RADModule extends Module {
   async setup() {
     await this.runHook('load', this.collectFromModule);
 
-    this.exportProperties(['setService', 'getService']);
+    this.exportProperties(['registerModuleService', 'setService', 'getService']);
   }
 
   collectFromModule = async module => {
-    if (!module.getConfig('autoloadServices', this.getConfig('autoloadEnabled'))) {
+    if (!module.getConfig('oors.rad.autoload', this.getConfig('autoloadEnabled'))) {
       return;
     }
 
-    try {
-      if (has(module, 'services')) {
-        Object.keys(module.services).forEach(serviceName => {
-          this.setService(`${module.name}.${serviceName}`, module.services[serviceName]);
-        });
-      } else {
-        await this.loadFromModule(module);
-      }
-    } catch (err) {
-      throw err;
-    }
+    await this.loadFromModule(module);
   };
 
   async loadFromModule(module) {
@@ -58,14 +47,14 @@ class RADModule extends Module {
       const stat = await fse.stat(dirPath);
       const isDirectory = stat && stat.isDirectory();
       if (!isDirectory) {
-        return false;
+        return;
       }
     } catch (err) {
-      return false;
+      return;
     }
 
-    return new Promise((resolve, reject) => {
-      glob(path.resolve(dirPath, '**/*.js'), { nodir: true }, (err, files) => {
+    await new Promise((resolve, reject) => {
+      glob(path.resolve(dirPath, '*.js'), { nodir: true }, (err, files) => {
         if (err) {
           reject(err);
           return;
@@ -77,12 +66,16 @@ class RADModule extends Module {
           if (!service.name) {
             throw new Error(`Unable to register a service without a name! ${service}`);
           }
-          this.setService(`${module.name}.${service.name}`, service);
+          this.registerModuleService(module, service);
         });
 
-        resolve(true);
+        resolve();
       });
     });
+  }
+
+  registerModuleService(module, service) {
+    this.setService(`${module.name}.${service.name}`, service);
   }
 
   setService = (key, service) => {
