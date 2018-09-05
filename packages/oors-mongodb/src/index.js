@@ -86,6 +86,7 @@ class MongoDB extends Module {
         toOjectId: this.toOjectId,
       });
     },
+    shutdown: () => this.closeConnection(),
   };
 
   createRepository = ({ collection, schema, collectionName, methods = {}, connectionName }) => {
