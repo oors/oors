@@ -1,0 +1,62 @@
+extend type Query {
+  findManyBlogPosts(
+    where: BlogPostFilter
+    orderBy: [SortItem!]
+    skip: Int
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): [BlogPost!]!
+  findOneBlogPost(where: BlogPostFilter): BlogPost
+}
+
+extend type User {
+  blogPosts: [BlogPost!]!
+}
+
+extend type Mutation {
+  createOneBlogPost(input: BlogPostInput!): BlogPost!
+  updateOneBlogPost(where: BlogPostFilter!, input: BlogPostInput!): BlogPost!
+  deleteOneBlogPost(where: BlogPostFilter!): BlogPost!
+}
+
+type BlogPost {
+  id: ID!
+  title: String!
+  slug: String!
+  excerpt: String
+  body: String
+  status: BlogPostStatus
+  tags: [String!]!
+  createdAt: DateTime
+  updatedAt: DateTime
+  author: User
+  updatedBy: User
+  related: [BlogPost!]!
+}
+
+input BlogPostFilter {
+  AND: [BlogPostFilter!]
+  OR: [BlogPostFilter!]
+  id: ID
+  id_in: [ID!]
+  id_not_in: [ID!]
+  title: String
+  title_contains: String
+  body_contains: String
+  isHidden: Boolean
+}
+
+input BlogPostInput {
+  title: String!
+  body: String
+  tags: [String!]
+  status: BlogPostStatus
+  categoryId: ID!
+}
+
+enum BlogPostStatus {
+  PUBLISHED
+  DRAFT
+}

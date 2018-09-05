@@ -1,0 +1,31 @@
+extend type Mutation {
+  createOneBlogComment(input: CreateBlogCommentInput!): BlogComment!
+  updateOneBlogComment(id: ID!, input: UpdateBlogCommentInput!): BlogComment!
+}
+
+extend type BlogPost {
+  comments(offset: Int, limit: Int): [BlogComment!]!
+}
+
+type BlogComment {
+  id: ID!
+  post: BlogPost
+  body: String!
+  isHidden: Boolean
+  createdAt: DateTime
+  updatedAt: DateTime
+  author: User
+  parent: BlogComment
+  children: [BlogComment!]!
+}
+
+input CreateBlogCommentInput {
+  parentId: ID
+  postId: ID!
+  body: String!
+}
+
+input UpdateBlogCommentInput {
+  body: String!
+  isHidden: Boolean
+}

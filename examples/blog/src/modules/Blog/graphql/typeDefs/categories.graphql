@@ -1,0 +1,42 @@
+extend type Query {
+  findManyBlogCategories(
+    where: BlogCategoryFilter
+    orderBy: [SortItem!]
+    skip: Int
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): [BlogCategory!]!
+  findOneBlogCategory(where: BlogCategoryFilter!): BlogCategory
+}
+
+extend type Mutation {
+  createOneBlogCategory(input: BlogCategoryInput!): BlogCategory!
+  updateOneBlogCategory(where: BlogCategoryFilter!, input: BlogCategoryInput!): BlogCategory!
+  deleteOneBlogCategory(where: BlogCategoryFilter!): BlogCategory!
+}
+
+extend type BlogPost {
+  category: BlogCategory!
+}
+
+type BlogCategory {
+  id: ID!
+  name: String
+  createdAt: DateTime
+  updatedAt: DateTime
+  posts: [BlogPost!]!
+}
+
+input BlogCategoryFilter {
+  AND: [BlogPostFilter!]
+  OR: [BlogPostFilter!]
+  id: ID
+  id_in: [ID!]
+  id_not_in: [ID!]
+}
+
+input BlogCategoryInput {
+  name: String!
+}
