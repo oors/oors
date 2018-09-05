@@ -227,7 +227,7 @@ class Gql extends Module {
     }
 
     try {
-      // try to load .graphl files from /graphql/typeDefs dir
+      // try to load /graphql/typeDefs/*.graphl
       const typeDefsDirPath = path.join(dirPath, 'typeDefs');
       const stats = await fse.stat(typeDefsDirPath);
       if (stats.isDirectory()) {
