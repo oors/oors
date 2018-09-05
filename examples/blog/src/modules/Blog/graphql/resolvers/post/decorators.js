@@ -23,16 +23,16 @@ export const validatePostInput = withSchema({
   },
 });
 
-export const parsePostInput = withArgs(
-  (_, { input, id }, { user, loaders: { blog: { categories } } }, { resolve }) => ({
-    input: {
-      ...input,
-      [id ? 'updatedBy' : 'createdBy']: user._id, // user stamps
-    },
-    // if we have a categoryId, we need to make sure it points to an existing database entry
-    category: input.categoryId ? resolve(categories.findById.load(input.categoryId)) : null,
-  }),
-);
+export const parsePostInput = withArgs((_, { input, id }, { user, loaders }, { resolve }) => ({
+  input: {
+    ...input,
+    [id ? 'updatedBy' : 'createdBy']: user._id, // user stamps
+  },
+  // if we have a categoryId, we need to make sure it points to an existing database entry
+  category: input.categoryId
+    ? resolve(loaders.blogCategories.findById.load(input.categoryId))
+    : null,
+}));
 
 export const validateReferences = withSchema({
   type: 'object',

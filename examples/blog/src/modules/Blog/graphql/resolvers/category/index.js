@@ -12,7 +12,7 @@ import { withUserStamps } from '../../decorators';
 
 const resolvers = createCRUDResolvers({
   getRepository: 'blogCategory',
-  getLoaders: ({ loaders }) => loaders.blog.categories,
+  getLoaders: ({ loaders }) => loaders.blogCategories,
 });
 
 export default {
@@ -21,7 +21,7 @@ export default {
     findOneBlogCategory: resolvers.findOne,
   },
   BlogCategory: {
-    posts: (category, args, { loaders }) => loaders.blog.posts.findMany.load({
+    posts: (category, args, { loaders }) => loaders.blogPosts.findMany.load({
       query: {
         categoryId: category._id,
       },

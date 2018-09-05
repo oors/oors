@@ -4,7 +4,7 @@ import { validatePostInput, parsePostInput, validateReferences } from './decorat
 
 const resolvers = createCRUDResolvers({
   getRepository: 'blogPost',
-  getLoaders: ({ loaders }) => loaders.blog.posts,
+  getLoaders: ({ loaders }) => loaders.blogPosts,
   // you can only delete and update your own posts posts
   canUpdate: (user, item) => user._id.toString() === item.createdBy.toString(),
   canDelete: (user, item) => user._id.toString() === item.createdBy.toString(),
@@ -18,9 +18,9 @@ export default {
   BlogPost: {
     author: (post, args, { loaders }) => loaders.users.findById.load(post.createdBy),
     updatedBy: (post, args, { loaders }) => post.updatedBy ? loaders.users.findById.load(post.updatedBy) : null,
-    category: (post, args, { loaders }) => loaders.blog.categories.findById.load(post.categoryId),
+    category: (post, args, { loaders }) => loaders.blogCategories.findById.load(post.categoryId),
     related: (post, args, { loaders }) => (post.relatedPostIds || []).length
-      ? loaders.blog.posts.findMany.load({
+      ? loaders.blogPosts.findMany.load({
         query: {
           _id: {
             $in: post.relatedPostIds,
@@ -28,7 +28,7 @@ export default {
         },
       })
       : [],
-    comments: (post, { offset = 0, limit = 10 }, { loaders }) => loaders.blog.comments.findMany.load({
+    comments: (post, { offset = 0, limit = 10 }, { loaders }) => loaders.blogComments.findMany.load({
       query: {
         postId: post._id,
       },
@@ -40,7 +40,7 @@ export default {
     }),
   },
   User: {
-    blogPosts: (user, args, { loaders }) => loaders.blog.posts.findMany.load({
+    blogPosts: (user, args, { loaders }) => loaders.blogPosts.findMany.load({
       query: {
         createdBy: user._id,
       },

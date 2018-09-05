@@ -1,4 +1,3 @@
-import { createLoaders } from '../../../../../packages/oors-mongodb/build/libs/graphql';
 import { Module } from '../../../../../packages/oors';
 import PostRepository from './repositories/Post';
 import CategoryRepository from './repositories/Category';
@@ -8,14 +7,15 @@ class BlogModule extends Module {
   name = 'oors.blog';
 
   async setup() {
-    const [{ addRepository }, { addLoaders }] = await this.dependencies([
+    const [{ addRepository }] = await this.dependencies([
       'oors.mongoDb',
       'oors.graphQL',
+      'oors.rad',
     ]);
 
     const Post = addRepository('blogPost', new PostRepository());
     const Category = addRepository('blogCategory', new CategoryRepository());
-    const Comment = addRepository('blogComment', new CommentRepository());
+    addRepository('blogComment', new CommentRepository());
 
     Post.addRelation('category', {
       repository: Category,
@@ -30,10 +30,6 @@ class BlogModule extends Module {
       localField: '_id',
       foreignField: 'categoryId',
     });
-
-    addLoaders(createLoaders(Post), 'blog.posts');
-    addLoaders(createLoaders(Category), 'blog.categories');
-    addLoaders(createLoaders(Comment), 'blog.comments');
   }
 }
 

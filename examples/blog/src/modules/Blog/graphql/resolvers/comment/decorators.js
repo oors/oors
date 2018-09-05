@@ -21,16 +21,14 @@ export const validateCreateCommentInput = withSchema({
   },
 });
 
-export const parseCommentInput = withArgs(
-  (_, { input, id }, { user, loaders: { blog: { posts, comments } } }, { resolve }) => ({
-    input: {
-      ...input,
-      [id ? 'updatedBy' : 'createdBy']: user._id,
-    },
-    parent: input.parentId ? resolve(comments.findById.load(input.parentId)) : null,
-    post: input.postId ? resolve(posts.findById.load(input.postId)) : null,
-  }),
-);
+export const parseCommentInput = withArgs((_, { input, id }, { user, loaders }, { resolve }) => ({
+  input: {
+    ...input,
+    [id ? 'updatedBy' : 'createdBy']: user._id,
+  },
+  parent: input.parentId ? resolve(loaders.blogComments.findById.load(input.parentId)) : null,
+  post: input.postId ? resolve(loaders.blogPosts.findById.load(input.postId)) : null,
+}));
 
 export const validateCreateCommentReferences = withSchema({
   type: 'object',

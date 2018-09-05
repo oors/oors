@@ -8,20 +8,20 @@ import {
 
 const resolvers = createCRUDResolvers({
   getRepository: 'blogComment',
-  getLoaders: ({ loaders }) => loaders.blog.comments,
+  getLoaders: ({ loaders }) => loaders.blogComments,
   canUpdate: (user, item) => user._id.toString() === item.createdBy.toString(),
   canDelete: (user, item) => user._id.toString() === item.createdBy.toString(),
 });
 
 export default {
   BlogComment: {
-    parent: (comment, args, { loaders }) => comment.parentId ? loaders.blog.comments.findById.load(comment.parentId) : null,
-    children: (comment, args, { loaders }) => loaders.blog.comments.findMany.load({
+    parent: (comment, args, { loaders }) => comment.parentId ? loaders.blogComments.findById.load(comment.parentId) : null,
+    children: (comment, args, { loaders }) => loaders.blogComments.findMany.load({
       query: {
         parentId: comment.id,
       },
     }),
-    post: (comment, args, { loaders }) => loaders.blog.posts.findById.load(comment.postId),
+    post: (comment, args, { loaders }) => loaders.blogPosts.findById.load(comment.postId),
     author: (comment, args, { loaders }) => loaders.users.findById.load(comment.createdBy),
   },
   Mutation: {
