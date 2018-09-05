@@ -58,10 +58,10 @@ class RADModule extends Module {
       return;
     }
 
-    await this.loadFromModule(module);
+    await this.loadModuleServices(module);
   };
 
-  async loadFromModule(module) {
+  async loadModuleServices(module) {
     const dirPath = path.resolve(path.dirname(module.filePath), 'services');
 
     try {
