@@ -1,13 +1,20 @@
+import pluralize from 'pluralize';
 import { Module } from 'oors';
+import camelCase from 'lodash/camelCase';
 import glob from 'glob';
 import fse from 'fs-extra';
 import path from 'path';
+import { createLoaders } from 'oors-mongodb/build/libs/graphql';
 
 class RADModule extends Module {
   static schema = {
     type: 'object',
     properties: {
-      autoloadEnabled: {
+      autoloadServices: {
+        type: 'boolean',
+        default: true,
+      },
+      autoCreateLoaders: {
         type: 'boolean',
         default: true,
       },
@@ -26,14 +33,28 @@ class RADModule extends Module {
     },
   };
 
-  async setup() {
+  async setup({ autoCreateLoaders }) {
+    await this.loadDependencies(['oors.graphQL', 'oors.mongoDb']);
+
+    const { loaders } = this.deps['oors.graphQL'];
+
     await this.runHook('load', this.collectFromModule);
 
     this.exportProperties(['registerModuleService', 'setService', 'getService']);
+
+    if (autoCreateLoaders) {
+      this.on('module:oors.mongoDb:repository', ({ repository, key }) => {
+        this.deps['oors.graphQL'].addLoaders(createLoaders(repository), this.getLoadersName(key));
+      });
+    }
+
+    this.export({
+      getLoaders: repositoryName => loaders[this.getLoadersName(repositoryName)],
+    });
   }
 
   collectFromModule = async module => {
-    if (!module.getConfig('oors.rad.autoload', this.getConfig('autoloadEnabled'))) {
+    if (!module.getConfig('oors.rad.autoload', this.getConfig('autoloadServices'))) {
       return;
     }
 
@@ -85,6 +106,8 @@ class RADModule extends Module {
   };
 
   getService = key => this.services[key];
+
+  getLoadersName = repositoryName => pluralize(camelCase(repositoryName));
 }
 
 export default RADModule;
