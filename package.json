@@ -1,8 +1,5 @@
 {
   "name": "oors-repo",
-  "engines": {
-    "node": "8.x.x"
-  },
   "private": true,
   "description": "",
   "main": "index.js",
