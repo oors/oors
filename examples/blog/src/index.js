@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
-import Application from '../../../packages/oors-presets/src/applications/Standard';
+import Application from '../../../packages/oors-presets/build/applications/Standard';
 import config from '../../../packages/oors-presets/build/config';
 import BlogModule from './modules/Blog';
-import RADModule from '../../../packages/oors-rad/src/index';
+import RADModule from '../../../packages/oors-rad/build/index';
 
 config.add({
   'modules.oors.rad.autoloadServices': false,
