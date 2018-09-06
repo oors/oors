@@ -6,3 +6,5 @@ export withLogger from './withLogger';
 export withSchema from './withSchema';
 export withUser from './withUser';
 export withWrapper from './withWrapper';
+export withBefore from './withBefore';
+export withAfter from './withAfter';
