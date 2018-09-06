@@ -65,7 +65,7 @@ class UserModule extends Module {
       },
       storageModule: {
         type: 'string',
-        default: 'oors.mongoDb',
+        default: 'oors.mongodb',
       },
     },
     required: ['jwtSecret', 'jwtConfig', 'rootURL'],
@@ -115,7 +115,7 @@ class UserModule extends Module {
       storageModule,
       'oors.router',
       'oors.mailer',
-      'oors.graphQL',
+      'oors.graphql',
     ]);
 
     const routerConfig = {

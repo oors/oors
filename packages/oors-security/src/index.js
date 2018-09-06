@@ -32,7 +32,7 @@ class Security extends Module {
 
   async setup() {
     const [{ createRepository }, { registerServices }] = await this.dependencies([
-      'oors.mongoDb',
+      'oors.mongodb',
       'oors.octobus',
     ]);
 

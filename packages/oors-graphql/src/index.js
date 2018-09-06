@@ -74,7 +74,7 @@ class Gql extends Module {
     },
   };
 
-  name = 'oors.graphQL';
+  name = 'oors.graphql';
 
   initialize() {
     this.ajv = new Ajv({

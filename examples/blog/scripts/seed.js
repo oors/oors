@@ -84,7 +84,7 @@ const createBlogComments = async ({ CommentRepository, posts, users }) => Promis
 app
   .boot()
   .then(async () => {
-    const { closeConnection, getRepository } = app.modules.get('oors.mongoDb');
+    const { closeConnection, getRepository } = app.modules.get('oors.mongodb');
     const PostRepository = getRepository('blogPost');
     const CategoryRepository = getRepository('blogCategory');
     const CommentRepository = getRepository('blogComment');

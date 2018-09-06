@@ -7,7 +7,7 @@ class TodoModule extends Module {
 
   async setup() {
     const [{ bindRepository }, { router }] = await this.dependencies([
-      'oors.mongoDb',
+      'oors.mongodb',
       'oors.router',
     ]);
 

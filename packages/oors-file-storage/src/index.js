@@ -33,7 +33,7 @@ class FileStorage extends Module {
   }
 
   async setup() {
-    const [{ addRepository }] = await this.dependencies(['oors.mongoDb']);
+    const [{ addRepository }] = await this.dependencies(['oors.mongodb']);
 
     const fileRepository = addRepository('File', new FileRepository());
     const fileService = new File({

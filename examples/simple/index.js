@@ -4,7 +4,7 @@ import withSchema from '../../packages/oors-graphql/src/decorators/withSchema';
 
 class SimpleModule extends Module {
   hooks = {
-    'oors.graphQL.load': ({ addTypeDefs }) => {
+    'oors.graphql.load': ({ addTypeDefs }) => {
       addTypeDefs(`
         extend type Query {
           sayHi(name: String!): String!
@@ -23,7 +23,7 @@ class SimpleModule extends Module {
 
   async setup() {
     let counter = 0;
-    const { addResolvers, pubsub } = await this.dependency('oors.graphQL');
+    const { addResolvers, pubsub } = await this.dependency('oors.graphql');
 
     addResolvers({
       Query: {

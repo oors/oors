@@ -3,7 +3,7 @@
 class Migration {
   constructor(app, db) {
     this.app = app;
-    this.db = db || this.app.modules.get('oors.mongoDb').getConnectionDb();
+    this.db = db || this.app.modules.get('oors.mongodb').getConnectionDb();
   }
 
   createCollection(...args) {
@@ -19,7 +19,7 @@ class Migration {
   }
 
   getRepository(name) {
-    return this.app.modules.get('oors.mongoDb').getRepository(name);
+    return this.app.modules.get('oors.mongodb').getRepository(name);
   }
 
   getCollectionName(repository) {

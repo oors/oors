@@ -8,8 +8,8 @@ class BlogModule extends Module {
 
   async setup() {
     const [{ addRepository }] = await this.dependencies([
-      'oors.mongoDb',
-      'oors.graphQL',
+      'oors.mongodb',
+      'oors.graphql',
       'oors.rad',
     ]);
 

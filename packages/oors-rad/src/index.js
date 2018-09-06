@@ -26,7 +26,7 @@ class RADModule extends Module {
   services = {};
 
   hooks = {
-    'oors.graphQL.buildContext': ({ context }) => {
+    'oors.graphql.buildContext': ({ context }) => {
       Object.assign(context, {
         getService: this.getService,
         getModule: name => this.app.modules.get(name),
@@ -35,17 +35,17 @@ class RADModule extends Module {
   };
 
   async setup({ autoCreateLoaders }) {
-    await this.loadDependencies(['oors.graphQL', 'oors.mongoDb']);
+    await this.loadDependencies(['oors.graphql', 'oors.mongodb']);
 
-    const { loaders } = this.deps['oors.graphQL'];
+    const { loaders } = this.deps['oors.graphql'];
 
     await this.runHook('load', this.collectFromModule);
 
     this.exportProperties(['registerModuleService', 'setService', 'getService']);
 
     if (autoCreateLoaders) {
-      this.on('module:oors.mongoDb:repository', ({ repository, key }) => {
-        this.deps['oors.graphQL'].addLoaders(createLoaders(repository), this.getLoadersName(key));
+      this.on('module:oors.mongodb:repository', ({ repository, key }) => {
+        this.deps['oors.graphql'].addLoaders(createLoaders(repository), this.getLoadersName(key));
       });
     }
 

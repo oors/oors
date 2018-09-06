@@ -59,7 +59,7 @@ class SentryModule extends Module {
     });
 
     if (logGqlErrors) {
-      this.onModule('oors.graphQL', 'error', error => {
+      this.onModule('oors.graphql', 'error', error => {
         this.logError(error);
       });
     }

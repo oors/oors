@@ -48,7 +48,7 @@ config.add({
     },
   },
   modules: {
-    'oors.mongoDb': {
+    'oors.mongodb': {
       connections: [
         {
           name: 'default',
@@ -92,7 +92,7 @@ config.add({
     'oors.fileStorage': {
       uploadDir: config.ref(() => path.resolve(config.get('rootDir'), './uploads')),
     },
-    'oors.graphQL': {},
+    'oors.graphql': {},
     'oors.router': {
       middlewarePivot: {
         after: 'isMethod',

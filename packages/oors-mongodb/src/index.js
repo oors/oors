@@ -63,14 +63,14 @@ class MongoDB extends Module {
     required: ['connections'],
   };
 
-  name = 'oors.mongoDb';
+  name = 'oors.mongodb';
 
   connections = {};
 
   repositories = {};
 
   hooks = {
-    'oors.graphQL.buildContext': ({ context }) => {
+    'oors.graphql.buildContext': ({ context }) => {
       const { fromMongo, fromMongoCursor, fromMongoArray, toMongo } = helpers;
 
       if (context.ajv) {
