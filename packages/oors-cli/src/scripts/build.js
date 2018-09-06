@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { transformFileSync } from 'babel-core';
+import * as babel from '@babel/core';
 import path from 'path';
 import fse from 'fs-extra';
 import { getPackageDirs, getPackageFiles, makeConfig, isJSFile } from '../libs/utils';
@@ -28,7 +28,7 @@ const run = async ({ packagesDir, babelConfig, ignoredPackages, srcDir, buildDir
             return fse.copy(file, destPath);
           }
 
-          const transformed = transformFileSync(file, babelConfig).code;
+          const transformed = babel.transformFileSync(file, babelConfig).code;
           return fse.outputFile(destPath, transformed);
         }),
       );

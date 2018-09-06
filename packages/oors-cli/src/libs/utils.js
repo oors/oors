@@ -1,6 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import Ajv from 'ajv';
-import { transformFileSync } from 'babel-core';
+import * as babel from '@babel/core';
 import path from 'path';
 import fse from 'fs-extra';
 import fs from 'fs';
@@ -53,14 +53,14 @@ export const compileFile = async ({ file, babelConfig, packagesDir, srcDir, buil
     return fse.copy(file, destPath);
   }
 
-  const transformed = transformFileSync(file, babelConfig).code;
+  const transformed = babel.transformFileSync(file, babelConfig).code;
   return fse.outputFile(destPath, transformed);
 };
 
 export const makeConfig = (config = {}) => {
   const finalConfig = {
     packagesDir: path.resolve('./packages'),
-    babelConfig: fse.readJsonSync(path.resolve('./.babelrc')),
+    babelConfig: require('../../../../babel.config'), // eslint-disable-line global-require
     watchGlob: [path.resolve('./packages/*/src/**')],
     ...omit(yargs.array('watchGlob').array('ignoredPackages').argv, ['_', '$0']),
     ...config,
