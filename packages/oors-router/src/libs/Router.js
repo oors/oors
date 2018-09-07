@@ -43,7 +43,7 @@ class Router {
       id,
       method,
       path,
-      handler: Router.wrapHandler(handler),
+      handler: this.constructor.wrapHandler(handler),
       middlewares,
     });
 
@@ -51,7 +51,7 @@ class Router {
   }
 
   addParam(paramName, handler) {
-    this.params[paramName] = Router.wrapHandler(handler);
+    this.params[paramName] = this.constructor.wrapHandler(handler);
   }
 
   addRouter(path, router) {
@@ -74,9 +74,7 @@ class Router {
   }
 
   use(middlewares) {
-    this.middlewares.push(
-      ...(Array.isArray(middlewares) ? middlewares : [middlewares]),
-    );
+    this.middlewares.push(...(Array.isArray(middlewares) ? middlewares : [middlewares]));
   }
 
   toExpress() {
@@ -88,13 +86,10 @@ class Router {
       this.router.param(paramName, this.params[paramName]);
     });
 
-    this.getRoutes().reduce(
-      (expressRouter, { method, path, middlewares, handler }) => {
-        expressRouter[method](path, ...middlewares, handler);
-        return expressRouter;
-      },
-      this.router,
-    );
+    this.getRoutes().reduce((expressRouter, { method, path, middlewares, handler }) => {
+      expressRouter[method](path, ...middlewares, handler);
+      return expressRouter;
+    }, this.router);
 
     Object.keys(this.routers).forEach(path => {
       const subRouter = this.routers[path].toExpress();
