@@ -36,6 +36,7 @@
     "oors-logger": "^1.11.0",
     "oors-mailer": "^1.6.0",
     "oors-mongodb": "^2.10.0",
+    "oors-rad": "0.2.0",
     "oors-router": "^1.7.0",
     "oors-user": "^1.7.0"
   }

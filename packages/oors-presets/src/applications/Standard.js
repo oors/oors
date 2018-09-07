@@ -1,4 +1,5 @@
 import path from 'path';
+import RADModule from 'oors-rad';
 import LoggerModule from 'oors-logger';
 import RouterModule from 'oors-router';
 import MongoDBModule from 'oors-mongodb';
@@ -47,6 +48,7 @@ class StandardApplication extends BaseApplication {
     );
 
     this.addModules(
+      new RADModule(),
       new LoggerModule(),
       new MongoDBModule(),
       new MailerModule(),

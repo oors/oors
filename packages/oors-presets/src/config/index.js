@@ -48,6 +48,9 @@ config.add({
     },
   },
   modules: {
+    'oors.rad': {
+      autoloadServices: false,
+    },
     'oors.mongodb': {
       connections: [
         {
