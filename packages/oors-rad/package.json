@@ -1,7 +1,6 @@
 {
   "name": "oors-rad",
   "version": "0.2.1",
-  "private": true,
   "main": "build/index.js",
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "ISC",
