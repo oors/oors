@@ -35,23 +35,26 @@ class RADModule extends Module {
   };
 
   async setup({ autoCreateLoaders }) {
-    await this.loadDependencies(['oors.graphql', 'oors.mongodb']);
+    const dependencies = [];
+    if (autoCreateLoaders) {
+      dependencies.push('oors.graphql', 'oors.mongodb');
+    }
 
-    const { loaders } = this.deps['oors.graphql'];
+    await this.loadDependencies(dependencies);
 
     await this.runHook('load', this.collectFromModule);
 
     this.exportProperties(['registerModuleService', 'setService', 'getService']);
 
     if (autoCreateLoaders) {
+      const { loaders } = this.deps['oors.graphql'];
       this.on('module:oors.mongodb:repository', ({ repository, key }) => {
         this.deps['oors.graphql'].addLoaders(createLoaders(repository), this.getLoadersName(key));
       });
+      this.export({
+        getLoaders: repositoryName => loaders[this.getLoadersName(repositoryName)],
+      });
     }
-
-    this.export({
-      getLoaders: repositoryName => loaders[this.getLoadersName(repositoryName)],
-    });
   }
 
   collectFromModule = async module => {
