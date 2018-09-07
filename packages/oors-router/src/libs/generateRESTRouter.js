@@ -71,9 +71,7 @@ export default ({ router = Router(), repository }) => {
           params.limit = parseInt(req.query.limit, 10);
         }
 
-        const cursor = await repository.findMany(params);
-
-        return cursor.toArray();
+        return repository.findMany(params);
       }),
     )
     .post(wrapHandler(req => repository.createOne(toBSON(req.body))));

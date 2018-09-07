@@ -13,7 +13,7 @@ class TodoModule extends Module {
 
     const TaskRepository = bindRepository(new TaskRepositoryClass());
 
-    router.get('/tasks', wrapHandler(() => TaskRepository.findMany().then(c => c.toArray())));
+    router.get('/tasks', wrapHandler(() => TaskRepository.findMany()));
 
     this.export({
       TaskRepository,

@@ -15,6 +15,17 @@ class Router {
     return descriptor;
   };
 
+  static wrapHandler(handler) {
+    return (req, res, next) =>
+      Promise.resolve(handler(req, res, next))
+        .then(response => {
+          if (typeof response !== 'undefined') {
+            res.json(response);
+          }
+        })
+        .catch(next);
+  }
+
   constructor() {
     this.params = {};
     this.routes = [];
@@ -60,17 +71,6 @@ class Router {
 
   getRoutes() {
     return this.routes;
-  }
-
-  static wrapHandler(handler) {
-    return (req, res, next) =>
-      Promise.resolve(handler(req, res, next))
-        .then(response => {
-          if (typeof response !== 'undefined') {
-            res.json(response);
-          }
-        })
-        .catch(next);
   }
 
   use(middlewares) {
