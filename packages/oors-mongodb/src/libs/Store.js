@@ -19,6 +19,10 @@ class Store {
     this._collection = collection;
   }
 
+  hasCollection() {
+    return this._collection !== undefined;
+  }
+
   // eslint-disable-next-line class-methods-use-this
   parse(data) {
     return data;

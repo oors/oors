@@ -59,6 +59,16 @@ class MongoDB extends Module {
         type: 'boolean',
         default: true,
       },
+      seeding: {
+        type: 'object',
+        properties: {
+          isEnabled: {
+            type: 'boolean',
+            default: false,
+          },
+        },
+        default: {},
+      },
     },
     required: ['connections'],
   };
@@ -89,8 +99,8 @@ class MongoDB extends Module {
     shutdown: () => this.closeConnection(),
   };
 
-  createRepository = ({ collection, schema, collectionName, methods = {}, connectionName }) => {
-    const repository = new Repository({ collection, schema, collectionName });
+  createRepository = ({ methods = {}, connectionName, ...options }) => {
+    const repository = new Repository(options);
 
     Object.keys(methods).forEach(methodName => {
       repository[methodName] = methods[methodName].bind(repository);
@@ -111,9 +121,13 @@ class MongoDB extends Module {
     );
 
     Object.assign(repository, {
-      collection: this.getConnectionDb(connectionName).collection(repository.collectionName),
+      collection: !repository.hasCollection()
+        ? this.getConnectionDb(connectionName).collection(repository.collectionName)
+        : repository.collection,
       ajv: this.ajv,
-      validate: this.ajv.compile(repository.schema),
+      validate:
+        repository.validate ||
+        (repository.schema ? this.ajv.compile(repository.schema) : () => true),
       getRepository: this.getRepository,
     });
 
@@ -194,7 +208,7 @@ class MongoDB extends Module {
     }
   }
 
-  async setup({ connections, logQueries, addTimestamps }) {
+  async setup({ connections, logQueries, addTimestamps, seeding }) {
     await Promise.all(connections.map(this.createConnection));
 
     this.ajv = new Ajv({
@@ -210,21 +224,29 @@ class MongoDB extends Module {
 
     this.addRepository('Migration', new MigrationRepository());
 
-    const seeder = new Seeder();
-    const seeds = {};
+    if (seeding.isEnabled) {
+      const seeder = new Seeder();
+      const seeds = {};
 
-    await Promise.all([
-      this.runHook('configureSeeder', () => {}, {
+      await Promise.all([
+        this.runHook('configureSeeder', () => {}, {
+          seeder,
+          getRepository: this.getRepository,
+        }),
+        this.runHook('loadSeedData', () => {}, {
+          seeds,
+        }),
+      ]);
+
+      if (Object.keys(seeds).length) {
+        await this.seed(seeds);
+      }
+
+      this.export({
         seeder,
-        getRepository: this.getRepository,
-      }),
-      this.runHook('loadSeedData', () => {}, {
-        seeds,
-      }),
-    ]);
+      });
 
-    if (Object.keys(seeds).length) {
-      await this.seed(seeds);
+      this.exportProperties(['seed', 'seeds']);
     }
 
     this.onModule(this.name, 'repository', ({ repository }) => {
@@ -235,10 +257,6 @@ class MongoDB extends Module {
       if (addTimestamps) {
         withTimestamps()(repository);
       }
-    });
-
-    this.export({
-      seeder,
     });
 
     this.exportProperties([
@@ -254,8 +272,6 @@ class MongoDB extends Module {
       'getRepository',
       'migrate',
       'ajv',
-      'seed',
-      'seeds',
       'toOjectId',
     ]);
   }

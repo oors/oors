@@ -17,8 +17,6 @@ class Repository extends Store {
   // eslint-disable-next-line
   configure({ getRepository }) {}
 
-  validate = () => true;
-
   // eslint-disable-next-line class-methods-use-this
   getRepository() {
     throw new Error('Not available! You need to bind the repository first.');
