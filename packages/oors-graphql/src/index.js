@@ -231,9 +231,17 @@ class Gql extends Module {
       const typeDefsDirPath = path.join(dirPath, 'typeDefs');
       const stats = await fse.stat(typeDefsDirPath);
       if (stats.isDirectory()) {
-        glob(path.resolve(typeDefsDirPath, '**/*.graphql'), { nodir: true }, (err, filePaths) =>
-          Promise.all(filePaths.map(filePath => this.addTypeDefsByPath(filePath))),
-        );
+        await new Promise((resolve, reject) => {
+          glob(path.resolve(typeDefsDirPath, '**/*.graphql'), { nodir: true }, (err, filePaths) => {
+            if (err) {
+              return reject(err);
+            }
+
+            return resolve(
+              Promise.all(filePaths.map(filePath => this.addTypeDefsByPath(filePath))),
+            );
+          });
+        });
       }
     } catch {
       // try to load /graphql/typeDefs.graphl
