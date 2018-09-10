@@ -23,6 +23,8 @@ import { importSchema } from 'graphql-import';
 import { Binding } from 'graphql-binding';
 import Ajv from 'ajv';
 import ajvKeywords from 'ajv-keywords';
+import depthLimit from 'graphql-depth-limit';
+import { createComplexityLimitRule } from 'graphql-validation-complexity';
 import mainResolvers from './graphql/resolvers';
 import modulesResolvers from './graphql/modulesResolvers';
 import LoadersMap from './libs/LoadersMap';
@@ -71,6 +73,42 @@ class Gql extends Module {
       pubsub: {
         type: 'object',
       },
+      depthLimit: {
+        type: 'object',
+        properties: {
+          limit: {
+            type: 'integer',
+            default: 10,
+          },
+          options: {
+            type: 'object',
+            properties: {
+              ignore: {
+                type: 'array',
+                default: [],
+              },
+            },
+          },
+          callback: {
+            instanceof: 'Function',
+          },
+        },
+        default: {},
+      },
+      complexityLimit: {
+        type: 'object',
+        properties: {
+          limit: {
+            type: 'integer',
+            default: 1000,
+          },
+          options: {
+            type: 'object',
+            default: {},
+          },
+        },
+        default: {},
+      },
     },
   };
 
@@ -86,6 +124,7 @@ class Gql extends Module {
     ajvKeywords(this.ajv, 'instanceof');
 
     this.typeDefs = [];
+    this.directives = {};
     this.resolvers = mainResolvers;
     this.resolverMiddlewares = [];
     this.pubsub = this.getConfig('pubsub', new PubSub());
@@ -109,6 +148,7 @@ class Gql extends Module {
       pick(this, [
         'pubsub',
         'addTypeDefs',
+        'addDirectives',
         'addTypeDefsByPath',
         'addResolvers',
         'addResolverMiddleware',
@@ -180,6 +220,10 @@ class Gql extends Module {
 
   addTypeDefs = typeDefs => {
     this.typeDefs.push(typeDefs);
+  };
+
+  addDirectives = directives => {
+    Object.assign(this.directives, directives);
   };
 
   addResolvers = resolvers => {
@@ -321,6 +365,17 @@ class Gql extends Module {
       introspection: true,
       mocks: false,
       persistedQueries: true,
+      validationRules: [
+        depthLimit(
+          this.getConfig('depthLimit.limit'),
+          this.getConfig('depthLimit.options'),
+          this.getConfig('depthLimit.callback'),
+        ),
+        createComplexityLimitRule(
+          this.getConfig('complexityLimit.limit'),
+          this.getConfig('complexityLimit.options'),
+        ),
+      ],
       ...this.getConfig('serverOptions'),
       ...options,
     };
