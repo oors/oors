@@ -1,3 +1,5 @@
+directive @isAuthenticated on OBJECT | FIELD_DEFINITION
+
 extend type Query {
   users: [User]
 }
