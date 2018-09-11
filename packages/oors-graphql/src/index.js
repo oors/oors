@@ -17,12 +17,14 @@ import {
   mergeSchemas,
   addResolveFunctionsToSchema,
   addSchemaLevelResolveFunction,
+  attachDirectiveResolvers,
 } from 'graphql-tools';
 import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
 import { importSchema } from 'graphql-import';
 import { Binding } from 'graphql-binding';
 import Ajv from 'ajv';
 import ajvKeywords from 'ajv-keywords';
+import ConstraintDirective from 'graphql-constraint-directive';
 import depthLimit from 'graphql-depth-limit';
 import { createComplexityLimitRule } from 'graphql-validation-complexity';
 import mainResolvers from './graphql/resolvers';
@@ -124,7 +126,9 @@ class Gql extends Module {
     ajvKeywords(this.ajv, 'instanceof');
 
     this.typeDefs = [];
-    this.directives = {};
+    this.directives = {
+      constraint: ConstraintDirective,
+    };
     this.resolvers = mainResolvers;
     this.resolverMiddlewares = [];
     this.pubsub = this.getConfig('pubsub', new PubSub());
@@ -193,6 +197,8 @@ class Gql extends Module {
       context: this.gqlContext,
       addSchemaResolvers: rootResolveFunction =>
         addSchemaLevelResolveFunction(this.schema, rootResolveFunction),
+      addDirectivesResolvers: directivesResolvers =>
+        attachDirectiveResolvers(this.schema, directivesResolvers),
     });
 
     this.on('after:setup', () => {
@@ -334,6 +340,8 @@ class Gql extends Module {
           },
         },
         allowUndefinedInResolve: false,
+        inheritResolversFromInterfaces: true,
+        schemaDirectives: this.directives,
       }),
     );
 
