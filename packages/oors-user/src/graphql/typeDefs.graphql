@@ -1,4 +1,4 @@
-directive @isAuthenticated on OBJECT | FIELD_DEFINITION
+directive @isAuthenticated(roles: [UserRole!]) on OBJECT | FIELD_DEFINITION
 
 extend type Query {
   users: [User]
@@ -31,4 +31,8 @@ type User {
 type AuthenticatedUser {
   token: String
   user: User
+}
+
+enum UserRole {
+  ADMIN
 }
