@@ -157,6 +157,7 @@ class Gql extends Module {
         'addResolvers',
         'addResolverMiddleware',
         'addLoader',
+        'loadFromDir',
       ]),
     );
 
@@ -265,7 +266,7 @@ class Gql extends Module {
     this.addTypeDefs(importSchema(schemaPath));
   };
 
-  async loadFromDir(dirPath) {
+  loadFromDir = async dirPath => {
     try {
       const stats = await fse.stat(dirPath);
       const isDirectory = stats && stats.isDirectory();
@@ -309,7 +310,17 @@ class Gql extends Module {
       }
       this.addResolvers(resolvers);
     } catch (err) {}
-  }
+
+    try {
+      // eslint-disable-next-line import/no-dynamic-require, global-require
+      const directives = require(`${dirPath}/directives`);
+      if (directives.default) {
+        Object.assign(directives, directives.default);
+        delete directives.default;
+      }
+      this.addDirectives(directives);
+    } catch (err) {}
+  };
 
   collectFromModule = async module => {
     if (!module.getConfig('graphql.autoload', true)) {
