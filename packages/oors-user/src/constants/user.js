@@ -1,2 +1,2 @@
-export const roles = ['admin'];
+export const roles = ['ADMIN'];
 export const defaultRoles = [];

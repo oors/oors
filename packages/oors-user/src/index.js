@@ -1,4 +1,5 @@
 import { Module } from 'oors';
+import upperFirst from 'lodash/upperFirst';
 import pivotSchema from 'oors/build/schemas/pivot';
 import { createLoaders } from 'oors-mongodb/build/libs/graphql';
 import UserRepositoryClass from './repositories/User';
@@ -15,6 +16,8 @@ import passportFactory from './libs/passport';
 import mockUser from './middlewares/mockUser';
 import ForgotPasswordTemplate from './mailerTemplates/ForgotPassword';
 import UserSignupTemplate from './mailerTemplates/UserSignup';
+import PermissionsManager from './libs/PermissionsManager';
+import { roles } from './constants/user';
 
 class UserModule extends Module {
   static schema = {
@@ -74,6 +77,12 @@ class UserModule extends Module {
   name = 'oors.user';
 
   hooks = {
+    'oors.graphql.buildContext': ({ context }) => {
+      Object.assign(context, {
+        permissionsManager: this.permissions,
+      });
+    },
+
     'oors.router.load': () => {},
   };
 
@@ -89,38 +98,37 @@ class UserModule extends Module {
     };
   }
 
-  configurePassport(routerConfig) {
-    const { passportConfig, passportMiddlewarePivot, jwtSecret } = this.getConfig();
-
-    if (!passportConfig.enabled) {
-      return;
-    }
-
-    const passport = passportFactory({ jwtSecret });
-    this.app.middlewares.insert(passportMiddlewarePivot, passportInitialize, passportSession);
-    this.export({ passport });
-    Object.assign(routerConfig, { passport });
-  }
-
-  async setup({
-    jwtSecret,
-    jwtConfig,
-    mockUserMiddlewarePivot,
-    mockUserConfig,
-    emailTemplates,
-    rootURL,
-    storageModule,
-  }) {
-    const [{ bindRepository }, { addRouter }, { Mail }, { addLoaders }] = await this.dependencies([
-      storageModule,
-      'oors.router',
-      'oors.mailer',
-      'oors.graphql',
-    ]);
+  async setup({ mockUserMiddlewarePivot, mockUserConfig, storageModule }) {
+    await this.loadDependencies([storageModule, 'oors.router', 'oors.mailer', 'oors.graphql']);
 
     const routerConfig = {
       jwtMiddleware: this.jwtMiddleware,
     };
+
+    await this.setupRepositories();
+    this.setupServices();
+    this.setupPermissions();
+
+    this.export({
+      gqlMiddlewares,
+      jwtMiddleware: this.jwtMiddleware,
+    });
+
+    this.configurePassport(routerConfig);
+
+    if (mockUserConfig.enabled) {
+      this.app.middlewares.insert(mockUserMiddlewarePivot, {
+        ...mockUser,
+        ...mockUserConfig,
+      });
+    }
+
+    this.deps['oors.router'].addRouter('userRouter', router(routerConfig));
+  }
+
+  async setupRepositories() {
+    const { bindRepository } = this.deps[this.getConfig('storageModule')];
+    const { addLoaders } = this.deps['oors.graphql'];
 
     const repositories = {
       UserRepository: bindRepository(new UserRepositoryClass()),
@@ -137,6 +145,30 @@ class UserModule extends Module {
       accounts: addLoaders(createLoaders(AccountRepository), 'accounts'),
       userLogins: addLoaders(createLoaders(UserLoginRepository), 'userLogins'),
     };
+
+    this.export({
+      repositories,
+      loaders,
+    });
+  }
+
+  configurePassport(routerConfig) {
+    const { passportConfig, passportMiddlewarePivot, jwtSecret } = this.getConfig();
+
+    if (!passportConfig.enabled) {
+      return;
+    }
+
+    const passport = passportFactory({ jwtSecret });
+    this.app.middlewares.insert(passportMiddlewarePivot, passportInitialize, passportSession);
+    this.export({ passport });
+    Object.assign(routerConfig, { passport });
+  }
+
+  setupServices() {
+    const { jwtSecret, jwtConfig, emailTemplates, rootURL } = this.getConfig();
+    const { UserRepository, AccountRepository } = this.get('repositories');
+    const { Mail } = this.deps['oors.mailer'];
 
     const User = new UserService({
       jwtConfig: {
@@ -157,24 +189,22 @@ class UserModule extends Module {
     });
 
     this.export({
-      ...repositories,
-      loaders,
       User,
       Account,
-      gqlMiddlewares,
-      jwtMiddleware: this.jwtMiddleware,
+    });
+  }
+
+  setupPermissions() {
+    this.permissions = new PermissionsManager();
+    this.export({
+      permissions: this.permissions,
     });
 
-    this.configurePassport(routerConfig);
-
-    if (mockUserConfig.enabled) {
-      this.app.middlewares.insert(mockUserMiddlewarePivot, {
-        ...mockUser,
-        ...mockUserConfig,
+    roles.forEach(role => {
+      this.permissions.define(`is${upperFirst(role)}`, user => (user.roles || []).includes(role), {
+        description: `User "${role}" role`,
       });
-    }
-
-    addRouter('userRouter', router(routerConfig));
+    });
   }
 }
 

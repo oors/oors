@@ -9,7 +9,7 @@ export default (
 ) => async (req, res, next) => {
   const subject = options.getSubject(req);
   const object = options.getObject(req);
-  const { permissionsManager } = req.app.modules.get('oors.security');
+  const { permissionsManager } = req.app.modules.get('oors.user');
 
   try {
     const isAllowed = await permissionsManager.can({

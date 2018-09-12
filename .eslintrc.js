@@ -37,7 +37,6 @@ module.exports = {
       'oors-mongodb',
       'oors-presets',
       'oors-router',
-      'oors-security',
       'oors-sentry',
       'oors-user',
     ],

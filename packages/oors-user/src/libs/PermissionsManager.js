@@ -1,5 +1,4 @@
-import assert from 'assert';
-import Joi from 'joi';
+import invariant from 'invariant';
 import flattenDeep from 'lodash/flattenDeep';
 import pick from 'lodash/pick';
 import NotAllowed from '../errors/NotAllowed';
@@ -12,16 +11,14 @@ class PermissionsManager {
     }));
   }
 
-  constructor({
-    extractor = subject => subject.permissions,
+  constructor(
     aliases = {
       view: 'read',
       access: 'read',
     },
-  }) {
+  ) {
     this.permissions = {};
-    this.aliases = aliases;
-    this.extractor = extractor;
+    this.aliases = aliases || {};
   }
 
   createAlias(forPermission, toPermission) {
@@ -34,10 +31,7 @@ class PermissionsManager {
         ...acc,
         {
           permission,
-          ...pick(this.permissions[permission], [
-            'description',
-            'dependencies',
-          ]),
+          ...pick(this.permissions[permission], ['description', 'dependencies']),
         },
       ],
       [],
@@ -48,25 +42,29 @@ class PermissionsManager {
     return Object.keys(this.permissions).includes(name);
   }
 
-  define(permission, rawConfig = {}) {
+  define(permission, check, rawConfig = {}) {
     if (Array.isArray(permission)) {
-      return permission.forEach(
-        ({ permission: permissionName, ...itemConfig }) =>
-          this.define(permissionName, { ...rawConfig, ...itemConfig }),
+      return permission.forEach(({ permission: permissionName, ...itemConfig }) =>
+        this.define(permissionName, check, { ...rawConfig, ...itemConfig }),
       );
     }
 
-    const config = Joi.attempt(rawConfig, {
-      description: Joi.string().default(`${permission} permission definition`),
-      dependencies: Joi.array().default([]),
-      check: Joi.func().default(() => true),
-      isValidObject: Joi.func().default(() => true),
-    });
+    invariant(permission && typeof permission === 'string', 'Permissions name is required!');
+    invariant(
+      typeof check === 'function',
+      `Missing required check function for "${permission}" permission!`,
+    );
+
+    const config = {
+      description: `${permission} permission definition`,
+      dependencies: [],
+      isValidObject: () => true,
+      ...rawConfig,
+      check,
+    };
 
     if (this.has(permission)) {
-      throw new Error(
-        `Can't add permission with a name of ${permission}. Already exists!`,
-      );
+      throw new Error(`Can't add permission with a name of ${permission}. Already exists!`);
     }
 
     const dependencies = flattenDeep(config.dependencies);
@@ -108,38 +106,22 @@ class PermissionsManager {
 
     return parallel
       ? Promise.all(walkPermissions.map(task => task()))
-      : walkPermissions.reduce(
-          (promise, task) => promise.then(task),
-          Promise.resolve(),
-        );
+      : walkPermissions.reduce((promise, task) => promise.then(task), Promise.resolve());
   }
 
   async check(subject, permissionName, object) {
-    assert(subject, 'Subject is required!');
-    assert(
-      permissionName && typeof permissionName === 'string',
-      'Permission is required!',
-    );
+    invariant(subject, 'Subject is required!');
+    invariant(permissionName && typeof permissionName === 'string', 'Permission is required!');
 
     const name = Object.keys(this.aliases).includes(permissionName)
       ? this.aliases[permissionName]
       : permissionName;
 
     if (!this.has(name)) {
-      throw new Error(
-        `Unable to find permission named "${name}" when checking access.`,
-      );
+      throw new Error(`Unable to find permission named "${name}" when checking access.`);
     }
 
     const permission = this.permissions[name];
-
-    const subjectPermissions = await this.extractor(subject);
-
-    if (!subjectPermissions.includes(name)) {
-      throw new NotAllowed(
-        `Failed permission check "${name}"! Reason: permission not included in the list of subjects permissions (${subjectPermissions}).`,
-      );
-    }
 
     if (!permission.isValidObject(object)) {
       throw new NotAllowed(
@@ -147,14 +129,14 @@ class PermissionsManager {
       );
     }
 
-    await this.checkAll(subject, permission.dependencies, object);
+    if (permission.dependencies.length) {
+      await this.checkAll(subject, permission.dependencies, object);
+    }
 
     const isAllowed = await permission.check(subject, object);
 
     if (!isAllowed) {
-      throw new NotAllowed(
-        `Failed permission check "${name}"! Reason: failed check function.`,
-      );
+      throw new NotAllowed(`Failed permission check "${name}"! Reason: failed check function.`);
     }
   }
 }
