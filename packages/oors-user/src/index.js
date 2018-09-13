@@ -1,5 +1,6 @@
 import { Module } from 'oors';
 import upperFirst from 'lodash/upperFirst';
+import camelCase from 'lodash/camelCase';
 import pivotSchema from 'oors/build/schemas/pivot';
 import { createLoaders } from 'oors-mongodb/build/libs/graphql';
 import UserRepositoryClass from './repositories/User';
@@ -201,9 +202,13 @@ class UserModule extends Module {
     });
 
     roles.forEach(role => {
-      this.permissions.define(`is${upperFirst(role)}`, user => (user.roles || []).includes(role), {
-        description: `User "${role}" role`,
-      });
+      this.permissions.define(
+        `is${upperFirst(camelCase(role))}`,
+        user => (user.roles || []).includes(role),
+        {
+          description: `User "${role}" role`,
+        },
+      );
     });
   }
 }
