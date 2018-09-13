@@ -67,7 +67,7 @@ class AggregationPipeline {
         : fields,
     });
 
-  lookup = (relation, { as = relation, project = false, match = false } = {}) => {
+  lookup = (relation, { as = relation, project = true, match = false } = {}) => {
     if (typeof relation === 'object') {
       return this.push({
         $lookup: relation,
