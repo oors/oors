@@ -1,18 +1,3 @@
-/**
-this.aggregate(pipeline =>
-  pipeline
-    .match({
-      age: {
-        $gt: 2,
-      },
-    })
-    .lookup('project')
-    .lookup('tags')
-    .slice(0, 10),
-);
-*/
-import set from 'lodash/set';
-
 class AggregationPipeline {
   static stages = [
     'addFields',
@@ -51,6 +36,14 @@ class AggregationPipeline {
         this[stage] = value => this.push({ [`$${stage}`]: value });
       }
     });
+  }
+
+  unshift(...operations) {
+    operations.reverse().forEach(operation => {
+      this.pipeline.unshift(...(Array.isArray(operation) ? operation : [operation]));
+    });
+
+    return this;
   }
 
   push(...operations) {
@@ -96,16 +89,11 @@ class AggregationPipeline {
     }
 
     if (project && type === 'one') {
-      const fields = {};
-
-      set(fields, `${as}.$arrayElemAt`, [`$${as}`, 0]);
-
-      // project its own fields
-      this.repository.getFields().forEach(propr => {
-        set(fields, propr, `$${propr}`);
+      this.addFields({
+        [as]: {
+          $arrayElemAt: [`$${as}`, 0],
+        },
       });
-
-      this.project(fields);
     }
 
     return this;

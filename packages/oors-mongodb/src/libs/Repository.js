@@ -1,3 +1,4 @@
+import identity from 'lodash/identity';
 import ValidationError from 'oors/build/errors/ValidationError';
 import Store from './Store';
 import AggregationPipeline from './AggregationPipeline';
@@ -73,6 +74,34 @@ class Repository extends Store {
   };
 
   createPipeline = () => new AggregationPipeline(this);
+
+  watchChanges = (onChange, ...args) => {
+    const changeStream = this.watch(...args);
+    changeStream.on('change', onChange);
+    return changeStream;
+  };
+
+  watch = (pipelineBuilder, options = {}) =>
+    this.collection.watch(pipelineBuilder(this.createPipeline()).toArray(), options);
+
+  on = (operation, cb, pipelineBuilder = identity, options = {}) => {
+    const operationType = operation === 'create' ? 'insert' : operation;
+    const changeStream = this.watchChanges(
+      change => cb(change.fullDocument, change),
+      p =>
+        pipelineBuilder(
+          p.match({
+            operationType,
+          }),
+        ),
+      {
+        fullDocument: 'updateLookup',
+        ...options,
+      },
+    );
+
+    return () => changeStream.close();
+  };
 }
 
 export default Repository;
