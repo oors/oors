@@ -95,7 +95,11 @@ config.add({
     'oors.fileStorage': {
       uploadDir: config.ref(() => path.resolve(config.get('rootDir'), './uploads')),
     },
-    'oors.graphql': {},
+    'oors.graphql': {
+      serverOptions: {
+        introspection: config.ref('isDev'),
+      },
+    },
     'oors.router': {
       middlewarePivot: {
         after: 'isMethod',
