@@ -26,7 +26,7 @@ import Ajv from 'ajv';
 import ajvKeywords from 'ajv-keywords';
 import ConstraintDirective from 'graphql-constraint-directive';
 import depthLimit from 'graphql-depth-limit';
-import { createComplexityLimitRule } from 'graphql-validation-complexity';
+import costAnalysis from 'graphql-cost-analysis';
 import mainResolvers from './graphql/resolvers';
 import modulesResolvers from './graphql/modulesResolvers';
 import LoadersMap from './libs/LoadersMap';
@@ -97,16 +97,12 @@ class Gql extends Module {
         },
         default: {},
       },
-      complexityLimit: {
+      costAnalysis: {
         type: 'object',
         properties: {
-          limit: {
+          maximumCost: {
             type: 'integer',
             default: 1000,
-          },
-          options: {
-            type: 'object',
-            default: {},
           },
         },
         default: {},
@@ -390,10 +386,7 @@ class Gql extends Module {
           this.getConfig('depthLimit.options'),
           this.getConfig('depthLimit.callback'),
         ),
-        createComplexityLimitRule(
-          this.getConfig('complexityLimit.limit'),
-          this.getConfig('complexityLimit.options'),
-        ),
+        costAnalysis(this.getConfig('costAnalysis')),
       ],
       ...this.getConfig('serverOptions'),
       ...options,
