@@ -23,6 +23,6 @@
   "homepage": "https://github.com/viczam/oors/tree/master/packages/oors/readme.md",
   "dependencies": {
     "invariant": "2.2.4",
-    "lodash": "4.17.10"
+    "lodash": "4.17.11"
   }
 }
