@@ -77,10 +77,6 @@ class UserModule extends Module {
 
   name = 'oors.user';
 
-  config = {
-    'oors.rad.autoload': false,
-  };
-
   hooks = {
     'oors.graphql.buildContext': ({ context }) => {
       Object.assign(context, {
@@ -90,6 +86,14 @@ class UserModule extends Module {
 
     'oors.router.load': () => {},
   };
+
+  constructor(...args) {
+    super(...args);
+
+    Object.assign(this.config, {
+      'oors.rad.autoload': false,
+    });
+  }
 
   initialize({ jwtSecret, emailTemplates }) {
     this.jwtMiddleware = jwtMiddleware({
