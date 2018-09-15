@@ -30,6 +30,10 @@ class Mailer extends Module {
 
   name = 'oors.mailer';
 
+  config = {
+    'oors.rad.autoload': false,
+  };
+
   initialize({ middlewarePivot }) {
     this.app.middlewares.insert(
       middlewarePivot,

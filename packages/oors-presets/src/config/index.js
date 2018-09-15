@@ -49,7 +49,7 @@ config.add({
   },
   modules: {
     'oors.rad': {
-      autoloadServices: false,
+      autoloadServices: true,
     },
     'oors.mongodb': {
       connections: [

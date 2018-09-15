@@ -4,10 +4,6 @@ import config from '../../../packages/oors-presets/build/config';
 import BlogModule from './modules/Blog';
 import RADModule from '../../../packages/oors-rad/build/index';
 
-config.add({
-  'modules.oors.rad.autoloadServices': false,
-});
-
 const app = new Application(config);
 
 app.addModules(new BlogModule());

@@ -77,6 +77,10 @@ class UserModule extends Module {
 
   name = 'oors.user';
 
+  config = {
+    'oors.rad.autoload': false,
+  };
+
   hooks = {
     'oors.graphql.buildContext': ({ context }) => {
       Object.assign(context, {
