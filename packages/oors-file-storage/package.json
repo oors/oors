@@ -1,6 +1,6 @@
 {
   "name": "oors-file-storage",
-  "version": "1.7.5",
+  "version": "1.7.6",
   "description": "oors file storage",
   "main": "build/index.js",
   "repository": {
@@ -20,8 +20,8 @@
     "fs-extra": "^7.0.0",
     "mongodb": "3.1.6",
     "multer": "1.3.1",
-    "oors": "^1.8.1",
-    "oors-mongodb": "^2.11.1",
-    "oors-router": "^1.7.5"
+    "oors": "^1.8.2",
+    "oors-mongodb": "^2.11.2",
+    "oors-router": "^1.7.6"
   }
 }
