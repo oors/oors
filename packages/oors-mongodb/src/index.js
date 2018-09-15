@@ -17,6 +17,7 @@ import Seeder from './libs/Seeder';
 import withLogger from './decorators/withLogger';
 import withTimestamps from './decorators/withTimestamps';
 import Migration from './libs/Migration';
+import Migrator from './libs/Migrator';
 
 class MongoDB extends Module {
   static schema = {
@@ -48,8 +49,18 @@ class MongoDB extends Module {
       defaultConnection: {
         type: 'string',
       },
-      migrationsDir: {
-        type: 'string',
+      migration: {
+        type: 'object',
+        properties: {
+          isEnabled: {
+            type: 'boolean',
+            default: false,
+          },
+          dir: {
+            type: 'string',
+          },
+        },
+        default: {},
       },
       logQueries: {
         type: 'boolean',
@@ -98,6 +109,117 @@ class MongoDB extends Module {
     },
     shutdown: () => this.closeConnection(),
   };
+
+  initialize({ connections, defaultConnection }) {
+    this.defaultConnectionName = defaultConnection || connections[0].name;
+
+    const names = connections.map(({ name }) => name);
+
+    if (!names.includes(this.defaultConnectionName)) {
+      throw new Error(
+        `Default connection name - "(${
+          this.defaultConnectionName
+        })" - can't be found through the list of available connections (${names})`,
+      );
+    }
+  }
+
+  async setup({ connections, logQueries, addTimestamps }) {
+    await Promise.all(connections.map(this.createConnection));
+
+    this.setupValidator();
+    this.setupMigration();
+    await this.setupSeeding();
+
+    this.onModule(this.name, 'repository', ({ repository }) => {
+      if (logQueries) {
+        withLogger()(repository);
+      }
+
+      if (addTimestamps) {
+        withTimestamps()(repository);
+      }
+    });
+
+    this.exportProperties([
+      'createConnection',
+      'closeConnection',
+      'getConnection',
+      'getConnectionDb',
+      'createStore',
+      'createRepository',
+      'bindRepository',
+      'bindRepositories',
+      'addRepository',
+      'getRepository',
+      'migrate',
+      'ajv',
+      'toOjectId',
+      'transaction',
+      'backup',
+    ]);
+  }
+
+  setupValidator() {
+    this.ajv = new Ajv({
+      allErrors: true,
+      verbose: true,
+      async: 'es7',
+      useDefaults: true,
+    });
+
+    ajvKeywords(this.ajv, 'instanceof');
+
+    this.ajv.addKeyword('isId', idValidator);
+  }
+
+  setupMigration() {
+    if (!this.getConfig('migration.isEnabled')) {
+      return;
+    }
+
+    const migrationRepository = this.addRepository('Migration', new MigrationRepository());
+
+    this.migrator = new Migrator({
+      migrationsDir: this.getConfig('migration.dir'),
+      context: {
+        app: this.app,
+        db: this.getConnectionDb(),
+      },
+      MigrationRepository: migrationRepository,
+      transaction: this.transaction,
+      backup: this.backup,
+    });
+  }
+
+  async setupSeeding() {
+    if (!this.getConfig('seeding.isEnabled')) {
+      return;
+    }
+
+    const seeder = new Seeder();
+    const seeds = {};
+
+    await Promise.all([
+      this.runHook('configureSeeder', () => {}, {
+        seeder,
+        getRepository: this.getRepository,
+      }),
+      this.runHook('loadSeedData', () => {}, {
+        seeds,
+      }),
+    ]);
+
+    if (Object.keys(seeds).length) {
+      await this.seed(seeds);
+    }
+
+    this.export({
+      seeder,
+    });
+
+    this.exportProperties(['seed', 'seeds']);
+  }
 
   createRepository = ({ methods = {}, connectionName, ...options }) => {
     const repository = new Repository(options);
@@ -194,90 +316,12 @@ class MongoDB extends Module {
 
   closeConnection = name => this.getConnection(name).close();
 
-  initialize({ connections, defaultConnection }) {
-    this.defaultConnectionName = defaultConnection || connections[0].name;
-
-    const names = connections.map(({ name }) => name);
-
-    if (!names.includes(this.defaultConnectionName)) {
-      throw new Error(
-        `Default connection name - "(${
-          this.defaultConnectionName
-        })" - can't be found through the list of available connections (${names})`,
-      );
-    }
-  }
-
-  async setup({ connections, logQueries, addTimestamps, seeding }) {
-    await Promise.all(connections.map(this.createConnection));
-
-    this.ajv = new Ajv({
-      allErrors: true,
-      verbose: true,
-      async: 'es7',
-      useDefaults: true,
-    });
-
-    ajvKeywords(this.ajv, 'instanceof');
-
-    this.ajv.addKeyword('isId', idValidator);
-
-    this.addRepository('Migration', new MigrationRepository());
-
-    if (seeding.isEnabled) {
-      const seeder = new Seeder();
-      const seeds = {};
-
-      await Promise.all([
-        this.runHook('configureSeeder', () => {}, {
-          seeder,
-          getRepository: this.getRepository,
-        }),
-        this.runHook('loadSeedData', () => {}, {
-          seeds,
-        }),
-      ]);
-
-      if (Object.keys(seeds).length) {
-        await this.seed(seeds);
-      }
-
-      this.export({
-        seeder,
-      });
-
-      this.exportProperties(['seed', 'seeds']);
-    }
-
-    this.onModule(this.name, 'repository', ({ repository }) => {
-      if (logQueries) {
-        withLogger()(repository);
-      }
-
-      if (addTimestamps) {
-        withTimestamps()(repository);
-      }
-    });
-
-    this.exportProperties([
-      'createConnection',
-      'closeConnection',
-      'getConnection',
-      'getConnectionDb',
-      'createStore',
-      'createRepository',
-      'bindRepository',
-      'bindRepositories',
-      'addRepository',
-      'getRepository',
-      'migrate',
-      'ajv',
-      'toOjectId',
-    ]);
-  }
-
   migrate = async () => {
-    const migrationsDir = this.getConfig('migrationsDir');
+    if (!this.getConfig('migration.isEnabled')) {
+      throw new Error('Migrations are not enabled!');
+    }
+
+    const migrationsDir = this.getConfig('migration.dir');
     if (!migrationsDir) {
       throw new Error(
         `Missing migrations directory! Please provide a "migrationsDir" configuration 
@@ -334,6 +378,14 @@ class MongoDB extends Module {
   seed = data => this.get('seeder').load(data);
 
   toOjectId = value => new ObjectID(value);
+
+  transaction = (cb, connectionName) => cb(this.getConnectionDb(connectionName));
+
+  // eslint-disable-next-line
+  backup = connectionName => {
+    // https://github.com/theycallmeswift/node-mongodb-s3-backup
+    // https://dzone.com/articles/auto-backup-mongodb-database-with-nodejs-on-server-1
+  };
 }
 
 export { MongoDB as default, Repository, helpers, decorators, Migration };
