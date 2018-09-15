@@ -379,7 +379,20 @@ class MongoDB extends Module {
 
   toOjectId = value => new ObjectID(value);
 
-  transaction = (cb, connectionName) => cb(this.getConnectionDb(connectionName));
+  transaction = async (cb, options = {}, connectionName) => {
+    const connection = this.getConnectionDb(connectionName);
+    const session = connection.startSession();
+    session.startTransaction(options);
+    try {
+      await cb();
+      await session.commitTransaction();
+      session.endSession();
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      throw error;
+    }
+  };
 
   // eslint-disable-next-line
   backup = connectionName => {
