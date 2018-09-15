@@ -27,9 +27,9 @@ class AggregationPipeline {
     'unwind',
   ];
 
-  constructor(repository) {
+  constructor(repository, pipeline = []) {
     this.repository = repository;
-    this.pipeline = [];
+    this.pipeline = pipeline;
     // check if using Proxy is a better alternative
     this.constructor.stages.forEach(stage => {
       if (!this[stage]) {
