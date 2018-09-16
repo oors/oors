@@ -1,0 +1,2 @@
+- autoloads services from `${module}/services/*.js`
+- creates DataLoader instances for repositories

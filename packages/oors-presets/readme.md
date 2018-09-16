@@ -1,0 +1,1 @@
+Offers preconfigured applications.
