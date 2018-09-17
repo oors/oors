@@ -1,8 +1,9 @@
 /* eslint-disable class-methods-use-this */
 
 class Job {
-  constructor(agenda) {
+  constructor(agenda, module) {
     this.agenda = agenda;
+    this.module = module;
     this.name = this.name || this.constructor.name;
     this.getConfig();
   }
@@ -14,8 +15,8 @@ class Job {
     throw new Error('Not implemented!');
   }
 
-  async save(module) {
-    return module.defineJob(this.name, () => this.run(module), this.getConfig());
+  async save(schedulerModule) {
+    return schedulerModule.defineJob(this.name, () => this.run(this.module), this.getConfig());
   }
 }
 

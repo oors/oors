@@ -165,7 +165,7 @@ class SchedulerModule extends Module {
         await Promise.all(
           files.map(file => {
             const Job = require(file).default; // eslint-disable-line global-require, import/no-dynamic-require
-            const job = new Job(this.agenda);
+            const job = new Job(this.agenda, module);
             return job.save(module);
           }),
         );
