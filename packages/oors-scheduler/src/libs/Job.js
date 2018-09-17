@@ -16,7 +16,11 @@ class Job {
   }
 
   async save(schedulerModule) {
-    return schedulerModule.defineJob(this.name, () => this.run(this.module), this.getConfig());
+    return schedulerModule.defineJob(
+      this.name,
+      async () => this.run(this.module),
+      this.getConfig(),
+    );
   }
 }
 
