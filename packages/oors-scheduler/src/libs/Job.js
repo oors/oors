@@ -9,12 +9,13 @@ class Job {
 
   getConfig() {}
 
-  run() {
+  // eslint-disable-next-line no-unused-vars
+  run(module) {
     throw new Error('Not implemented!');
   }
 
   async save(module) {
-    return module.defineJob(this.name, this.run, this.getConfig());
+    return module.defineJob(this.name, () => this.run(module), this.getConfig());
   }
 }
 
