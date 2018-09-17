@@ -93,7 +93,7 @@ class SchedulerModule extends Module {
   };
 
   defineJob = async (name, handler, options = {}) => {
-    const { interval, data, intervalOptions, when, now, ...restOptions } = {
+    const { interval, data, intervalOptions, schedule, now, ...restOptions } = {
       data: null,
       intervalOptions: {},
       ...options,
@@ -113,12 +113,12 @@ class SchedulerModule extends Module {
       await this.get('every')(interval, name, data, intervalOptions);
     }
 
-    if (when) {
-      await this.get('schedule')(when, name, data);
+    if (schedule) {
+      await this.get('schedule')(schedule, name, data);
     }
 
     if (now) {
-      await this.get('now')(when, name, data);
+      await this.get('now')(name, data);
     }
   };
 
