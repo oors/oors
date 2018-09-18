@@ -67,9 +67,18 @@ class Repository extends Store {
     return bulk.execute();
   };
 
-  aggregate = (callback, options = {}) => {
-    const result = callback(this.createPipeline());
-    const pipeline = Array.isArray(result) ? result : result.toArray();
+  aggregate = (callbackOrPipeline, options = {}) => {
+    let pipeline;
+
+    if (typeof callbackOrPipeline === 'function') {
+      const result = callbackOrPipeline(this.createPipeline());
+      pipeline = Array.isArray(result) ? result : result.toArray();
+    } else if (callbackOrPipeline instanceof AggregationPipeline) {
+      pipeline = callbackOrPipeline.toArray();
+    } else if (!Array.isArray(callbackOrPipeline)) {
+      throw new Error('Invalid pipeline argument!');
+    }
+
     return this.collection.aggregate(pipeline, options).toArray();
   };
 
