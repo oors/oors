@@ -1,6 +1,6 @@
 {
   "name": "oors-router",
-  "version": "1.7.7",
+  "version": "1.7.8",
   "description": "oors module that helps you register routers provided by other modules",
   "main": "build/index.js",
   "repository": {
@@ -23,6 +23,6 @@
     "mongodb": "3.1.6",
     "mongodb-extended-json": "1.10.0",
     "oors": "^1.8.2",
-    "oors-mongodb": "^2.11.3"
+    "oors-mongodb": "^2.12.0"
   }
 }
