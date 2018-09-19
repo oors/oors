@@ -1,4 +1,5 @@
 import identity from 'lodash/identity';
+import get from 'lodash/get';
 import ValidationError from 'oors/build/errors/ValidationError';
 import Store from './Store';
 import AggregationPipeline from './AggregationPipeline';
@@ -64,7 +65,8 @@ class Repository extends Store {
   runBulkOperation = async (callback, { ordered = false } = {}) => {
     const bulk = this.collection[`initialize${ordered ? 'Ordered' : 'Unordered'}BulkOp`]();
     await callback(bulk);
-    return bulk.execute();
+    const hasOperations = get(bulk, 's.currentBatch.operations', []).length > 0;
+    return hasOperations ? bulk.execute() : false;
   };
 
   aggregate = (callbackOrPipeline, options = {}) => {
