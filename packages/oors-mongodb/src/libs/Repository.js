@@ -13,7 +13,6 @@ class Repository extends Store {
     super(collection);
     this.schema = schema || this.constructor.schema;
     this.collectionName = collectionName || this.constructor.getCollectionName();
-    this.relations = {};
   }
 
   // eslint-disable-next-line
@@ -30,34 +29,6 @@ class Repository extends Store {
     }
 
     return data;
-  }
-
-  addRelation = (name, options) => {
-    const { repositoryName, collectionName, type, localField, foreignField } = options;
-    const repository = options.repository || this.getRepository(repositoryName);
-
-    this.relations[name] = {
-      repositoryName,
-      repository,
-      collectionName: collectionName || repository.collectionName,
-      type,
-      localField,
-      foreignField,
-    };
-
-    return this;
-  };
-
-  relationToLookup(name, options = {}) {
-    const { collectionName, localField, foreignField, as } = this.relations[name];
-
-    return {
-      from: collectionName,
-      localField,
-      foreignField,
-      as: as || name,
-      ...options,
-    };
   }
 
   getFields = () => Object.keys(this.schema.properties);

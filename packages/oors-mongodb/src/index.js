@@ -79,6 +79,8 @@ class MongoDB extends Module {
 
   repositories = {};
 
+  relations = {};
+
   hooks = {
     'oors.graphql.buildContext': ({ context }) => {
       const { fromMongo, fromMongoCursor, fromMongoArray, toMongo } = helpers;
@@ -129,6 +131,11 @@ class MongoDB extends Module {
         repository.validate ||
         (repository.schema ? this.ajv.compile(repository.schema) : () => true),
       getRepository: this.getRepository,
+      relationToLookup: (name, options = {}) => ({
+        ...this.relationToLookup(repository.collectionName, name),
+        ...options,
+      }),
+      getRelation: name => this.relations[repository.collectionName][name],
     });
 
     repository.configure({
@@ -273,6 +280,8 @@ class MongoDB extends Module {
       'migrate',
       'ajv',
       'toOjectId',
+      'addRelation',
+      'configureRelations',
     ]);
   }
 
@@ -334,6 +343,47 @@ class MongoDB extends Module {
   seed = data => this.get('seeder').load(data);
 
   toOjectId = value => new ObjectID(value);
+
+  configureRelations = configure => configure({ add: this.addRelation, relations: this.relations });
+
+  parseRelationNode = node => ({
+    ...node,
+    collectionName:
+      node.collectionName ||
+      (node.repositoryName && this.getRepository(node.repositoryName).collectionName) ||
+      (node.repository && node.repository.collectionName),
+  });
+
+  addRelation = ({ type, inversedType, ...args }) => {
+    const from = this.parseRelationNode(args.from);
+    const to = this.parseRelationNode(args.to);
+
+    if (!this.relations[from.collectionName]) {
+      this.relations[from.collectionName] = {};
+    }
+
+    this.relations[from.collectionName][from.name] = {
+      collectionName: to.collectionName,
+      localField: from.field,
+      foreignField: to.field,
+      type,
+    };
+
+    if (inversedType && to.name) {
+      this.addRelation({
+        from: to,
+        to: from,
+        type: inversedType,
+      });
+    }
+  };
+
+  relationToLookup = (collectionName, name) => ({
+    from: this.relations[collectionName][name].collectionName,
+    localField: this.relations[collectionName][name].localField,
+    foreignField: this.relations[collectionName][name].foreignField,
+    as: name,
+  });
 }
 
 export { MongoDB as default, Repository, helpers, decorators, Migration };
