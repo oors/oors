@@ -7,11 +7,10 @@ export default {
           query,
         });
       }
+      return next();
     } catch (err) {
       return next(err);
     }
-
-    return next();
   },
   params: {},
 };
