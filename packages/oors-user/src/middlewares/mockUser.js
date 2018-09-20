@@ -3,7 +3,7 @@ export default {
   factory: query => async (req, res, next) => {
     try {
       if (!req.user) {
-        req.user = await req.app.modules.get('oors.user').UserRepository.findOne({
+        req.user = await req.app.modules.get('oors.user').repositories.UserRepository.findOne({
           query,
         });
       }
