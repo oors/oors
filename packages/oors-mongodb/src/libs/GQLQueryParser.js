@@ -95,7 +95,7 @@ class GQLQueryParser {
         return acc;
       }
 
-      if (Object.keys(this.relations[collectionName]).includes(field)) {
+      if (Object.keys(this.relations[collectionName] || {}).includes(field)) {
         node.type = this.constructor.NODE_TYPES.RELATION;
         node.children = this.parseQuery(
           value,
