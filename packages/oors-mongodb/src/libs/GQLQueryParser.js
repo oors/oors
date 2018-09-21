@@ -148,11 +148,13 @@ class GQLQueryParser {
 
   visitBranch = (branch, nodeVisitors, parent) => {
     branch.forEach(node => {
-      if (node.type === this.constructor.NODE_TYPES.FIELD) {
-        nodeVisitors.forEach(nodeVisitor => nodeVisitor(node, branch, parent));
-      } else if (node.type === this.constructor.NODE_TYPES.LOGICAL_QUERY) {
+      nodeVisitors.forEach(nodeVisitor => nodeVisitor(node, branch, parent));
+
+      if (node.type === this.constructor.NODE_TYPES.LOGICAL_QUERY) {
         node.children.forEach(childNodes => this.visitBranch(childNodes, nodeVisitors, node));
-      } else if (node.type === this.constructor.NODE_TYPES.RELATION) {
+      }
+
+      if (node.type === this.constructor.NODE_TYPES.RELATION) {
         this.visitBranch(node.children, nodeVisitors, node);
       }
     });
