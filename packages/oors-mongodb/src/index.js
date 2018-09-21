@@ -74,6 +74,11 @@ class MongoDB extends Module {
     required: ['connections'],
   };
 
+  static RELATION_TYPE = {
+    ONE: 'one',
+    MANY: 'many',
+  };
+
   name = 'oors.mongodb';
 
   connections = {};
@@ -350,7 +355,12 @@ class MongoDB extends Module {
 
   toOjectId = value => new ObjectID(value);
 
-  configureRelations = configure => configure({ add: this.addRelation, relations: this.relations });
+  configureRelations = configure =>
+    configure({
+      add: this.addRelation,
+      relations: this.relations,
+      RELATION_TYPE: this.constructor.RELATION_TYPE,
+    });
 
   parseRelationNode = node => ({
     ...node,
