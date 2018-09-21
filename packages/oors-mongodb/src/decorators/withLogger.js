@@ -6,11 +6,13 @@ export default (log = console.log.bind(console)) => repository =>
     beforeAll: (method, ...args) => {
       const { name } = repository.constructor;
       const { collectionName } = repository;
-      const formattedArgs = util.inspect(args, {
+      const finalArgs =
+        method === 'aggregate' ? [repository.toMongoPipeline(args[0]), ...args.slice(1)] : args;
+      const formattedArgs = util.inspect(finalArgs, {
         depth: null,
         colors: true,
       });
 
-      log(`${name}.${method} (${collectionName}) called with args: ${formattedArgs}!`);
+      log(`${name}.${method} (${collectionName}) called with args: \n${formattedArgs}`);
     },
   })(repository);

@@ -40,20 +40,24 @@ class Repository extends Store {
     return hasOperations ? bulk.execute() : false;
   };
 
-  aggregate = (callbackOrPipeline, options = {}) => {
-    let pipeline;
+  toMongoPipeline = pipeline => {
+    if (typeof pipeline === 'function') {
+      return this.toMongoPipeline(pipeline(this.createPipeline()));
+    }
 
-    if (typeof callbackOrPipeline === 'function') {
-      const result = callbackOrPipeline(this.createPipeline());
-      pipeline = Array.isArray(result) ? result : result.toArray();
-    } else if (callbackOrPipeline instanceof AggregationPipeline) {
-      pipeline = callbackOrPipeline.toArray();
-    } else if (!Array.isArray(callbackOrPipeline)) {
+    if (pipeline instanceof AggregationPipeline) {
+      return pipeline.toArray();
+    }
+
+    if (!Array.isArray(pipeline)) {
       throw new Error('Invalid pipeline argument!');
     }
 
-    return this.collection.aggregate(pipeline, options).toArray();
+    return pipeline;
   };
+
+  aggregate = (pipeline, options = {}) =>
+    this.collection.aggregate(this.toMongoPipeline(pipeline), options).toArray();
 
   createPipeline = initialPipeline => new AggregationPipeline(this, initialPipeline);
 
