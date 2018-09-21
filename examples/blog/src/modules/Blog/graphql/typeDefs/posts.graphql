@@ -46,6 +46,7 @@ input BlogPostFilter {
   title_contains: String
   body_contains: String
   isHidden: Boolean
+  category: BlogCategoryFilter
 }
 
 input BlogPostInput {

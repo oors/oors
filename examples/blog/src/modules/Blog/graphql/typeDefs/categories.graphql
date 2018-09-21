@@ -35,6 +35,7 @@ input BlogCategoryFilter {
   id: ID
   id_in: [ID!]
   id_not_in: [ID!]
+  name_contains: String
 }
 
 input BlogCategoryInput {
