@@ -289,7 +289,7 @@ class MongoDB extends Module {
       'getRepository',
       'migrate',
       'ajv',
-      'toOjectId',
+      'toObjectId',
       'addRelation',
       'configureRelations',
       'gqlQueryParser',
@@ -353,7 +353,7 @@ class MongoDB extends Module {
 
   seed = data => this.get('seeder').load(data);
 
-  toOjectId = value => new ObjectID(value);
+  toObjectId = value => new ObjectID(value);
 
   configureRelations = configure =>
     configure({
