@@ -17,6 +17,7 @@ import Seeder from './libs/Seeder';
 import withLogger from './decorators/withLogger';
 import withTimestamps from './decorators/withTimestamps';
 import Migration from './libs/Migration';
+import GQLQueryParser from './libs/GQLQueryParser';
 
 class MongoDB extends Module {
   static schema = {
@@ -136,6 +137,7 @@ class MongoDB extends Module {
         ...options,
       }),
       getRelation: name => this.relations[repository.collectionName][name],
+      getRelations: () => this.relations[repository.collectionName],
     });
 
     repository.configure({
@@ -266,6 +268,8 @@ class MongoDB extends Module {
       }
     });
 
+    this.gqlQueryParser = new GQLQueryParser(this);
+
     this.exportProperties([
       'createConnection',
       'closeConnection',
@@ -282,6 +286,7 @@ class MongoDB extends Module {
       'toOjectId',
       'addRelation',
       'configureRelations',
+      'gqlQueryParser',
     ]);
   }
 
