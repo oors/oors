@@ -10,7 +10,7 @@ class GQLQueryParser {
     LOGICAL_QUERY: Symbol('nestedQuery'),
   };
 
-  static defaultNodeResolvers = [
+  static defaultNodeVisitors = [
     node => {
       if (
         node.type === GQLQueryParser.NODE_TYPES.FIELD &&
@@ -147,27 +147,25 @@ class GQLQueryParser {
     }, {});
   }
 
-  applyNodeResolvers = (branch, nodeResolvers, parent) => {
+  applyNodeVisitors = (branch, nodeVisitors, parent) => {
     branch.forEach(node => {
       if (node.type === this.constructor.NODE_TYPES.FIELD) {
-        nodeResolvers.forEach(nodeResolver => nodeResolver(node, branch, parent));
+        nodeVisitors.forEach(nodeVisitor => nodeVisitor(node, branch, parent));
       } else if (node.type === this.constructor.NODE_TYPES.LOGICAL_QUERY) {
-        node.children.forEach(childNodes =>
-          this.applyNodeResolvers(childNodes, nodeResolvers, node),
-        );
+        node.children.forEach(childNodes => this.applyNodeVisitors(childNodes, nodeVisitors, node));
       } else if (node.type === this.constructor.NODE_TYPES.RELATION) {
-        this.applyNodeResolvers(node.children, nodeResolvers, node);
+        this.applyNodeVisitors(node.children, nodeVisitors, node);
       }
     });
   };
 
   toPipeline(
     { where = {}, skip, after, first, last, pivot, orderBy = [] } = {},
-    { repository, pipeline = repository.createPipeline(), nodeResolvers = [] },
+    { repository, pipeline = repository.createPipeline(), nodeVisitors = [] },
   ) {
     const tree = this.parseQuery(where, repository.collectionName);
 
-    this.applyNodeResolvers(tree, [...this.constructor.defaultNodeResolvers, ...nodeResolvers]);
+    this.applyNodeVisitors(tree, [...this.constructor.defaultNodeVisitors, ...nodeVisitors]);
 
     const matchersBranch = tree.filter(node => node.type !== this.constructor.NODE_TYPES.RELATION);
 
