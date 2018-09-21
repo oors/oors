@@ -1,6 +1,7 @@
 import has from 'lodash/has';
 import get from 'lodash/get';
 import escapeRegexp from 'escape-string-regexp';
+import { ObjectID as objectId } from 'mongodb';
 
 class GQLQueryParser {
   static NODE_TYPES = {
@@ -8,6 +9,20 @@ class GQLQueryParser {
     RELATION: Symbol('relation'),
     LOGICAL_QUERY: Symbol('nestedQuery'),
   };
+
+  static defaultNodeResolvers = [
+    node => {
+      if (
+        node.type === GQLQueryParser.NODE_TYPES.FIELD &&
+        (node.field === 'id' || node.fieldName === 'id')
+      ) {
+        Object.assign(node, {
+          value: Array.isArray(node.value) ? node.value.map(objectId) : objectId(node.value),
+          fieldName: '_id',
+        });
+      }
+    },
+  ];
 
   constructor(module) {
     this.module = module;
@@ -69,6 +84,7 @@ class GQLQueryParser {
         field,
         value,
         operator: null,
+        parent: null,
         children: null,
       };
 
@@ -103,13 +119,8 @@ class GQLQueryParser {
     }, []);
   }
 
-  branchToMongo(branch, namespace = '', fieldResolvers = {}) {
+  branchToMongo(branch, namespace = '') {
     return branch.reduce((acc, node) => {
-      if (fieldResolvers[node.field]) {
-        fieldResolvers[node.field](acc, node, branch);
-        return acc;
-      }
-
       if (node.type === this.constructor.NODE_TYPES.FIELD) {
         Object.assign(acc, {
           [`${namespace}${node.fieldName}`]: node.operator
@@ -121,14 +132,14 @@ class GQLQueryParser {
       if (node.type === this.constructor.NODE_TYPES.LOGICAL_QUERY) {
         Object.assign(acc, {
           [`$${node.field.toLowerCase()}`]: node.children.map(children =>
-            this.branchToMongo(children, namespace, fieldResolvers),
+            this.branchToMongo(children, namespace),
           ),
         });
       }
 
       if (node.type === this.constructor.NODE_TYPES.RELATION) {
         Object.assign(acc, {
-          [node.field]: this.branchToMongo(node.children, '', fieldResolvers),
+          [node.field]: this.branchToMongo(node.children, ''),
         });
       }
 
@@ -136,20 +147,37 @@ class GQLQueryParser {
     }, {});
   }
 
+  applyNodeResolvers = (branch, nodeResolvers, parent) => {
+    branch.forEach(node => {
+      if (node.type === this.constructor.NODE_TYPES.FIELD) {
+        nodeResolvers.forEach(nodeResolver => nodeResolver(node, branch, parent));
+      } else if (node.type === this.constructor.NODE_TYPES.LOGICAL_QUERY) {
+        node.children.forEach(childNodes =>
+          this.applyNodeResolvers(childNodes, nodeResolvers, node),
+        );
+      } else if (node.type === this.constructor.NODE_TYPES.RELATION) {
+        this.applyNodeResolvers(node.children, nodeResolvers, node);
+      }
+    });
+  };
+
   toPipeline(
     { where = {}, skip, after, first, last, pivot, orderBy = [] } = {},
-    { repository, pipeline = repository.createPipeline(), fieldResolvers = {} },
+    { repository, pipeline = repository.createPipeline(), nodeResolvers = [] },
   ) {
     const tree = this.parseQuery(where, repository.collectionName);
+
+    this.applyNodeResolvers(tree, [...this.constructor.defaultNodeResolvers, ...nodeResolvers]);
+
     const matchersBranch = tree.filter(node => node.type !== this.constructor.NODE_TYPES.RELATION);
 
     if (matchersBranch.length) {
-      pipeline.match(this.branchToMongo(matchersBranch, '', fieldResolvers));
+      pipeline.match(this.branchToMongo(matchersBranch, ''));
     }
 
     tree.filter(node => node.type === this.constructor.NODE_TYPES.RELATION).forEach(node => {
       pipeline.lookup(node.field);
-      pipeline.match(this.branchToMongo(node.children, `${node.field}.`, fieldResolvers));
+      pipeline.match(this.branchToMongo(node.children, `${node.field}.`));
     });
 
     if (pivot) {
