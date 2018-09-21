@@ -101,7 +101,7 @@ class MongoDB extends Module {
         fromMongoArray,
         toMongo,
         getRepository: this.getRepository,
-        toOjectId: this.toOjectId,
+        toObjectId: this.toObjectId,
         gqlQueryParser: this.gqlQueryParser,
       });
     },
