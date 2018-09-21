@@ -83,7 +83,7 @@ export const createCRUDResolvers = config => {
       required: ['where'],
     })(async (_, args, ctx) => {
       const results = await getLoaders(ctx).aggregate.load(createPipeline(args, ctx).limit(1));
-      return results.length > 0 ? results[0] : null;
+      return results.length > 0 ? ctx.fromMongo(results[0]) : null;
     }),
     findMany: withSchema({
       type: 'object',
@@ -103,7 +103,9 @@ export const createCRUDResolvers = config => {
         });
       }
 
-      return getLoaders(ctx).aggregate.load(createPipeline(args, ctx));
+      return getLoaders(ctx)
+        .aggregate.load(createPipeline(args, ctx))
+        .then(ctx.fromMongoArray);
     }),
     count: async (_, args, ctx) => {
       const results = await getLoaders(ctx).aggregate.load(createPipeline(args, ctx).count());
@@ -213,8 +215,7 @@ export const createLoaders = Repository => ({
     },
   },
   aggregate: {
-    loader: pipelines =>
-      Promise.all(pipelines.map(pipeline => Repository.aggregate(pipeline).then(fromMongoArray))),
+    loader: pipelines => Promise.all(pipelines.map(pipeline => Repository.aggregate(pipeline))),
     options: {
       cacheKeyFn: key => JSON.stringify(Repository.toMongoPipeline(key)),
     },
