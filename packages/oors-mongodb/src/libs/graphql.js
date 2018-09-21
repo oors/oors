@@ -1,11 +1,9 @@
 /* eslint-disable no-case-declarations */
 import invariant from 'invariant';
 import identity from 'lodash/identity';
-import update from 'lodash/update';
 import omit from 'lodash/omit';
 import withSchema from 'oors-graphql/build/decorators/withSchema';
 import { ObjectID as objectId } from 'mongodb';
-import QueryBuilder from './QueryBuilder';
 import { fromMongo, fromMongoArray } from './helpers';
 
 const createPaginationSchema = ({ maxPerPage, defaultPerPage } = {}) => ({
@@ -34,11 +32,11 @@ const createPaginationSchema = ({ maxPerPage, defaultPerPage } = {}) => ({
 });
 
 export const createCRUDResolvers = config => {
-  const { queryBuilder, getLoaders, canDelete, canUpdate, wrapQuery, pagination } = {
-    queryBuilder: new QueryBuilder(),
-    wrapQuery: () => identity,
+  const { getLoaders, canDelete, canUpdate, wrapPipeline, nodeVisitors, pagination } = {
+    wrapPipeline: () => identity,
     canDelete: () => true,
     canUpdate: () => true,
+    nodeVisitors: [],
     ...config,
     pagination: {
       maxPerPage: 20,
@@ -59,16 +57,18 @@ export const createCRUDResolvers = config => {
       context as argument and returns DataLoader instances)`,
   );
 
-  const findManyQuery = (...args) =>
-    update(queryBuilder.toQuery(...args), 'query', wrapQuery(...args));
-  const findOneQuery = (...args) =>
-    update(queryBuilder.toQuery(...args), 'query', wrapQuery(...args));
-  const countQuery = (...args) =>
-    update(queryBuilder.toQuery(...args), 'query', wrapQuery(...args));
   const getRepository =
     typeof config.getRepository === 'string'
       ? ctx => ctx.getRepository(config.getRepository)
       : config.getRepository;
+
+  const createPipeline = (args, ctx) =>
+    wrapPipeline(args, ctx)(
+      ctx.gqlQueryParser.toPipeline(args, {
+        repository: getRepository(ctx),
+        nodeVisitors,
+      }),
+    );
 
   return {
     findById: (_, { id }, ctx) => getLoaders(ctx).findById.load(id),
@@ -81,7 +81,10 @@ export const createCRUDResolvers = config => {
         },
       },
       required: ['where'],
-    })((_, args, ctx) => getLoaders(ctx).findOne.load(findOneQuery(args, ctx))),
+    })(async (_, args, ctx) => {
+      const results = await getLoaders(ctx).aggregate.load(createPipeline(args, ctx).limit(1));
+      return results.length > 0 ? results[0] : null;
+    }),
     findMany: withSchema({
       type: 'object',
       properties: {
@@ -100,9 +103,12 @@ export const createCRUDResolvers = config => {
         });
       }
 
-      return getLoaders(ctx).findMany.load(findManyQuery(args, ctx));
+      return getLoaders(ctx).aggregate.load(createPipeline(args, ctx));
     }),
-    count: (_, args, ctx) => getRepository(ctx).count(countQuery(args, ctx)),
+    count: async (_, args, ctx) => {
+      const results = await getLoaders(ctx).aggregate.load(createPipeline(args, ctx).count());
+      return Array.isArray(results) && results.length > 0 ? results[0].count : null;
+    },
     createOne: async (_, { input }, ctx) =>
       ctx.fromMongo(await getRepository(ctx).createOne(input)),
     createMany: async (_, args, ctx) =>
@@ -110,7 +116,12 @@ export const createCRUDResolvers = config => {
     updateOne: async (_, args, ctx) => {
       const { input } = args;
       const Repository = getRepository(ctx);
-      const item = args.item || (await Repository.findOne(findOneQuery(args, ctx)));
+      let { item } = args.item;
+
+      if (item === undefined) {
+        const results = await getLoaders(ctx).aggregate.load(createPipeline(args, ctx).limit(1));
+        item = Array.isArray(results) && results.length > 0 ? results[0] : undefined;
+      }
 
       if (!item) {
         throw new Error('Unable to find item!');
@@ -143,7 +154,12 @@ export const createCRUDResolvers = config => {
     },
     deleteOne: async (_, args, ctx) => {
       const Repository = getRepository(ctx);
-      const item = args.item || (await Repository.findOne(findOneQuery(args, ctx)));
+      let { item } = args.item;
+
+      if (item === undefined) {
+        const results = await getLoaders(ctx).aggregate.load(createPipeline(args, ctx).limit(1));
+        item = Array.isArray(results) && results.length > 0 ? results[0] : undefined;
+      }
 
       if (!item) {
         throw new Error('Unable to find item!');
@@ -194,6 +210,13 @@ export const createLoaders = Repository => ({
       Promise.all(queries.map((query = {}) => Repository.findMany(query).then(fromMongoArray))),
     options: {
       cacheKeyFn: key => JSON.stringify(key),
+    },
+  },
+  aggregate: {
+    loader: pipelines =>
+      Promise.all(pipelines.map(pipeline => Repository.aggregate(pipeline).then(fromMongoArray))),
+    options: {
+      cacheKeyFn: key => JSON.stringify(Repository.toMongoPipeline(key)),
     },
   },
   count: {
