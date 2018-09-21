@@ -147,14 +147,14 @@ class GQLQueryParser {
     }, {});
   }
 
-  applyNodeVisitors = (branch, nodeVisitors, parent) => {
+  visitBranch = (branch, nodeVisitors, parent) => {
     branch.forEach(node => {
       if (node.type === this.constructor.NODE_TYPES.FIELD) {
         nodeVisitors.forEach(nodeVisitor => nodeVisitor(node, branch, parent));
       } else if (node.type === this.constructor.NODE_TYPES.LOGICAL_QUERY) {
-        node.children.forEach(childNodes => this.applyNodeVisitors(childNodes, nodeVisitors, node));
+        node.children.forEach(childNodes => this.visitBranch(childNodes, nodeVisitors, node));
       } else if (node.type === this.constructor.NODE_TYPES.RELATION) {
-        this.applyNodeVisitors(node.children, nodeVisitors, node);
+        this.visitBranch(node.children, nodeVisitors, node);
       }
     });
   };
@@ -165,7 +165,7 @@ class GQLQueryParser {
   ) {
     const tree = this.parseQuery(where, repository.collectionName);
 
-    this.applyNodeVisitors(tree, [...this.constructor.defaultNodeVisitors, ...nodeVisitors]);
+    this.visitBranch(tree, [...this.constructor.defaultNodeVisitors, ...nodeVisitors]);
 
     const matchersBranch = tree.filter(node => node.type !== this.constructor.NODE_TYPES.RELATION);
 
