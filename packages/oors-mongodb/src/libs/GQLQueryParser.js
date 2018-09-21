@@ -10,28 +10,15 @@ class GQLQueryParser {
     LOGICAL_QUERY: Symbol('nestedQuery'),
   };
 
-  static defaultNodeVisitors = [
-    node => {
-      if (
-        node.type === GQLQueryParser.NODE_TYPES.FIELD &&
-        (node.field === 'id' || node.fieldName === 'id')
-      ) {
-        Object.assign(node, {
-          value: Array.isArray(node.value) ? node.value.map(objectId) : objectId(node.value),
-          fieldName: '_id',
-        });
-      }
-    },
-  ];
-
   constructor(module) {
     this.module = module;
     this.operators = {};
+    this.nodeVisitors = [];
 
-    this.configureOperators();
+    this.configure();
   }
 
-  configureOperators() {
+  configure() {
     this.addOperator('not', value => ({ $ne: value }));
     this.addOperator('in', value => ({ $in: value }));
     this.addOperator('notIn', value => ({ $nin: value }));
@@ -63,6 +50,18 @@ class GQLQueryParser {
       $regex: `.*${escapeRegexp(value)}$`,
       $options: 'i',
     }));
+
+    this.nodeVisitors.push(node => {
+      if (
+        node.type === this.constructor.NODE_TYPES.FIELD &&
+        (node.field === 'id' || node.fieldName === 'id')
+      ) {
+        Object.assign(node, {
+          value: Array.isArray(node.value) ? node.value.map(objectId) : objectId(node.value),
+          fieldName: '_id',
+        });
+      }
+    });
   }
 
   get relations() {
@@ -165,7 +164,7 @@ class GQLQueryParser {
   ) {
     const tree = this.parseQuery(where, repository.collectionName);
 
-    this.visitBranch(tree, [...this.constructor.defaultNodeVisitors, ...nodeVisitors]);
+    this.visitBranch(tree, [...this.nodeVisitors, ...nodeVisitors]);
 
     const matchersBranch = tree.filter(node => node.type !== this.constructor.NODE_TYPES.RELATION);
 

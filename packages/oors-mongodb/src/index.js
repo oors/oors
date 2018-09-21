@@ -97,6 +97,7 @@ class MongoDB extends Module {
         toMongo,
         getRepository: this.getRepository,
         toOjectId: this.toOjectId,
+        gqlQueryParser: this.gqlQueryParser,
       });
     },
     shutdown: () => this.closeConnection(),
