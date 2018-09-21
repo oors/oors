@@ -24,7 +24,7 @@ class CategoryRepository extends Repository {
       .lookup('posts')
       .unwind({ path: '$posts', preserveNullAndEmptyArrays: true })
       .lookup(
-        this.relations.posts.repository.relationToLookup('category', {
+        this.getRepository('blogPost').relationToLookup('category', {
           localField: 'posts.categoryId',
           as: 'posts.category',
         }),

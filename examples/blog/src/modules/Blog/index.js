@@ -7,7 +7,7 @@ class BlogModule extends Module {
   name = 'oors.blog';
 
   async setup() {
-    const [{ addRepository }] = await this.dependencies([
+    const [{ addRepository, configureRelations }] = await this.dependencies([
       'oors.mongodb',
       'oors.graphql',
       'oors.rad',
@@ -17,18 +17,21 @@ class BlogModule extends Module {
     const Category = addRepository('blogCategory', new CategoryRepository());
     addRepository('blogComment', new CommentRepository());
 
-    Post.addRelation('category', {
-      repository: Category,
-      type: 'one',
-      localField: 'categoryId',
-      foreignField: '_id',
-    });
-
-    Category.addRelation('posts', {
-      repository: Post,
-      type: 'many',
-      localField: '_id',
-      foreignField: 'categoryId',
+    configureRelations(({ add }) => {
+      add({
+        from: {
+          repository: Post,
+          field: 'categoryId',
+          name: 'category',
+        },
+        to: {
+          repository: Category,
+          field: '_id',
+          name: 'posts',
+        },
+        type: 'one',
+        inversedType: 'many',
+      });
     });
   }
 }
