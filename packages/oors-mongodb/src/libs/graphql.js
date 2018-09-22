@@ -109,7 +109,7 @@ export const createCRUDResolvers = config => {
     }),
     count: async (_, args, ctx) => {
       const results = await getLoaders(ctx).aggregate.load(createPipeline(args, ctx).count());
-      return Array.isArray(results) && results.length > 0 ? results[0].count : null;
+      return Array.isArray(results) && results.length > 0 ? results[0].count : 0;
     },
     createOne: async (_, { input }, ctx) =>
       ctx.fromMongo(await getRepository(ctx).createOne(input)),
