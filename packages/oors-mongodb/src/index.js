@@ -379,6 +379,17 @@ class MongoDB extends Module {
 
   toOjectId = value => new ObjectID(value);
 
+  isReplicaSet = async connectionName => {
+    try {
+      await this.getConnectionDb(connectionName)
+        .admin()
+        .replSetGetStatus();
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
+
   transaction = async (cb, options = {}, connectionName) => {
     const connection = this.getConnectionDb(connectionName);
     const session = connection.startSession();
