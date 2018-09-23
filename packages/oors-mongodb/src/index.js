@@ -182,6 +182,7 @@ class MongoDB extends Module {
       'transaction',
       'backup',
       'getRepository',
+      'addRepository',
     ]);
   }
 
