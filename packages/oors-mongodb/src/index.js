@@ -136,22 +136,6 @@ class MongoDB extends Module {
     this.repositoryStore = new RepositoryStore(this);
     this.relationsManager = new RelationsManager(this);
 
-    this.setupValidator();
-    this.setupMigration();
-    await this.setupSeeding();
-
-    this.onModule(this.name, 'repository', ({ repository }) => {
-      if (logQueries) {
-        withLogger()(repository);
-      }
-
-      if (addTimestamps) {
-        withTimestamps()(repository);
-      }
-    });
-
-    this.gqlQueryParser = new GQLQueryParser(this);
-
     this.export({
       createRepository: this.repositoryStore.create,
       bindRepositories: this.repositoryStore.bind,
@@ -168,6 +152,22 @@ class MongoDB extends Module {
         }),
       relationToLookup: this.relationsManager.toLookup,
     });
+
+    this.setupValidator();
+    this.setupMigration();
+    await this.setupSeeding();
+
+    this.onModule(this.name, 'repository', ({ repository }) => {
+      if (logQueries) {
+        withLogger()(repository);
+      }
+
+      if (addTimestamps) {
+        withTimestamps()(repository);
+      }
+    });
+
+    this.gqlQueryParser = new GQLQueryParser(this);
 
     this.exportProperties([
       'createConnection',
