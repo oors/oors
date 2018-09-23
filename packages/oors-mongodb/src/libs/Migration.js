@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 
 class Migration {
-  constructor(app, db) {
+  constructor({ app, db }) {
     this.app = app;
     this.db = db || this.app.modules.get('oors.mongodb').getConnectionDb();
   }
