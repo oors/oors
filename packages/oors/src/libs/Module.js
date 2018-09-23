@@ -131,6 +131,14 @@ class Module {
     this.hooks[`${moduleName}.${hook}`] = handler;
     return this;
   }
+
+  proxy(methods, receiver) {
+    methods.forEach(method => {
+      this[method] = receiver[method].bind(receiver);
+    });
+
+    this.exportProperties(methods);
+  }
 }
 
 export default Module;
