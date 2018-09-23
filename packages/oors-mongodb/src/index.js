@@ -250,7 +250,7 @@ class MongoDB extends Module {
 
     this.export({
       seeder,
-      seed: this.seeder.load,
+      seed: seeder.load,
     });
   }
 
