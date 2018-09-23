@@ -1,5 +1,6 @@
 import path from 'path';
 import glob from 'glob';
+import { getTimestampFromMigrationFile } from './helpers';
 
 class Migrator {
   constructor({
@@ -66,7 +67,7 @@ class Migrator {
     const lastDbMigrationTimestamp = lastDbMigration ? lastDbMigration.timestamp : 0;
 
     return migrationFiles
-      .filter(file => this.getTimestampFromMigrationFile(file) > lastDbMigrationTimestamp)
+      .filter(file => getTimestampFromMigrationFile(file) > lastDbMigrationTimestamp)
       .reduce(
         (promise, file) => promise.then(() => this.runSingleMigration(file)),
         Promise.resolve(),
