@@ -86,7 +86,7 @@ class Migrator {
         const result = await migration.up();
         const duration = Date.now() - startTime;
 
-        this.MigrationRepository.createOne({
+        await this.MigrationRepository.createOne({
           timestamp,
           name: migration.name,
           result,
