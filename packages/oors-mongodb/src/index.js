@@ -56,6 +56,10 @@ class MongoDB extends Module {
           dir: {
             type: 'string',
           },
+          isSilent: {
+            type: 'boolean',
+            default: false,
+          },
         },
         default: {},
       },
@@ -108,7 +112,7 @@ class MongoDB extends Module {
         fromMongoCursor,
         fromMongoArray,
         toMongo,
-        getRepository: this.get('getRepository'),
+        getRepository: this.getRepository,
         toObjectId: this.toObjectId,
         gqlQueryParser: this.gqlQueryParser,
       });
@@ -141,7 +145,6 @@ class MongoDB extends Module {
       bindRepositories: this.repositoryStore.bind,
       bindRepository: this.repositoryStore.bind,
       addRepository: this.repositoryStore.add,
-      getRepository: this.repositoryStore.get,
       relations: this.relationsManager.relations,
       addRelation: this.relationsManager.add,
       configureRelations: configure =>
@@ -179,6 +182,7 @@ class MongoDB extends Module {
       'gqlQueryParser',
       'transaction',
       'backup',
+      'getRepository',
     ]);
   }
 
@@ -213,6 +217,8 @@ class MongoDB extends Module {
       MigrationRepository: migrationRepository,
       transaction: this.transaction,
       backup: this.backup,
+      getRepository: this.getRepository,
+      silent: this.getConfig('migration.isSilent'),
     });
 
     this.export({
@@ -231,7 +237,7 @@ class MongoDB extends Module {
     await Promise.all([
       this.runHook('configureSeeder', () => {}, {
         seeder,
-        getRepository: this.get('getRepository'),
+        getRepository: this.getRepository,
       }),
       this.runHook('loadSeedData', () => {}, {
         seeds,
@@ -306,6 +312,8 @@ class MongoDB extends Module {
     // https://github.com/theycallmeswift/node-mongodb-s3-backup
     // https://dzone.com/articles/auto-backup-mongodb-database-with-nodejs-on-server-1
   };
+
+  getRepository = (...args) => this.repositoryStore.get(...args);
 }
 
 export { MongoDB as default, Repository, helpers, decorators, Migration };

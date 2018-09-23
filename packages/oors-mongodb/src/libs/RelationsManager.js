@@ -13,8 +13,7 @@ class RelationsManager {
     ...node,
     collectionName:
       node.collectionName ||
-      (node.repositoryName &&
-        this.module.get('getRepository')(node.repositoryName).collectionName) ||
+      (node.repositoryName && this.module.getRepository(node.repositoryName).collectionName) ||
       (node.repository && node.repository.collectionName),
   });
 
