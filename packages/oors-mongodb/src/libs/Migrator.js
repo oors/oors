@@ -8,6 +8,7 @@ class Migrator {
     MigrationRepository,
     transaction,
     backup,
+    getRepository,
     silent = false,
   }) {
     this.migrationsDir = migrationsDir;
@@ -19,6 +20,7 @@ class Migrator {
       await backup();
       this.print('Database backup completed.');
     };
+    this.getRepository = getRepository;
     this.silent = silent;
   }
 
@@ -83,7 +85,7 @@ class Migrator {
         const result = await migration.up();
         const duration = Date.now() - startTime;
 
-        this.getRepository('Migration').createOne({
+        this.MigrationRepository.createOne({
           timestamp,
           name: migration.name,
           result,
@@ -93,7 +95,7 @@ class Migrator {
         this.print(`Completed migration - ${fileName}`);
       });
     } catch (error) {
-      this.getRepository('Migration').createOne({
+      this.MigrationRepository.createOne({
         timestamp,
         name: migration.name,
         error,
