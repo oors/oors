@@ -231,7 +231,7 @@ class MongoDB extends Module {
     await Promise.all([
       this.runHook('configureSeeder', () => {}, {
         seeder,
-        getRepository: this.getRepository,
+        getRepository: this.get('getRepository'),
       }),
       this.runHook('loadSeedData', () => {}, {
         seeds,
