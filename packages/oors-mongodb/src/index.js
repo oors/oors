@@ -144,7 +144,6 @@ class MongoDB extends Module {
       createRepository: this.repositoryStore.create,
       bindRepositories: this.repositoryStore.bind,
       bindRepository: this.repositoryStore.bind,
-      addRepository: this.repositoryStore.add,
       relations: this.relationsManager.relations,
       addRelation: this.relationsManager.add,
       configureRelations: configure =>
@@ -314,6 +313,8 @@ class MongoDB extends Module {
   };
 
   getRepository = (...args) => this.repositoryStore.get(...args);
+
+  addRepository = (...args) => this.repositoryStore.add(...args);
 }
 
 export { MongoDB as default, Repository, helpers, decorators, Migration };
