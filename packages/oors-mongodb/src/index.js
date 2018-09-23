@@ -1,13 +1,8 @@
-import set from 'lodash/set';
-import get from 'lodash/get';
-import has from 'lodash/has';
 import Ajv from 'ajv';
 import ajvKeywords from 'ajv-keywords';
-import invariant from 'invariant';
 import { MongoClient, ObjectID } from 'mongodb';
-import path from 'path';
-import glob from 'glob';
 import { Module } from 'oors';
+import RepositoryStore from './libs/RepositoryStore';
 import Repository from './libs/Repository';
 import * as helpers from './libs/helpers';
 import idValidator from './libs/idValidator';
@@ -18,6 +13,8 @@ import withLogger from './decorators/withLogger';
 import withTimestamps from './decorators/withTimestamps';
 import Migration from './libs/Migration';
 import GQLQueryParser from './libs/GQLQueryParser';
+import Migrator from './libs/Migrator';
+import RelationsManager from './libs/RelationsManager';
 
 class MongoDB extends Module {
   static schema = {
@@ -49,8 +46,18 @@ class MongoDB extends Module {
       defaultConnection: {
         type: 'string',
       },
-      migrationsDir: {
-        type: 'string',
+      migration: {
+        type: 'object',
+        properties: {
+          isEnabled: {
+            type: 'boolean',
+            default: false,
+          },
+          dir: {
+            type: 'string',
+          },
+        },
+        default: {},
       },
       logQueries: {
         type: 'boolean',
@@ -70,22 +77,23 @@ class MongoDB extends Module {
         },
         default: {},
       },
+      transaction: {
+        type: 'object',
+        properties: {
+          isEnabled: {
+            type: 'boolean',
+            default: false,
+          },
+        },
+        default: {},
+      },
     },
     required: ['connections'],
-  };
-
-  static RELATION_TYPE = {
-    ONE: 'one',
-    MANY: 'many',
   };
 
   name = 'oors.mongodb';
 
   connections = {};
-
-  repositories = {};
-
-  relations = {};
 
   hooks = {
     'oors.graphql.buildContext': ({ context }) => {
@@ -100,7 +108,7 @@ class MongoDB extends Module {
         fromMongoCursor,
         fromMongoArray,
         toMongo,
-        getRepository: this.getRepository,
+        getRepository: this.get('getRepository'),
         toObjectId: this.toObjectId,
         gqlQueryParser: this.gqlQueryParser,
       });
@@ -108,76 +116,137 @@ class MongoDB extends Module {
     shutdown: () => this.closeConnection(),
   };
 
-  createRepository = ({ methods = {}, connectionName, ...options }) => {
-    const repository = new Repository(options);
+  initialize({ connections, defaultConnection }) {
+    this.defaultConnectionName = defaultConnection || connections[0].name;
 
-    Object.keys(methods).forEach(methodName => {
-      repository[methodName] = methods[methodName].bind(repository);
+    const names = connections.map(({ name }) => name);
+
+    if (!names.includes(this.defaultConnectionName)) {
+      throw new Error(
+        `Default connection name - "(${
+          this.defaultConnectionName
+        })" - can't be found through the list of available connections (${names})`,
+      );
+    }
+  }
+
+  async setup({ connections, logQueries, addTimestamps }) {
+    await Promise.all(connections.map(this.createConnection));
+
+    this.repositoryStore = new RepositoryStore(this);
+    this.relationsManager = new RelationsManager(this);
+
+    this.setupValidator();
+    this.setupMigration();
+    await this.setupSeeding();
+
+    this.onModule(this.name, 'repository', ({ repository }) => {
+      if (logQueries) {
+        withLogger()(repository);
+      }
+
+      if (addTimestamps) {
+        withTimestamps()(repository);
+      }
     });
 
-    this.bindRepository(repository, connectionName);
+    this.gqlQueryParser = new GQLQueryParser(this);
 
-    return repository;
-  };
-
-  bindRepositories = (repositories, connectionName) =>
-    repositories.map(repository => this.bindRepository(repository, connectionName));
-
-  bindRepository = (repository, connectionName) => {
-    invariant(
-      repository.collectionName,
-      `Missing repository collection name - ${repository.constructor.name}!`,
-    );
-
-    Object.assign(repository, {
-      collection: !repository.hasCollection()
-        ? this.getConnectionDb(connectionName).collection(repository.collectionName)
-        : repository.collection,
-      ajv: this.ajv,
-      validate:
-        repository.validate ||
-        (repository.schema ? this.ajv.compile(repository.schema) : () => true),
-      getRepository: this.getRepository,
-      relationToLookup: (name, options = {}) => ({
-        ...this.relationToLookup(repository.collectionName, name),
-        ...options,
-      }),
-      getRelation: name => this.relations[repository.collectionName][name],
-      getRelations: () => this.relations[repository.collectionName],
+    this.export({
+      createRepository: this.repositoryStore.create,
+      bindRepositories: this.repositoryStore.bind,
+      bindRepository: this.repositoryStore.bind,
+      addRepository: this.repositoryStore.add,
+      getRepository: this.repositoryStore.get,
+      relations: this.relationsManager.relations,
+      addRelation: this.relationsManager.add,
+      configureRelations: configure =>
+        configure({
+          add: this.relationsManager.add,
+          relations: this.relationsManager.relations,
+          RELATION_TYPE: this.relationsManager.constructor.RELATION_TYPE,
+        }),
+      relationToLookup: this.relationsManager.toLookup,
     });
 
-    repository.configure({
-      getRepository: this.getRepository,
+    this.exportProperties([
+      'createConnection',
+      'closeConnection',
+      'getConnection',
+      'getConnectionDb',
+      'repositoryStore',
+      'toObjectId',
+      'gqlQueryParser',
+      'transaction',
+      'backup',
+    ]);
+  }
+
+  setupValidator() {
+    this.ajv = new Ajv({
+      allErrors: true,
+      verbose: true,
+      async: 'es7',
+      useDefaults: true,
     });
 
-    return repository;
-  };
+    ajvKeywords(this.ajv, 'instanceof');
 
-  addRepository = (key, repository, options = {}) => {
-    const payload = {
-      key,
-      repository,
-      options,
-    };
+    this.ajv.addKeyword('isId', idValidator);
 
-    this.emit('repository', payload);
+    this.exportProperties(['ajv']);
+  }
 
-    set(
-      this.repositories,
-      payload.key,
-      this.bindRepository(payload.repository, options.connectionName),
-    );
-
-    return this.getRepository(payload.key);
-  };
-
-  getRepository = key => {
-    if (!has(this.repositories, key)) {
-      throw new Error(`Unable to find "${key}" repository!`);
+  setupMigration() {
+    if (!this.getConfig('migration.isEnabled')) {
+      return;
     }
 
-    return get(this.repositories, key);
-  };
+    const migrationRepository = this.addRepository('Migration', new MigrationRepository());
+
+    this.migrator = new Migrator({
+      migrationsDir: this.getConfig('migration.dir'),
+      context: {
+        app: this.app,
+        db: this.getConnectionDb(),
+      },
+      MigrationRepository: migrationRepository,
+      transaction: this.transaction,
+      backup: this.backup,
+    });
+
+    this.export({
+      migrate: this.migrator.run,
+    });
+  }
+
+  async setupSeeding() {
+    if (!this.getConfig('seeding.isEnabled')) {
+      return;
+    }
+
+    const seeder = new Seeder();
+    const seeds = {};
+
+    await Promise.all([
+      this.runHook('configureSeeder', () => {}, {
+        seeder,
+        getRepository: this.getRepository,
+      }),
+      this.runHook('loadSeedData', () => {}, {
+        seeds,
+      }),
+    ]);
+
+    if (Object.keys(seeds).length) {
+      await this.seed(seeds);
+    }
+
+    this.export({
+      seeder,
+      seed: this.seeder.load,
+    });
+  }
 
   createConnection = async ({ name, url, options }) => {
     this.connections[name] = await MongoClient.connect(
@@ -209,197 +278,34 @@ class MongoDB extends Module {
 
   closeConnection = name => this.getConnection(name).close();
 
-  initialize({ connections, defaultConnection }) {
-    this.defaultConnectionName = defaultConnection || connections[0].name;
-
-    const names = connections.map(({ name }) => name);
-
-    if (!names.includes(this.defaultConnectionName)) {
-      throw new Error(
-        `Default connection name - "(${
-          this.defaultConnectionName
-        })" - can't be found through the list of available connections (${names})`,
-      );
-    }
-  }
-
-  async setup({ connections, logQueries, addTimestamps, seeding }) {
-    await Promise.all(connections.map(this.createConnection));
-
-    this.ajv = new Ajv({
-      allErrors: true,
-      verbose: true,
-      async: 'es7',
-      useDefaults: true,
-    });
-
-    ajvKeywords(this.ajv, 'instanceof');
-
-    this.ajv.addKeyword('isId', idValidator);
-
-    this.addRepository('Migration', new MigrationRepository());
-
-    if (seeding.isEnabled) {
-      const seeder = new Seeder();
-      const seeds = {};
-
-      await Promise.all([
-        this.runHook('configureSeeder', () => {}, {
-          seeder,
-          getRepository: this.getRepository,
-        }),
-        this.runHook('loadSeedData', () => {}, {
-          seeds,
-        }),
-      ]);
-
-      if (Object.keys(seeds).length) {
-        await this.seed(seeds);
-      }
-
-      this.export({
-        seeder,
-      });
-
-      this.exportProperties(['seed', 'seeds']);
-    }
-
-    this.onModule(this.name, 'repository', ({ repository }) => {
-      if (logQueries) {
-        withLogger()(repository);
-      }
-
-      if (addTimestamps) {
-        withTimestamps()(repository);
-      }
-    });
-
-    this.gqlQueryParser = new GQLQueryParser(this);
-
-    this.exportProperties([
-      'createConnection',
-      'closeConnection',
-      'getConnection',
-      'getConnectionDb',
-      'createStore',
-      'createRepository',
-      'bindRepository',
-      'bindRepositories',
-      'addRepository',
-      'getRepository',
-      'migrate',
-      'ajv',
-      'toObjectId',
-      'addRelation',
-      'configureRelations',
-      'gqlQueryParser',
-    ]);
-  }
-
-  migrate = async () => {
-    const migrationsDir = this.getConfig('migrationsDir');
-    if (!migrationsDir) {
-      throw new Error(
-        `Missing migrations directory! Please provide a "migrationsDir" configuration 
-        directive where your migration files are located.`,
-      );
-    }
-
-    this.emit('migration:before');
-
-    const db = this.getConnectionDb();
-
-    const migrationFiles = await new Promise((resolve, reject) => {
-      glob(path.join(migrationsDir, '*.js'), (err, files) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(files);
-        }
-      });
-    });
-
-    if (!migrationFiles.length) {
-      throw new Error(
-        `No migration files have been found in the migrations directory ("${migrationsDir}")!`,
-      );
-    }
-
-    const lastDbMigration = await this.getRepository('Migration').findOne({
-      options: {
-        sort: [['timestamp', '-1']],
-      },
-    });
-
-    const lastDbMigrationTimestamp = lastDbMigration ? lastDbMigration.timestamp : 0;
-
-    return migrationFiles
-      .filter(file => helpers.getTimestampFromMigrationFile(file) > lastDbMigrationTimestamp)
-      .reduce((promise, file) => {
-        const timestamp = helpers.getTimestampFromMigrationFile(file);
-        const MigrationClass = require(file).default; // eslint-disable-line import/no-dynamic-require, global-require
-        const migration = new MigrationClass(this.app, db);
-
-        return promise.then(() =>
-          migration.up().then(() =>
-            this.getRepository('Migration').createOne({
-              timestamp,
-              name: migration.name,
-            }),
-          ),
-        );
-      }, Promise.resolve());
-  };
-
-  seed = data => this.get('seeder').load(data);
-
   toObjectId = value => new ObjectID(value);
 
-  configureRelations = configure =>
-    configure({
-      add: this.addRelation,
-      relations: this.relations,
-      RELATION_TYPE: this.constructor.RELATION_TYPE,
-    });
+  transaction = async (cb, options = {}, connectionName) => {
+    const db = this.getConnectionDb(connectionName);
 
-  parseRelationNode = node => ({
-    ...node,
-    collectionName:
-      node.collectionName ||
-      (node.repositoryName && this.getRepository(node.repositoryName).collectionName) ||
-      (node.repository && node.repository.collectionName),
-  });
-
-  addRelation = ({ type, inversedType, ...args }) => {
-    const from = this.parseRelationNode(args.from);
-    const to = this.parseRelationNode(args.to);
-
-    if (!this.relations[from.collectionName]) {
-      this.relations[from.collectionName] = {};
+    if (!this.getConfig('transaction.isEnabled')) {
+      return cb(db);
     }
 
-    this.relations[from.collectionName][from.name] = {
-      collectionName: to.collectionName,
-      localField: from.field,
-      foreignField: to.field,
-      type,
-    };
-
-    if (inversedType && to.name) {
-      this.addRelation({
-        from: to,
-        to: from,
-        type: inversedType,
-      });
+    const session = db.startSession();
+    session.startTransaction(options);
+    try {
+      const result = await cb(db);
+      await session.commitTransaction();
+      session.endSession();
+      return result;
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      throw error;
     }
   };
 
-  relationToLookup = (collectionName, name) => ({
-    from: this.relations[collectionName][name].collectionName,
-    localField: this.relations[collectionName][name].localField,
-    foreignField: this.relations[collectionName][name].foreignField,
-    as: name,
-  });
+  // eslint-disable-next-line
+  backup = connectionName => {
+    // https://github.com/theycallmeswift/node-mongodb-s3-backup
+    // https://dzone.com/articles/auto-backup-mongodb-database-with-nodejs-on-server-1
+  };
 }
 
 export { MongoDB as default, Repository, helpers, decorators, Migration };

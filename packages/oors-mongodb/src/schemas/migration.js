@@ -7,6 +7,9 @@ export default {
     name: {
       type: 'string',
     },
+    duration: {
+      type: 'integer',
+    },
   },
   required: ['timestamp'],
 };

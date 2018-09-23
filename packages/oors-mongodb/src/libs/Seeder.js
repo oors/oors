@@ -22,7 +22,7 @@ class Seeder {
     this.branches = {};
   }
 
-  addResolver(branch, resolver, refs = {}) {
+  addResolver = (branch, resolver, refs = {}) => {
     this.branches[branch] = {
       resolver,
       refs: Object.keys(refs).reduce((acc, key) => {
@@ -39,12 +39,12 @@ class Seeder {
       }, {}),
       data: null,
     };
-  }
+  };
 
-  load(data) {
+  load = data => {
     this.data = data;
     return Promise.all(Object.keys(this.data).map(this.seedBranch.bind(this)));
-  }
+  };
 
   async seedBranch(branch) {
     if (!this.branches[branch].promise) {

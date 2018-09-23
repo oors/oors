@@ -65,7 +65,7 @@ class GQLQueryParser {
   }
 
   get relations() {
-    return this.module.relations;
+    return this.module.get('relations');
   }
 
   addOperator(nameOrNames, transfomer) {

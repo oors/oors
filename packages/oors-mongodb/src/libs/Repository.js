@@ -11,8 +11,9 @@ class Repository extends Store {
 
   constructor({ collection, schema, collectionName } = {}) {
     super(collection);
-    this.schema = schema || this.constructor.schema;
-    this.collectionName = collectionName || this.constructor.getCollectionName();
+    this.schema = schema || this.schema || this.constructor.schema;
+    this.collectionName =
+      collectionName || this.collectionName || this.constructor.getCollectionName();
   }
 
   // eslint-disable-next-line
