@@ -62,13 +62,18 @@ export const createCRUDResolvers = config => {
       ? ctx => ctx.getRepository(config.getRepository)
       : config.getRepository;
 
-  const createPipeline = (args, ctx) =>
-    wrapPipeline(args, ctx)(
+  const createPipeline = (args, ctx) => {
+    const repository = getRepository(ctx);
+    const pipeline = args.pipeline || repository.createPipeline();
+
+    return wrapPipeline(args, ctx)(
       ctx.gqlQueryParser.toPipeline(args, {
-        repository: getRepository(ctx),
+        repository,
+        pipeline,
         nodeVisitors,
       }),
     );
+  };
 
   return {
     findById: (_, { id }, ctx) => getLoaders(ctx).findById.load(id),
