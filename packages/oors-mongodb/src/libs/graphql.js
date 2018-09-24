@@ -32,8 +32,17 @@ const createPaginationSchema = ({ maxPerPage, defaultPerPage } = {}) => ({
 });
 
 export const createCRUDResolvers = config => {
-  const { getLoaders, canDelete, canUpdate, wrapPipeline, nodeVisitors, pagination } = {
+  const {
+    getLoaders,
+    canDelete,
+    canUpdate,
+    wrapPipeline,
+    nodeVisitors,
+    pagination,
+    getInitialPipeline,
+  } = {
     wrapPipeline: () => identity,
+    getInitialPipeline: (args, ctx, repository) => repository.createPipeline(),
     canDelete: () => true,
     canUpdate: () => true,
     nodeVisitors: [],
@@ -64,7 +73,7 @@ export const createCRUDResolvers = config => {
 
   const createPipeline = (args, ctx) => {
     const repository = getRepository(ctx);
-    const pipeline = args.pipeline || repository.createPipeline();
+    const pipeline = args.pipeline || getInitialPipeline(args, ctx, repository);
 
     return wrapPipeline(args, ctx)(
       ctx.gqlQueryParser.toPipeline(args, {
