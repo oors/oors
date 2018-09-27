@@ -1,6 +1,6 @@
 {
   "name": "oors-cache",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "private": true,
   "main": "build/index.js",
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
@@ -10,6 +10,6 @@
     "catbox-memory": "3.1.2",
     "catbox-mongodb": "4.2.0",
     "lodash": "4.17.11",
-    "oors": "^1.8.3"
+    "oors": "^1.8.4"
   }
 }
