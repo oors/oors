@@ -55,7 +55,7 @@ class Web extends Module {
     },
   };
 
-  name = 'cjn.web';
+  name = 'oors.web';
 
   initialize({ nextMiddlewareConfig, nextMiddlewarePivot, routes }) {
     this.app.middlewares.insert(
