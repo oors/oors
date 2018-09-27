@@ -14,7 +14,7 @@
   },
   "homepage": "https://github.com/viczam/oors#readme",
   "dependencies": {
-    "ajv": "6.5.3",
+    "ajv": "6.5.4",
     "boom": "7.2.0",
     "express": "4.16.3",
     "fs-extra": "^7.0.0",
