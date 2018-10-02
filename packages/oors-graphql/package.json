@@ -31,7 +31,7 @@
     "graphql-subscriptions": "1.0.0",
     "graphql-tools": "4.0.0",
     "graphql-type-json": "0.2.1",
-    "graphql-voyager": "1.0.0-rc.25",
+    "graphql-voyager": "1.0.0-rc.26",
     "invariant": "2.2.4",
     "isomorphic-fetch": "2.2.1",
     "lodash": "4.17.11",
