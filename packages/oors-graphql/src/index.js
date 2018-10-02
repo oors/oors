@@ -26,7 +26,6 @@ import Ajv from 'ajv';
 import ajvKeywords from 'ajv-keywords';
 import ConstraintDirective from 'graphql-constraint-directive';
 import depthLimit from 'graphql-depth-limit';
-// import costAnalysis from 'graphql-cost-analysis';
 import mainResolvers from './graphql/resolvers';
 import modulesResolvers from './graphql/modulesResolvers';
 import LoadersMap from './libs/LoadersMap';
@@ -388,6 +387,7 @@ class Gql extends Module {
         ),
         // costAnalysis(this.getConfig('costAnalysis')),
       ],
+      costAnalysisConfig: this.getConfig('costAnalysis'),
       ...this.getConfig('serverOptions'),
       ...options,
     };
