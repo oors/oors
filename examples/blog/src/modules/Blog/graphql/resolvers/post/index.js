@@ -1,19 +1,25 @@
+import {
+  findMany,
+  findOne,
+  createOne,
+  updateOne,
+  deleteOne,
+} from '../../../../../../../../packages/oors-mongodb/build/libs/graphql/createResolvers';
 import { compose } from '../../../../../../../../packages/oors-graphql/build/decorators';
-import { createCRUDResolvers } from '../../../../../../../../packages/oors-mongodb/build/libs/graphql';
 import { validatePostInput, parsePostInput, validateReferences } from './decorators';
 
-const resolvers = createCRUDResolvers({
+const resolversConfig = {
   getRepository: 'blogPost',
   getLoaders: ({ loaders }) => loaders.blogPosts,
   // you can only delete and update your own posts posts
   canUpdate: (user, item) => user._id.toString() === item.createdBy.toString(),
   canDelete: (user, item) => user._id.toString() === item.createdBy.toString(),
-});
+};
 
 export default {
   Query: {
-    findManyBlogPosts: resolvers.findMany,
-    findOneBlogPost: resolvers.findOne,
+    findManyBlogPosts: findMany(resolversConfig),
+    findOneBlogPost: findOne(resolversConfig),
   },
   BlogPost: {
     author: (post, args, { loaders }) => loaders.users.findById.load(post.createdBy),
@@ -51,11 +57,11 @@ export default {
       validatePostInput,
       parsePostInput,
       validateReferences,
-    )(resolvers.createOne),
+    )(createOne(resolversConfig)),
     updateOneBlogPost: compose(
       validatePostInput,
       parsePostInput,
-    )(resolvers.updateOne),
-    deleteOneBlogPost: resolvers.deleteOne,
+    )(updateOne(resolversConfig)),
+    deleteOneBlogPost: deleteOne(resolversConfig),
   },
 };

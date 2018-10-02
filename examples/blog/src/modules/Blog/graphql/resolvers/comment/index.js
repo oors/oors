@@ -1,4 +1,7 @@
-import { createCRUDResolvers } from '../../../../../../../../packages/oors-mongodb/build/libs/graphql';
+import {
+  createOne,
+  updateOne,
+} from '../../../../../../../../packages/oors-mongodb/build/libs/graphql/createResolvers';
 import { compose } from '../../../../../../../../packages/oors-graphql/build/decorators';
 import {
   validateCreateCommentInput,
@@ -6,12 +9,12 @@ import {
   validateCreateCommentReferences,
 } from './decorators';
 
-const resolvers = createCRUDResolvers({
+const resolversConfig = {
   getRepository: 'blogComment',
   getLoaders: ({ loaders }) => loaders.blogComments,
   canUpdate: (user, item) => user._id.toString() === item.createdBy.toString(),
   canDelete: (user, item) => user._id.toString() === item.createdBy.toString(),
-});
+};
 
 export default {
   BlogComment: {
@@ -29,7 +32,7 @@ export default {
       validateCreateCommentInput,
       parseCommentInput,
       validateCreateCommentReferences,
-    )(resolvers.createOne),
-    updateOneBlogComment: compose(parseCommentInput)(resolvers.updateOne),
+    )(createOne(resolversConfig)),
+    updateOneBlogComment: compose(parseCommentInput)(updateOne(resolversConfig)),
   },
 };

@@ -1,4 +1,10 @@
-import { createCRUDResolvers } from '../../../../../../../../packages/oors-mongodb/build/libs/graphql';
+import {
+  findMany,
+  findOne,
+  createOne,
+  updateOne,
+  deleteOne,
+} from '../../../../../../../../packages/oors-mongodb/build/libs/graphql/createResolvers';
 import { withUserStamps } from '../../decorators';
 
 /**
@@ -10,15 +16,15 @@ import { withUserStamps } from '../../decorators';
  *   the bootstrap file of the module
  */
 
-const resolvers = createCRUDResolvers({
+const resolversConfig = {
   getRepository: 'blogCategory',
   getLoaders: ({ loaders }) => loaders.blogCategories,
-});
+};
 
 export default {
   Query: {
-    findManyBlogCategories: resolvers.findMany,
-    findOneBlogCategory: resolvers.findOne,
+    findManyBlogCategories: findMany(resolversConfig),
+    findOneBlogCategory: findOne(resolversConfig),
   },
   BlogCategory: {
     posts: (category, args, { loaders }) => loaders.blogPosts.findMany.load({
@@ -28,8 +34,8 @@ export default {
     }),
   },
   Mutation: {
-    createOneBlogCategory: withUserStamps(resolvers.createOne),
-    updateOneBlogCategory: withUserStamps(resolvers.updateOne),
-    deleteOneBlogCategory: resolvers.deleteOne,
+    createOneBlogCategory: withUserStamps(createOne(resolversConfig)),
+    updateOneBlogCategory: withUserStamps(updateOne(resolversConfig)),
+    deleteOneBlogCategory: deleteOne(resolversConfig),
   },
 };
