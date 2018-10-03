@@ -3,6 +3,12 @@ directive @cacheControl(
   scope: CacheControlScope
 ) on FIELD_DEFINITION | OBJECT | INTERFACE
 
+directive @cost(
+  complexity: Int
+  useMultipliers: Boolean
+  multipliers: [String]
+) on FIELD_DEFINITION | OBJECT | INTERFACE
+
 directive @constraint(
   # String constraints
   minLength: Int
