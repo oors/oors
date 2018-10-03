@@ -1,6 +1,6 @@
 {
   "name": "oors-presets",
-  "version": "1.16.11",
+  "version": "1.16.12",
   "description": "oors presets",
   "main": "build/index.js",
   "repository": {
@@ -30,14 +30,14 @@
     "node-notifier": "5.2.1",
     "oors": "^1.8.4",
     "oors-config": "^2.2.1",
-    "oors-file-storage": "^1.9.11",
-    "oors-graphql": "^2.9.2",
-    "oors-health": "^1.7.4",
-    "oors-logger": "^1.11.4",
+    "oors-file-storage": "^1.9.12",
+    "oors-graphql": "^2.10.0",
+    "oors-health": "^1.7.5",
+    "oors-logger": "^1.11.5",
     "oors-mailer": "^1.6.4",
-    "oors-mongodb": "^2.14.11",
-    "oors-rad": "^0.4.11",
-    "oors-router": "^1.9.11",
-    "oors-user": "^1.10.11"
+    "oors-mongodb": "^2.14.12",
+    "oors-rad": "^0.4.12",
+    "oors-router": "^1.9.12",
+    "oors-user": "^1.10.12"
   }
 }
