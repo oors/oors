@@ -27,6 +27,7 @@ class Web extends Module {
               },
               routes: {
                 type: 'object',
+                default: {},
               },
             },
             default: {},
@@ -48,27 +49,17 @@ class Web extends Module {
         },
         default: {},
       },
-      routes: {
-        type: 'object',
-        default: {},
-      },
     },
   };
 
   name = 'oors.web';
 
-  initialize({ nextMiddlewareConfig, nextMiddlewarePivot, routes }) {
+  initialize({ nextMiddlewareConfig, nextMiddlewarePivot }) {
     this.app.middlewares.insert(
       nextMiddlewarePivot,
       {
         ...nextInstallMiddleware,
-        ...{
-          ...nextMiddlewareConfig,
-          params: {
-            routes,
-            ...nextMiddlewareConfig.params,
-          },
-        },
+        ...nextMiddlewareConfig,
       },
       nextRenderMiddleware,
     );
