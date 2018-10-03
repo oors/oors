@@ -1,8 +1,9 @@
-/* eslint-disable no-empty */
+/* eslint-disable no-empty, import/no-dynamic-require, global-require */
 import glob from 'glob';
 import path from 'path';
 import fse from 'fs-extra';
 import get from 'lodash/get';
+import set from 'lodash/set';
 import has from 'lodash/has';
 import pick from 'lodash/pick';
 import isPlainObject from 'lodash/isPlainObject';
@@ -297,17 +298,39 @@ class Gql extends Module {
     }
 
     try {
-      // eslint-disable-next-line import/no-dynamic-require, global-require
       const resolvers = require(`${dirPath}/resolvers`);
       if (resolvers.default) {
         Object.assign(resolvers, resolvers.default);
         delete resolvers.default;
       }
       this.addResolvers(resolvers);
-    } catch (err) {}
+    } catch (err) {
+      const resolvers = await new Promise((resolve, reject) => {
+        glob(path.resolve(`${dirPath}/resolvers`, '**/*.js'), (globErr, resolversPath) => {
+          if (globErr) {
+            reject(err);
+          } else {
+            resolve(
+              resolversPath.reduce((acc, resolverPath) => {
+                const resolverName = path
+                  .relative(`${dirPath}/resolvers`, resolverPath)
+                  .slice(0, -3)
+                  .split(path.sep)
+                  .join('.');
+
+                set(acc, resolverName, require(resolverPath).default);
+
+                return acc;
+              }, {}),
+            );
+          }
+        });
+      });
+
+      this.addResolvers(resolvers);
+    }
 
     try {
-      // eslint-disable-next-line import/no-dynamic-require, global-require
       const directives = require(`${dirPath}/directives`);
       if (directives.default) {
         Object.assign(directives, directives.default);
