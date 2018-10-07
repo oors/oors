@@ -30,7 +30,7 @@ const createPaginationSchema = ({ maxPerPage, defaultPerPage } = {}) => ({
 });
 
 export const buildConfig = config => {
-  const { getLoaders, wrapPipeline, nodeVisitors, getInitialPipeline } = {
+  const { wrapPipeline, nodeVisitors, getInitialPipeline, repositoryName } = {
     wrapPipeline: () => identity,
     getInitialPipeline: (args, ctx, repository) => repository.createPipeline(),
     canDelete: () => true,
@@ -44,6 +44,21 @@ export const buildConfig = config => {
     },
   };
 
+  if (repositoryName) {
+    if (!config.getRepository) {
+      Object.assign(config, {
+        getRepository: ({ getRepository }) => getRepository(repositoryName),
+      });
+    }
+
+    if (!config.getLoaders) {
+      Object.assign(config, {
+        getLoaders: ({ app, loaders }) =>
+          loaders[app.modules.get('oors.rad').getLoadersName(repositoryName)],
+      });
+    }
+  }
+
   invariant(
     typeof config.getRepository === 'string' || typeof config.getRepository === 'function',
     `Invalid required getRepository parameter (needs to be a repository name or a function that 
@@ -51,7 +66,7 @@ export const buildConfig = config => {
   );
 
   invariant(
-    typeof getLoaders === 'function',
+    typeof config.getLoaders === 'function',
     `Invalid required getLoaders parameter (needs to be a function that will receive a resolver 
       context as argument and returns DataLoader instances)`,
   );
