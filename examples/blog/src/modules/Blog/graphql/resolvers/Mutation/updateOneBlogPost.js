@@ -36,8 +36,7 @@ export default compose(
   })),
 )(
   updateOne({
-    getRepository: 'blogPost',
-    getLoaders: ({ loaders }) => loaders.blogPosts,
+    repositoryName: 'blogPost',
     // you can only delete and update your own posts posts
     canUpdate: (user, item) => user._id.toString() === item.createdBy.toString(),
   }),

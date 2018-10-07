@@ -12,8 +12,7 @@ export default compose(
   })),
 )(
   updateOne({
-    getRepository: 'blogComment',
-    getLoaders: ({ loaders }) => loaders.blogComments,
+    repositoryName: 'blogComment',
     canUpdate: (user, item) => user._id.toString() === item.createdBy.toString(),
   }),
 );

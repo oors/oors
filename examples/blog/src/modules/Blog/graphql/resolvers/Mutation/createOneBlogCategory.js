@@ -3,7 +3,6 @@ import { withUserStamps } from '../../decorators';
 
 export default withUserStamps(
   createOne({
-    getRepository: 'blogCategory',
-    getLoaders: ({ loaders }) => loaders.blogCategories,
+    repositoryName: 'blogCategory',
   }),
 );

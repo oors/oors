@@ -44,7 +44,6 @@ export default compose(
   }),
 )(
   createOne({
-    getRepository: 'blogPost',
-    getLoaders: ({ loaders }) => loaders.blogPosts,
+    repositoryName: 'blogPost',
   }),
 );
