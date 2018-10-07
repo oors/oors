@@ -44,7 +44,7 @@ class RADModule extends Module {
 
     await this.runHook('load', this.collectFromModule);
 
-    this.exportProperties(['registerModuleService', 'setService', 'getService']);
+    this.exportProperties(['registerModuleService', 'setService', 'getService', 'getLoadersName']);
 
     if (autoCreateLoaders) {
       const { loaders } = this.deps['oors.graphql'];
