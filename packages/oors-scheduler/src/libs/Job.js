@@ -5,10 +5,11 @@ class Job {
     this.agenda = agenda;
     this.module = module;
     this.name = this.name || this.constructor.name;
-    this.getConfig();
   }
 
-  getConfig() {}
+  getConfig() {
+    return this.config || {};
+  }
 
   // eslint-disable-next-line no-unused-vars
   run(module) {
