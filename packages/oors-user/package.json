@@ -25,7 +25,7 @@
     "jsonwebtoken": "8.3.0",
     "lodash": "4.17.11",
     "moment": "2.22.2",
-    "mongodb": "3.1.6",
+    "mongodb": "3.1.7",
     "oors": "^1.8.4",
     "oors-mongodb": "^2.16.0",
     "oors-router": "^1.10.0",
