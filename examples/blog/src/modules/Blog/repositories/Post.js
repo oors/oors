@@ -36,18 +36,18 @@ class PostRepository extends Repository {
       relatedPostIds: {
         type: 'array',
         items: {
-          isId: true,
+          isObjectId: true,
         },
         default: [],
       },
       categoryId: {
-        isId: true,
+        isObjectId: true,
       },
       createdBy: {
-        isId: true,
+        isObjectId: true,
       },
       updatedBy: {
-        isId: true,
+        isObjectId: true,
       },
     },
     required: ['title', 'createdBy', 'categoryId'],

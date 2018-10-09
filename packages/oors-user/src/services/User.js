@@ -30,7 +30,7 @@ class User {
               type: 'string',
             },
             accountId: {
-              isId: true,
+              isObjectId: true,
             },
             username: {
               type: 'string',

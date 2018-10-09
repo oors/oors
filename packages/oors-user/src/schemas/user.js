@@ -4,7 +4,7 @@ export default {
   type: 'object',
   properties: {
     accountId: {
-      isId: true,
+      isObjectId: true,
     },
     username: {
       type: 'string',

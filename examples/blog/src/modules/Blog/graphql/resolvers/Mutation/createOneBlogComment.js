@@ -13,10 +13,10 @@ export default compose(
         type: 'object',
         properties: {
           parentId: {
-            isId: true,
+            isObjectId: true,
           },
           postId: {
-            isId: true,
+            isObjectId: true,
           },
         },
         required: ['postId'],

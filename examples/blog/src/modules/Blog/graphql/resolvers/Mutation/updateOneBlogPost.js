@@ -18,7 +18,7 @@ export default compose(
             enum: PostRepository.statuses, // making sure we only accept valid statuses
           },
           categoryId: {
-            isId: true,
+            isObjectId: true,
           },
         },
       },

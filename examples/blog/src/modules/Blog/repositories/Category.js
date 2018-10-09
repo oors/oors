@@ -8,10 +8,10 @@ class CategoryRepository extends Repository {
         type: 'string',
       },
       createdBy: {
-        isId: true,
+        isObjectId: true,
       },
       updatedBy: {
-        isId: true,
+        isObjectId: true,
       },
     },
     required: ['name', 'createdBy'],

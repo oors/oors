@@ -2,7 +2,7 @@ export default {
   type: 'object',
   properties: {
     userId: {
-      isId: true,
+      isObjectId: true,
     },
     ip: {
       type: 'string',

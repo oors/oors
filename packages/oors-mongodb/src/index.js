@@ -104,7 +104,7 @@ class MongoDB extends Module {
       const { fromMongo, fromMongoCursor, fromMongoArray, toMongo } = helpers;
 
       if (context.ajv) {
-        context.ajv.addKeyword('isId', idValidator);
+        context.ajv.addKeyword('isObjectId', idValidator);
       }
 
       Object.assign(context, {
@@ -196,7 +196,7 @@ class MongoDB extends Module {
 
     ajvKeywords(this.ajv, 'instanceof');
 
-    this.ajv.addKeyword('isId', idValidator);
+    this.ajv.addKeyword('isObjectId', idValidator);
 
     this.exportProperties(['ajv']);
   }

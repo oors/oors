@@ -13,11 +13,11 @@ for you.
 
 Then the resolver needs to deal with:
 
-* input validation
-  * we need to make sure the postId is a valid id of an actual post
-  * the email has to be a valid email address
-* map the arguments to a single "input" object because this is what our CRUD resolver can deal with
-* notify the admin (or post author) about the comment
+- input validation
+  - we need to make sure the postId is a valid id of an actual post
+  - the email has to be a valid email address
+- map the arguments to a single "input" object because this is what our CRUD resolver can deal with
+- notify the admin (or post author) about the comment
 
 We can achieve all of the above with decorators:
 
@@ -34,7 +34,7 @@ export default compose(
       // we only validate what graphql can't handle
       postId: {
         // making sure this is a valid id
-        isId: true,
+        isObjectId: true,
       },
       email: {
         type: 'string',

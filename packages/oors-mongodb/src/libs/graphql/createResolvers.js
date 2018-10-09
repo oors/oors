@@ -11,10 +11,10 @@ const createPaginationSchema = ({ maxPerPage, defaultPerPage } = {}) => ({
     default: 0,
   },
   after: {
-    type: 'string',
+    isObjectId: true,
   },
   before: {
-    type: 'string',
+    isObjectId: true,
   },
   first: {
     type: 'integer',

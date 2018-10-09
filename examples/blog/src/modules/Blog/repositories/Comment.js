@@ -5,10 +5,10 @@ class CommentRepository extends Repository {
     type: 'object',
     properties: {
       parentId: {
-        isId: true,
+        isObjectId: true,
       },
       postId: {
-        isId: true,
+        isObjectId: true,
       },
       body: {
         type: 'string',
@@ -18,7 +18,7 @@ class CommentRepository extends Repository {
         default: false,
       },
       createdBy: {
-        isId: true,
+        isObjectId: true,
       },
     },
     required: ['postId', 'body', 'createdBy'],
