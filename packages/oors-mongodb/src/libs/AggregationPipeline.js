@@ -1,3 +1,5 @@
+import last from 'lodash/last';
+
 class AggregationPipeline {
   static stages = [
     'addFields',
@@ -124,11 +126,12 @@ class AggregationPipeline {
     }
 
     // merge successive $match calls
-    const pipeline = [this.pipeline[0]];
-    let index = 1;
-    do {
-      const current = pipeline[pipeline.length - 1];
-      const next = this.pipeline[index];
+    return this.pipeline.reduce((pipeline, next, index) => {
+      if (index === 0) {
+        return [{ ...next }];
+      }
+
+      const current = last(pipeline);
 
       if (current.$match && next.$match) {
         current.$match = {
@@ -138,13 +141,11 @@ class AggregationPipeline {
           ],
         };
       } else {
-        pipeline.push(this.pipeline[index]);
+        pipeline.push({ ...next });
       }
 
-      index += 1;
-    } while (index < this.pipeline.length);
-
-    return pipeline;
+      return pipeline;
+    }, []);
   };
 
   toJSON = () => this.toArray();
