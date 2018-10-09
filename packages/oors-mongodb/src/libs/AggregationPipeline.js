@@ -118,7 +118,34 @@ class AggregationPipeline {
 
   count = (outputField = 'count') => this.push({ $count: outputField });
 
-  toArray = () => this.pipeline;
+  toArray = () => {
+    if (this.pipeline.length <= 1) {
+      return this.pipeline;
+    }
+
+    // merge successive $match calls
+    const pipeline = [this.pipeline[0]];
+    let index = 1;
+    do {
+      const current = pipeline[pipeline.length - 1];
+      const next = this.pipeline[index];
+
+      if (current.$match && next.$match) {
+        current.$match = {
+          $and: [
+            ...(Array.isArray(current.$match.$and) ? current.$match.$and : [current.$match]),
+            next.$match,
+          ],
+        };
+      } else {
+        pipeline.push(this.pipeline[index]);
+      }
+
+      index += 1;
+    } while (index < this.pipeline.length);
+
+    return pipeline;
+  };
 
   toJSON = () => this.toArray();
 }
