@@ -22,6 +22,25 @@ class Application extends ExpressApplication {
     this.emit('after:boot');
   }
 
+  async shutdown() {
+    this.emit('before:shutdown');
+
+    if (this.server) {
+      await new Promise((resolve, reject) => {
+        this.server.close(err => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      });
+    }
+
+    await this.modules.teardown();
+    this.emit('after:shutdown');
+  }
+
   async applyMiddlewares() {
     const middlewares = await Promise.all(
       this.middlewares

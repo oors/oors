@@ -85,17 +85,14 @@ class ModulesManager extends EventEmitter {
     this.exportMap[name] = {};
     this.dependencyGraph[name] = [];
     this.expandedDependencyGraph[name] = [];
+
     this.loads[name] = new Promise(resolve => {
       this.on(`module:${name}:after:setup`, () => {
         this.emit('module:loaded', module);
         resolve(this.exportMap[name]);
       });
     });
-    this.unloads[name] = new Promise(resolve => {
-      this.on(`module:${name}:after:teardown`, () => {
-        resolve(this.exportMap[name]);
-      });
-    });
+
     module.connect(this);
 
     return this;

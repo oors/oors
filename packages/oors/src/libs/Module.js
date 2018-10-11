@@ -110,10 +110,6 @@ class Module {
     return Promise.all(dependencies.map(this.loadDependency.bind(this)));
   }
 
-  waitToUnload(dependencies) {
-    return Promise.all(dependencies.map(dependency => this.manager.unloads[dependency]));
-  }
-
   on(...args) {
     return this.manager.on(...args);
   }
