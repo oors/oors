@@ -28,6 +28,7 @@ class Module {
 
   initialize(config, manager) {} // eslint-disable-line
   setup(config, manager) {} // eslint-disable-line
+  teardown(config, manager) {} // eslint-disable-line
 
   setConfig(key, value) {
     setPath(this.config, key, value);
@@ -82,6 +83,12 @@ class Module {
     this.asyncEmit('after:setup');
   }
 
+  async unload() {
+    this.asyncEmit('before:teardown');
+    await this.teardown(this.config, this.manager);
+    this.asyncEmit('after:teardown');
+  }
+
   dependency(dependency) {
     if (typeof dependency !== 'string') {
       throw new Error(`Unexpected dependency name: ${dependency}!`);
@@ -101,6 +108,10 @@ class Module {
 
   loadDependencies(dependencies) {
     return Promise.all(dependencies.map(this.loadDependency.bind(this)));
+  }
+
+  waitToUnload(dependencies) {
+    return Promise.all(dependencies.map(dependency => this.manager.unloads[dependency]));
   }
 
   on(...args) {

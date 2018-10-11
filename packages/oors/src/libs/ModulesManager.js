@@ -91,6 +91,11 @@ class ModulesManager extends EventEmitter {
         resolve(this.exportMap[name]);
       });
     });
+    this.unloads[name] = new Promise(resolve => {
+      this.on(`module:${name}:after:teardown`, () => {
+        resolve(this.exportMap[name]);
+      });
+    });
     module.connect(this);
 
     return this;
@@ -102,6 +107,12 @@ class ModulesManager extends EventEmitter {
     await this.asyncEmit('after:setup');
   }
 
+  async teardown() {
+    await this.asyncEmit('before:teardown');
+    await Promise.all(Object.keys(this.modules).map(name => this.modules[name].unload()));
+    await this.asyncEmit('after:teardown');
+  }
+
   addDependency(from, to) {
     if (from === to) {
       throw new Error(`Cyclic dependency detected - module "${from}" waits for itself to load!`);
@@ -109,9 +120,7 @@ class ModulesManager extends EventEmitter {
 
     if (!this.hasModule(to)) {
       throw new Error(
-        `Can't find module "${to}" required by "${
-          from
-        }" through the list of registered modules: "${this.getModuleNames()}"!`,
+        `Can't find module "${to}" required by "${from}" through the list of registered modules: "${this.getModuleNames()}"!`,
       );
     }
 
