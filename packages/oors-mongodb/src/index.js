@@ -117,7 +117,6 @@ class MongoDB extends Module {
         gqlQueryParser: this.gqlQueryParser,
       });
     },
-    shutdown: () => this.closeConnection(),
   };
 
   initialize({ connections, defaultConnection }) {
@@ -185,6 +184,11 @@ class MongoDB extends Module {
       'addRepository',
     ]);
   }
+
+  teardown = () =>
+    Promise.all(
+      Object.keys(this.connections).map(connectionName => this.closeConnection(connectionName)),
+    );
 
   setupValidator() {
     this.ajv = new Ajv({

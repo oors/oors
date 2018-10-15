@@ -30,10 +30,6 @@ class SchedulerModule extends Module {
 
   name = 'oors.scheduler';
 
-  hooks = {
-    shutdown: () => this.agenda.stop(),
-  };
-
   async setup({ isWorker }) {
     await this.loadDependencies(['oors.mongodb', 'oors.logger']);
 
@@ -68,6 +64,8 @@ class SchedulerModule extends Module {
       await this.agenda.start();
     }
   }
+
+  teardown = () => this.agenda.stop();
 
   createJob = (name, data) =>
     new Promise((resolve, reject) => {
