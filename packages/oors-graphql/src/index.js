@@ -1,4 +1,5 @@
 /* eslint-disable no-empty, import/no-dynamic-require, global-require */
+import { graphql } from 'graphql';
 import glob from 'glob';
 import path from 'path';
 import fse from 'fs-extra';
@@ -131,6 +132,7 @@ class Gql extends Module {
     this.gqlContext = {
       pubsub: this.pubsub,
       ajv: this.ajv,
+      app: this.app,
     };
     this.loaders = new LoadersMap();
     this.contextExtenders = [];
@@ -188,6 +190,8 @@ class Gql extends Module {
       'setupListen',
       'pubsub',
       'formatters',
+      'buildContext',
+      'execute',
     ]);
 
     this.export({
@@ -424,10 +428,8 @@ class Gql extends Module {
     return server;
   };
 
-  buildContext = async ({ req, connection }) => {
+  buildContext = ({ req, connection } = {}) => {
     const context = {
-      app: this.app,
-      ajv: this.ajv,
       ...this.gqlContext,
       loaders: this.loaders.build(),
     };
@@ -446,7 +448,7 @@ class Gql extends Module {
         req,
         user: req.user,
       });
-    } else {
+    } else if (connection) {
       Object.assign(context, {
         connection,
       });
@@ -485,6 +487,21 @@ class Gql extends Module {
       {},
     );
   }
+
+  execute = (source, options = {}) => {
+    const { root, context, variables, operation } = {
+      root: undefined,
+      context: {
+        ...this.buildContext(),
+        ...(options.context || {}),
+      },
+      variables: {},
+      operation: undefined,
+      ...options,
+    };
+
+    return graphql(this.schema, source, root, context, variables, operation);
+  };
 
   applyMiddlewares(server) {
     this.app.middlewares.insertBefore(
