@@ -432,6 +432,14 @@ class Gql extends Module {
     const context = {
       ...this.gqlContext,
       loaders: this.loaders.build(),
+      execute: (source, options = {}) =>
+        this.execute(source, {
+          ...options,
+          context: () => ({
+            ...context,
+            ...(options.context || {}),
+          }),
+        }),
     };
 
     if (req) {
@@ -491,13 +499,16 @@ class Gql extends Module {
   execute = (source, options = {}) => {
     const { root, context, variables, operation } = {
       root: undefined,
-      context: {
-        ...this.buildContext(),
-        ...(options.context || {}),
-      },
       variables: {},
       operation: undefined,
       ...options,
+      context:
+        typeof options.context === 'function'
+          ? options.context(this.buildContext)
+          : {
+              ...this.buildContext(),
+              ...(options.context || {}),
+            },
     };
 
     return graphql(this.schema, source, root, context, variables, operation);
