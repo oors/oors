@@ -432,35 +432,25 @@ class Gql extends Module {
     const context = {
       ...this.gqlContext,
       loaders: this.loaders.build(),
-      execute: (source, options = {}) =>
-        this.execute(source, {
-          ...options,
-          context: () => ({
-            ...context,
-            ...(options.context || {}),
-          }),
-        }),
+      req,
+      connection,
+      ...(req
+        ? {
+            user: req.user,
+          }
+        : {}),
     };
 
-    if (req) {
-      Object.assign(context, {
-        ...this.contextExtenders.reduce(
-          (acc, extender) => ({
-            ...acc,
-            ...(typeof extender === 'function'
-              ? extender({ req, connection }, this.context)
-              : extender),
-          }),
-          {},
-        ),
-        req,
-        user: req.user,
+    this.contextExtenders.forEach(extender => extender(context));
+
+    context.execute = (source, options = {}) =>
+      this.execute(source, {
+        ...options,
+        context: () => ({
+          ...context,
+          ...(options.context || {}),
+        }),
       });
-    } else if (connection) {
-      Object.assign(context, {
-        connection,
-      });
-    }
 
     return context;
   };
