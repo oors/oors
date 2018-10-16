@@ -32,7 +32,7 @@ const createPaginationSchema = ({ maxPerPage, defaultPerPage } = {}) => ({
 export const buildConfig = config => {
   const { wrapPipeline, nodeVisitors, getInitialPipeline, repositoryName } = {
     wrapPipeline: () => identity,
-    getInitialPipeline: (args, ctx, repository) => repository.createPipeline(),
+    getInitialPipeline: (_, args, ctx, repository) => repository.createPipeline(),
     canDelete: () => true,
     canUpdate: () => true,
     nodeVisitors: [],
@@ -76,9 +76,9 @@ export const buildConfig = config => {
       ? ctx => ctx.getRepository(config.getRepository)
       : config.getRepository;
 
-  const createPipeline = (args, ctx) => {
+  const createPipeline = (_, args, ctx) => {
     const repository = getRepository(ctx);
-    const pipeline = args.pipeline || getInitialPipeline(args, ctx, repository);
+    const pipeline = args.pipeline || getInitialPipeline(_, args, ctx, repository);
 
     return wrapPipeline(args, ctx)(
       ctx.gqlQueryParser.toPipeline(args, {
@@ -113,7 +113,7 @@ export const findOne = config => {
     },
     required: ['where'],
   })(async (_, args, ctx) => {
-    const results = await getLoaders(ctx).aggregate.load(createPipeline(args, ctx).limit(1));
+    const results = await getLoaders(ctx).aggregate.load(createPipeline(_, args, ctx).limit(1));
     return results.length > 0 ? ctx.fromMongo(results[0]) : null;
   });
 };
@@ -140,7 +140,7 @@ export const findMany = config => {
     }
 
     return getLoaders(ctx)
-      .aggregate.load(createPipeline(args, ctx))
+      .aggregate.load(createPipeline(_, args, ctx))
       .then(ctx.fromMongoArray);
   });
 };
@@ -148,7 +148,7 @@ export const findMany = config => {
 export const count = config => {
   const { getLoaders, createPipeline } = buildConfig(config);
   return async (_, args, ctx) => {
-    const results = await getLoaders(ctx).aggregate.load(createPipeline(args, ctx).count());
+    const results = await getLoaders(ctx).aggregate.load(createPipeline(_, args, ctx).count());
     return Array.isArray(results) && results.length > 0 ? results[0].count : 0;
   };
 };
@@ -172,7 +172,7 @@ export const updateOne = config => {
     let { item } = args.item;
 
     if (item === undefined) {
-      const results = await getLoaders(ctx).aggregate.load(createPipeline(args, ctx).limit(1));
+      const results = await getLoaders(ctx).aggregate.load(createPipeline(_, args, ctx).limit(1));
       item = Array.isArray(results) && results.length > 0 ? results[0] : undefined;
     }
 
@@ -214,7 +214,7 @@ export const deleteOne = config => {
     let { item } = args.item;
 
     if (item === undefined) {
-      const results = await getLoaders(ctx).aggregate.load(createPipeline(args, ctx).limit(1));
+      const results = await getLoaders(ctx).aggregate.load(createPipeline(_, args, ctx).limit(1));
       item = Array.isArray(results) && results.length > 0 ? results[0] : undefined;
     }
 
