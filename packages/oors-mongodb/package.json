@@ -1,6 +1,6 @@
 {
   "name": "oors-mongodb",
-  "version": "2.17.0",
+  "version": "2.18.0",
   "description": "oors database storage module providing MongoDB integration.",
   "main": "build/index.js",
   "repository": {
@@ -23,6 +23,6 @@
     "mongodb": "3.1.7",
     "mongodb-extended-json": "^1.10.0",
     "oors": "^1.9.0",
-    "oors-graphql": "^2.11.0"
+    "oors-graphql": "^2.12.0"
   }
 }
