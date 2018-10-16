@@ -75,35 +75,23 @@ class GQLQueryParser {
     });
   }
 
-  parseQuery(query, collectionName) {
-    return Object.keys(query).reduce((acc, field) => {
-      const value = query[field];
-      const node = {
-        collectionName,
-        field,
-        value,
-        operator: null,
-        parent: null,
-        children: null,
-      };
+  createNode = (field, value, collectionName) => {
+    const node = {
+      collectionName,
+      field,
+      value,
+      operator: null,
+      parent: null,
+      children: null,
+    };
 
-      acc.push(node);
-
-      if (['and', 'or', 'nor'].includes(field.toLowerCase())) {
-        node.type = this.constructor.NODE_TYPES.LOGICAL_QUERY;
-        node.children = value.map(subQuery => this.parseQuery(subQuery, collectionName));
-        return acc;
-      }
-
-      if (Object.keys(this.relations[collectionName] || {}).includes(field)) {
-        node.type = this.constructor.NODE_TYPES.RELATION;
-        node.children = this.parseQuery(
-          value,
-          this.relations[collectionName][field].collectionName,
-        );
-        return acc;
-      }
-
+    if (['and', 'or', 'nor'].includes(field.toLowerCase())) {
+      node.type = this.constructor.NODE_TYPES.LOGICAL_QUERY;
+      node.children = value.map(subQuery => this.parseQuery(subQuery, collectionName));
+    } else if (Object.keys(this.relations[collectionName] || {}).includes(field)) {
+      node.type = this.constructor.NODE_TYPES.RELATION;
+      node.children = this.parseQuery(value, this.relations[collectionName][field].collectionName);
+    } else {
       node.type = this.constructor.NODE_TYPES.FIELD;
       const match = field.match(new RegExp(`^(.*)_(${Object.keys(this.operators).join('|')})$`));
 
@@ -113,13 +101,25 @@ class GQLQueryParser {
       } else {
         node.fieldName = field;
       }
+    }
 
-      return acc;
-    }, []);
+    return node;
+  };
+
+  parseQuery(query, collectionName) {
+    return Object.keys(query).reduce(
+      (acc, field) => [...acc, this.createNode(field, query[field], collectionName)],
+      [],
+    );
   }
 
   branchToMongo(branch, namespace = '') {
     return branch.reduce((acc, node) => {
+      if (typeof node.toMongo === 'function') {
+        node.toMongo(acc, branch, namespace);
+        return acc;
+      }
+
       if (node.type === this.constructor.NODE_TYPES.FIELD) {
         Object.assign(acc, {
           [`${namespace}${node.fieldName}`]: node.operator
