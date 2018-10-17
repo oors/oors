@@ -10,7 +10,6 @@
     "debug": "babel-node --inspect src/index.js",
     "babel-node": "babel-node",
     "lint": "eslint .",
-    "precommit": "lint-staged",
     "watch": "babel-node ./packages/oors-cli/src/scripts/watch.js",
     "build": "babel-node ./packages/oors-cli/src/scripts/build.js",
     "publish-packages": "npm run build && lerna publish",
@@ -47,7 +46,7 @@
     "eslint-plugin-jsx-a11y": "6.1.1",
     "eslint-plugin-prettier": "3.0.0",
     "eslint-plugin-react": "7.11.1",
-    "husky": "1.1.0",
+    "husky": "1.1.2",
     "lerna": "^3.4.0",
     "lint-staged": "7.3.0",
     "npm-run-all": "4.1.3",
@@ -55,5 +54,10 @@
   },
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  }
 }
