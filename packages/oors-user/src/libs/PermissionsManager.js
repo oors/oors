@@ -1,6 +1,7 @@
 import invariant from 'invariant';
 import flattenDeep from 'lodash/flattenDeep';
 import pick from 'lodash/pick';
+import identity from 'lodash/identity';
 import NotAllowed from '../errors/NotAllowed';
 
 class PermissionsManager {
@@ -94,6 +95,14 @@ class PermissionsManager {
     }
 
     return true;
+  }
+
+  async checkAny(subject, permissions, object) {
+    const result = await Promise.all(
+      permissions.map(permission => this.can(subject, permission, object)),
+    );
+
+    return result.some(identity);
   }
 
   async checkAll(subject, permissions, object, parallel = true) {
