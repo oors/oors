@@ -121,25 +121,29 @@ class GQLQueryParser {
       }
 
       if (node.type === this.constructor.NODE_TYPES.FIELD) {
-        Object.assign(acc, {
-          [`${namespace}${node.fieldName}`]: node.operator
-            ? this.operators[node.operator](node.value)
-            : node.value,
-        });
+        acc[`${namespace}${node.fieldName}`] = node.operator
+          ? this.operators[node.operator](node.value)
+          : node.value;
       }
 
       if (node.type === this.constructor.NODE_TYPES.LOGICAL_QUERY) {
-        Object.assign(acc, {
-          [`$${node.field.toLowerCase()}`]: node.children.map(children =>
-            this.branchToMongo(children, namespace),
-          ),
-        });
+        const operator = `$${node.field.toLowerCase()}`;
+
+        if (!Array.isArray(acc[operator])) {
+          acc[operator] = [];
+        }
+
+        acc[operator].push(
+          ...node.children.map(children => this.branchToMongo(children, namespace)),
+        );
       }
 
       if (node.type === this.constructor.NODE_TYPES.RELATION) {
-        Object.assign(acc, {
-          [node.field]: this.branchToMongo(node.children, ''),
-        });
+        if (typeof acc[node.field] === 'undefined') {
+          acc[node.field] = {};
+        }
+
+        Object.assign(acc[node.field], this.branchToMongo(node.children, ''));
       }
 
       return acc;
