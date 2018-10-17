@@ -166,7 +166,10 @@ class GQLQueryParser {
   }
 
   visitBranch = (branch, nodeVisitors, parent) => {
-    branch.forEach(node => {
+    let index = 0;
+    do {
+      const node = branch[index];
+
       nodeVisitors.forEach(nodeVisitor =>
         nodeVisitor(node, {
           branch,
@@ -192,7 +195,9 @@ class GQLQueryParser {
       if (node.type === this.constructor.NODE_TYPES.RELATION) {
         this.visitBranch(node.children, nodeVisitors, node);
       }
-    });
+
+      index += 1;
+    } while (index < branch.length);
   };
 
   toPipeline(
