@@ -77,11 +77,11 @@ class GQLQueryParser {
 
   createNode = (field, value, collectionName) => {
     const node = {
+      skip: false,
       collectionName,
       field,
       value,
       operator: null,
-      parent: null,
       children: null,
     };
 
@@ -115,6 +115,10 @@ class GQLQueryParser {
 
   branchToMongo(branch, namespace = '') {
     return branch.reduce((acc, node) => {
+      if (node.skip) {
+        return acc;
+      }
+
       if (typeof node.toMongo === 'function') {
         node.toMongo(acc, branch, namespace);
         return acc;
@@ -128,22 +132,31 @@ class GQLQueryParser {
 
       if (node.type === this.constructor.NODE_TYPES.LOGICAL_QUERY) {
         const operator = `$${node.field.toLowerCase()}`;
+        const queries = node.children.map(children => this.branchToMongo(children, namespace));
+
+        if (!queries.length) {
+          return acc;
+        }
 
         if (!Array.isArray(acc[operator])) {
           acc[operator] = [];
         }
 
-        acc[operator].push(
-          ...node.children.map(children => this.branchToMongo(children, namespace)),
-        );
+        acc[operator].push(...queries);
       }
 
       if (node.type === this.constructor.NODE_TYPES.RELATION) {
+        const query = this.branchToMongo(node.children, '');
+
+        if (!Object.keys(query).length) {
+          return acc;
+        }
+
         if (typeof acc[node.field] === 'undefined') {
           acc[node.field] = {};
         }
 
-        Object.assign(acc[node.field], this.branchToMongo(node.children, ''));
+        Object.assign(acc[node.field], query);
       }
 
       return acc;
@@ -152,7 +165,23 @@ class GQLQueryParser {
 
   visitBranch = (branch, nodeVisitors, parent) => {
     branch.forEach(node => {
-      nodeVisitors.forEach(nodeVisitor => nodeVisitor(node, branch, parent));
+      nodeVisitors.forEach(nodeVisitor =>
+        nodeVisitor(node, {
+          branch,
+          parent,
+          remove: () => {
+            Object.assign(node, {
+              skip: true,
+            });
+          },
+          replaceWith: (field, value) => {
+            Object.assign(node, this.createNode(field, value, node.collectionName));
+          },
+          add: (field, value) => {
+            branch.push(this.createNode(field, value, node.collectionName));
+          },
+        }),
+      );
 
       if (node.type === this.constructor.NODE_TYPES.LOGICAL_QUERY) {
         node.children.forEach(childNodes => this.visitBranch(childNodes, nodeVisitors, node));
