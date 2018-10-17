@@ -9,7 +9,7 @@
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "dotenv": "4.0.0",
+    "dotenv": "6.1.0",
     "lodash": "4.17.11",
     "moment": "2.21.0",
     "mongodb": "3.0.4",

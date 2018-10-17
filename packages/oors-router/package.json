@@ -17,7 +17,7 @@
     "ajv": "6.5.4",
     "ajv-keywords": "3.2.0",
     "boom": "7.2.0",
-    "celebrate": "8.0.2",
+    "celebrate": "9.0.0",
     "express": "4.16.3",
     "lodash": "^4.17.11",
     "mongodb": "3.1.7",

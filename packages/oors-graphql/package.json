@@ -29,7 +29,7 @@
     "graphql-depth-limit": "1.1.0",
     "graphql-import": "0.7.1",
     "graphql-subscriptions": "1.0.0",
-    "graphql-tools": "4.0.0",
+    "graphql-tools": "4.0.1",
     "graphql-type-json": "0.2.1",
     "graphql-voyager": "1.0.0-rc.26",
     "invariant": "2.2.4",
