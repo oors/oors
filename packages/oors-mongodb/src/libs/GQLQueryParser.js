@@ -113,14 +113,14 @@ class GQLQueryParser {
     );
   }
 
-  branchToMongo(branch, namespace = '') {
+  branchToMongo(branch, namespace = '', pipeline) {
     return branch.reduce((acc, node) => {
       if (node.skip) {
         return acc;
       }
 
       if (typeof node.toMongo === 'function') {
-        node.toMongo(acc, branch, namespace);
+        node.toMongo(acc, branch, namespace, pipeline);
         return acc;
       }
 
@@ -132,7 +132,9 @@ class GQLQueryParser {
 
       if (node.type === this.constructor.NODE_TYPES.LOGICAL_QUERY) {
         const operator = `$${node.field.toLowerCase()}`;
-        const queries = node.children.map(children => this.branchToMongo(children, namespace));
+        const queries = node.children.map(children =>
+          this.branchToMongo(children, namespace, pipeline),
+        );
 
         if (!queries.length) {
           return acc;
@@ -146,7 +148,7 @@ class GQLQueryParser {
       }
 
       if (node.type === this.constructor.NODE_TYPES.RELATION) {
-        const query = this.branchToMongo(node.children, '');
+        const query = this.branchToMongo(node.children, '', pipeline);
 
         if (!Object.keys(query).length) {
           return acc;
@@ -204,12 +206,12 @@ class GQLQueryParser {
     const matchersBranch = tree.filter(node => node.type !== this.constructor.NODE_TYPES.RELATION);
 
     if (matchersBranch.length) {
-      pipeline.match(this.branchToMongo(matchersBranch, ''));
+      pipeline.match(this.branchToMongo(matchersBranch, '', pipeline));
     }
 
     tree.filter(node => node.type === this.constructor.NODE_TYPES.RELATION).forEach(node => {
       pipeline.lookup(node.field);
-      pipeline.match(this.branchToMongo(node.children, `${node.field}.`));
+      pipeline.match(this.branchToMongo(node.children, `${node.field}.`), pipeline);
     });
 
     if (pivot) {
