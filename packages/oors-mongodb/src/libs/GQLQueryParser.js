@@ -174,8 +174,8 @@ class GQLQueryParser {
         nodeVisitor(node, {
           branch,
           parent,
-          remove: () => {
-            Object.assign(node, {
+          remove: n => {
+            Object.assign(n || node, {
               skip: true,
             });
           },
