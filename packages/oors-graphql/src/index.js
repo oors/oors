@@ -209,6 +209,8 @@ class Gql extends Module {
     });
   }
 
+  teardown = () => this.server.stop();
+
   extendContext = extender => {
     invariant(
       typeof extender === 'function' || isPlainObject(extender),
