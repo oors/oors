@@ -44,7 +44,6 @@ class IsAuthenticatedDirective extends SchemaDirectiveVisitor {
     const { resolve = defaultFieldResolver } = field;
 
     Object.assign(field, {
-      isAuthenticatedWrapped: true,
       resolve: async (root, args, context, info) => {
         if (!context.user) {
           throw new AuthenticationError('Not authenticated!');
