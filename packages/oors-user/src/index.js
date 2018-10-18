@@ -78,12 +78,6 @@ class UserModule extends Module {
   name = 'oors.user';
 
   hooks = {
-    'oors.graphql.buildContext': ({ context }) => {
-      Object.assign(context, {
-        permissionsManager: this.permissions,
-      });
-    },
-
     'oors.router.load': () => {},
   };
 
@@ -217,6 +211,12 @@ class UserModule extends Module {
           description: `User "${role}" role`,
         },
       );
+    });
+
+    this.deps['oors.graphql'].extendContext(context => {
+      Object.assign(context, {
+        permissionsManager: this.permissions,
+      });
     });
   }
 }

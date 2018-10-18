@@ -1,7 +1,6 @@
 import invariant from 'invariant';
 import flattenDeep from 'lodash/flattenDeep';
 import pick from 'lodash/pick';
-import identity from 'lodash/identity';
 import NotAllowed from '../errors/NotAllowed';
 
 class PermissionsManager {
@@ -102,7 +101,11 @@ class PermissionsManager {
       permissions.map(permission => this.can(subject, permission, object)),
     );
 
-    return result.some(identity);
+    const isAllowed = result.some(item => !!item);
+
+    if (!isAllowed) {
+      throw new NotAllowed(`Failed permission check.`);
+    }
   }
 
   async checkAll(subject, permissions, object, parallel = true) {
