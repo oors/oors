@@ -15,6 +15,7 @@ extend type Mutation {
   createOneBlogCategory(input: BlogCategoryInput!): BlogCategory!
   updateOneBlogCategory(where: BlogCategoryFilter!, input: BlogCategoryInput!): BlogCategory!
   deleteOneBlogCategory(where: BlogCategoryFilter!): BlogCategory!
+    @requiresPermissions(all: ["isAdmin"])
 }
 
 extend type BlogPost {

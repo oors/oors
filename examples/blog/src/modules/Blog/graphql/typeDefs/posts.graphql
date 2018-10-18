@@ -18,7 +18,7 @@ extend type User {
 extend type Mutation {
   createOneBlogPost(input: BlogPostInput!): BlogPost!
   updateOneBlogPost(where: BlogPostFilter!, input: BlogPostInput!): BlogPost!
-  deleteOneBlogPost(where: BlogPostFilter!): BlogPost!
+  deleteOneBlogPost(where: BlogPostFilter!): BlogPost! @requiresPermissions(all: ["isAdmin"])
 }
 
 type BlogPost {
