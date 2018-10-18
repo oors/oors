@@ -12,8 +12,10 @@ import BaseApplication from './Base';
 import * as middlewares from '../middlewares';
 import config from '../config';
 
-process.on('unhandledRejection', reason => console.log(reason)); // eslint-disable-line
-process.on('uncaughtException', err => console.log(err)); // eslint-disable-line
+if (process.env.NODE_ENV === 'development') {
+  process.on('unhandledRejection', reason => console.log(reason)); // eslint-disable-line
+  process.on('uncaughtException', err => console.log(err)); // eslint-disable-line
+}
 
 class StandardApplication extends BaseApplication {
   constructor(...args) {
