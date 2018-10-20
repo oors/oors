@@ -166,6 +166,10 @@ class GQLQueryParser {
   }
 
   visitBranch = (branch, nodeVisitors, parent) => {
+    if (!branch.length) {
+      return;
+    }
+
     let index = 0;
     do {
       const node = branch[index];
