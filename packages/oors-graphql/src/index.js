@@ -113,6 +113,12 @@ class Gql extends Module {
 
   name = 'oors.graphql';
 
+  hooks = {
+    'oors.cache.load': ({ createPolicy }) => {
+      createPolicy('graphqlResolvers');
+    },
+  };
+
   initialize() {
     this.ajv = new Ajv({
       allErrors: true,
@@ -144,10 +150,6 @@ class Gql extends Module {
   }
 
   async setup() {
-    await this.loadDependencies(['oors.cache']);
-
-    this.deps['oors.cache'].createPolicy('graphqlResolvers');
-
     await this.runHook(
       'load',
       this.collectFromModule,

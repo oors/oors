@@ -10,8 +10,7 @@ export default getCacheConfig => resolver => async (_, args, ctx, info) => {
 
   if (typeof config === 'string') {
     config = {
-      policy: config.substr(0, config.indexOf('.')) || 'graphqlResolvers',
-      id: config.substr(config.indexOf('.') + 1),
+      id: `${config}:${JSON.stringify(args)}`,
     };
   }
 
