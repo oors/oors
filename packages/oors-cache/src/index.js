@@ -41,6 +41,10 @@ class Cache extends Module {
 
   async setup({ defaultCache }) {
     await this.createMemoryClient(defaultCache.name, defaultCache.options);
+    await this.runHook('load', () => {}, {
+      createClient: this.createClient,
+      createPolicy: this.createPolicy,
+    });
 
     this.exportProperties([
       'createClient',
