@@ -144,6 +144,10 @@ class Gql extends Module {
   }
 
   async setup() {
+    await this.loadDependencies(['oors.cache']);
+
+    this.deps['oors.cache'].createPolicy('graphqlResolvers');
+
     await this.runHook(
       'load',
       this.collectFromModule,

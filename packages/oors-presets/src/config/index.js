@@ -108,6 +108,12 @@ config.add({
     'oors.logger': {
       logsDir: config.ref(() => path.resolve(config.get('rootDir'), './logs')),
     },
+    'oors.cache': {
+      defaultCache: {
+        name: 'cache',
+        options: {},
+      },
+    },
   },
 });
 

@@ -8,6 +8,7 @@ import MailerModule from 'oors-mailer';
 import FileStorageModule from 'oors-file-storage';
 import HealthModule from 'oors-health';
 import UserModule from 'oors-user';
+import CacheModule from 'oors-cache';
 import BaseApplication from './Base';
 import * as middlewares from '../middlewares';
 import config from '../config';
@@ -59,6 +60,7 @@ class StandardApplication extends BaseApplication {
       new GQLModule(),
       new RouterModule(),
       new UserModule(),
+      new CacheModule(),
     );
   }
 }

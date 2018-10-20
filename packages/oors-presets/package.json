@@ -29,6 +29,7 @@
     "morgan": "1.9.1",
     "node-notifier": "5.2.1",
     "oors": "^1.9.0",
+    "oors-cache": "*",
     "oors-config": "^2.2.1",
     "oors-file-storage": "^1.13.0",
     "oors-graphql": "^2.13.0",
