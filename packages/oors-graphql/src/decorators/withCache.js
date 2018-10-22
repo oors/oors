@@ -9,8 +9,11 @@ export default getCacheConfig => resolver => async (_, args, ctx, info) => {
       : getCacheConfig;
 
   if (typeof config === 'string') {
+    const serializedArgs = Object.keys(args).length
+      ? JSON.stringify(args, Object.keys(args).sort())
+      : '';
     config = {
-      id: `${config}:${JSON.stringify(args)}`,
+      id: `${config}${serializedArgs ? `:${serializedArgs}` : ''}`,
     };
   }
 
