@@ -15,7 +15,6 @@ extend type Mutation {
   createOneBlogCategory(input: BlogCategoryInput!): BlogCategory!
   updateOneBlogCategory(where: BlogCategoryFilter!, input: BlogCategoryInput!): BlogCategory!
   deleteOneBlogCategory(where: BlogCategoryFilter!): BlogCategory!
-    @requiresPermissions(all: ["isAdmin"])
 }
 
 extend type BlogPost {
@@ -31,12 +30,13 @@ type BlogCategory {
 }
 
 input BlogCategoryFilter {
-  AND: [BlogPostFilter!]
-  OR: [BlogPostFilter!]
+  AND: [BlogCategoryFilter!]
+  OR: [BlogCategoryFilter!]
   id: ID
   id_in: [ID!]
   id_not_in: [ID!]
   name_contains: String
+  name_startsWith: String
 }
 
 input BlogCategoryInput {

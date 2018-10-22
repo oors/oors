@@ -50,11 +50,11 @@ input BlogPostFilter {
 }
 
 input BlogPostInput {
-  title: String!
+  title: String
   body: String
   tags: [String!]
   status: BlogPostStatus
-  categoryId: ID!
+  categoryId: ID
 }
 
 enum BlogPostStatus {
