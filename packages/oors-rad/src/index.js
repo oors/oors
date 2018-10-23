@@ -10,9 +10,18 @@ class RADModule extends Module {
   static schema = {
     type: 'object',
     properties: {
-      autoloadServices: {
-        type: 'boolean',
-        default: true,
+      autoload: {
+        type: 'object',
+        properties: {
+          services: {
+            type: 'boolean',
+            default: true,
+          },
+          methods: {
+            type: 'boolean',
+            default: true,
+          },
+        },
       },
       autoCreateLoaders: {
         type: 'boolean',
@@ -58,11 +67,21 @@ class RADModule extends Module {
   }
 
   collectFromModule = async module => {
-    if (!module.getConfig('oors.rad.autoload', this.getConfig('autoloadServices'))) {
+    const tasks = [];
+
+    if (module.getConfig('oors.rad.autoload.services', this.getConfig('autoload.services'))) {
+      tasks.push(this.loadModuleServices(module));
+    }
+
+    if (module.getConfig('oors.rad.autoload.methods', this.getConfig('autoload.methods'))) {
+      tasks.push(this.loadModuleMethods(module));
+    }
+
+    if (!tasks.length) {
       return;
     }
 
-    await this.loadModuleServices(module);
+    await Promise.all(tasks);
   };
 
   async loadModuleServices(module) {
@@ -92,6 +111,45 @@ class RADModule extends Module {
             throw new Error(`Unable to register a service without a name! ${service}`);
           }
           this.registerModuleService(module, service);
+        });
+
+        resolve();
+      });
+    });
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  async loadModuleMethods(module) {
+    const dirPath = path.resolve(path.dirname(module.filePath), 'methods');
+
+    try {
+      const stat = await fse.stat(dirPath);
+      const isDirectory = stat && stat.isDirectory();
+      if (!isDirectory) {
+        return;
+      }
+    } catch (err) {
+      return;
+    }
+
+    await new Promise((resolve, reject) => {
+      glob(path.resolve(dirPath, '*.js'), { nodir: true }, (err, files) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        files.forEach(file => {
+          const method = require(file).default; // eslint-disable-line global-require, import/no-dynamic-require
+          const { name } = path.parse(file);
+
+          if (typeof method !== 'function') {
+            throw new Error(
+              `Unable to register "${name}" method for ${module.name} module! (not a function)`,
+            );
+          }
+
+          module.export(name, (...args) => method.call(module, ...args, module));
         });
 
         resolve();

@@ -85,7 +85,7 @@ class UserModule extends Module {
     super(...args);
 
     Object.assign(this.config, {
-      'oors.rad.autoload': false,
+      'oors.rad.autoload.services': false,
     });
   }
 

@@ -1,4 +1,5 @@
 /* eslint-disable no-underscore-dangle */
+import util from 'util';
 import pick from 'lodash/pick';
 import getPath from 'lodash/get';
 import setPath from 'lodash/set';
@@ -54,8 +55,22 @@ class Module {
     return this.manager.context;
   }
 
-  export(map) {
-    return Object.assign(this.manager.exportMap[this.name], map);
+  export(name, value) {
+    if (typeof name === 'object') {
+      Object.assign(this.manager.exportMap[this.name], name);
+      return;
+    }
+
+    if (typeof name === 'string') {
+      this.manager.exportMap[this.name][name] = value;
+      return;
+    }
+
+    throw new Error(
+      `Unable to export ${util.inspect(value)} in "${
+        this.name
+      }" module! (invalid type: "${typeof name}")`,
+    );
   }
 
   exportProperties(props) {
