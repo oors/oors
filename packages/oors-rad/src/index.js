@@ -149,7 +149,9 @@ class RADModule extends Module {
             );
           }
 
-          module.export(name, (...args) => method.call(module, { args, module }));
+          module.export(name, (...args) =>
+            method.call(module, { args, module, getService: this.getService }),
+          );
         });
 
         resolve();
