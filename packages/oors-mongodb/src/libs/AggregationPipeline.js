@@ -1,4 +1,5 @@
 import last from 'lodash/last';
+import isEmpty from 'lodash/isEmpty';
 
 class AggregationPipeline {
   static stages = [
@@ -127,6 +128,11 @@ class AggregationPipeline {
 
     // merge successive $match calls
     return this.pipeline.reduce((pipeline, next, index) => {
+      // ignore empty $match calls
+      if (next.$match && isEmpty(next.$match)) {
+        return pipeline;
+      }
+
       if (index === 0) {
         return [{ ...next }];
       }
