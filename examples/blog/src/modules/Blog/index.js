@@ -6,6 +6,8 @@ import CommentRepository from './repositories/Comment';
 class BlogModule extends Module {
   name = 'oors.blog';
 
+  doNothingMessage = 'do nothing!';
+
   async setup() {
     const [{ addRepository, configureRelations }] = await this.dependencies([
       'oors.mongodb',
