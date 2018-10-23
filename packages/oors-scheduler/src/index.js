@@ -38,21 +38,17 @@ class SchedulerModule extends Module {
       ...this.getConfig('agendaConfig'),
     });
 
-    await this.runHook('loadJobs', this.collectFromModule, {
-      agenda: this.agenda,
-      defineJob: this.defineJob,
-      defineJobs: this.defineJobs,
-    });
-
     this.export({
       agenda: this.agenda,
       defineJob: this.defineJob,
       defineJobs: this.defineJobs,
-      now: this.promisify('now'),
-      every: this.promisify('every'),
-      schedule: this.promisify('schedule'),
-      cancel: this.promisify('cancel'),
       createJob: this.createJob,
+    });
+
+    await this.runHook('loadJobs', this.collectFromModule, {
+      agenda: this.agenda,
+      defineJob: this.defineJob,
+      defineJobs: this.defineJobs,
     });
 
     this.agenda.on('error', err => {
@@ -108,29 +104,17 @@ class SchedulerModule extends Module {
     });
 
     if (interval) {
-      await this.get('every')(interval, name, data, intervalOptions);
+      await this.agenda.every(interval, name, data, intervalOptions);
     }
 
     if (schedule) {
-      await this.get('schedule')(schedule, name, data);
+      await this.agenda.schedule(schedule, name, data);
     }
 
     if (now) {
-      await this.get('now')(name, data);
+      await this.agenda.now(name, data);
     }
   };
-
-  promisify = method => (...args) =>
-    new Promise((resolve, reject) =>
-      this.agenda[method](...args, (err, result) => {
-        if (err) {
-          this.deps['oors.logger'].logError(err);
-          reject(err);
-        } else {
-          resolve(result);
-        }
-      }),
-    );
 
   collectFromModule = async module => {
     if (!module.getConfig('oors.scheduler.autoload', this.getConfig('autoloadJobs'))) {
@@ -164,7 +148,7 @@ class SchedulerModule extends Module {
           files.map(file => {
             const Job = require(file).default; // eslint-disable-line global-require, import/no-dynamic-require
             const job = new Job(this.agenda, module);
-            return job.save(module);
+            return job.save(this);
           }),
         );
 

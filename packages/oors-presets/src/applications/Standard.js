@@ -9,6 +9,7 @@ import FileStorageModule from 'oors-file-storage';
 import HealthModule from 'oors-health';
 import UserModule from 'oors-user';
 import CacheModule from 'oors-cache';
+import SchedulerModule from 'oors-scheduler';
 import BaseApplication from './Base';
 import * as middlewares from '../middlewares';
 import config from '../config';
@@ -61,6 +62,7 @@ class StandardApplication extends BaseApplication {
       new RouterModule(),
       new UserModule(),
       new CacheModule(),
+      new SchedulerModule(),
     );
   }
 }

@@ -39,6 +39,7 @@
     "oors-mongodb": "^2.21.0",
     "oors-rad": "^0.10.0",
     "oors-router": "^1.15.0",
+    "oors-scheduler": "*",
     "oors-user": "^1.16.0"
   }
 }
