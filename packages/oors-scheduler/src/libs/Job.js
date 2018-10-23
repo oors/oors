@@ -12,7 +12,7 @@ class Job {
   }
 
   // eslint-disable-next-line no-unused-vars
-  run(module) {
+  run() {
     throw new Error('Not implemented!');
   }
 
@@ -22,7 +22,7 @@ class Job {
       ...this.getConfig(),
     };
 
-    return schedulerModule.defineJob(name, async () => this.run(this.module), config);
+    return schedulerModule.defineJob(name, this.run.bind(this), config);
   }
 }
 

@@ -6,9 +6,9 @@ class DoNothing extends Job {
     interval: '10 minutes',
   };
 
-  run(module) {
-    console.log(module.doNothingMessage);
-  }
+  run = () => {
+    console.log(this.module.doNothingMessage);
+  };
 }
 
 export default DoNothing;
