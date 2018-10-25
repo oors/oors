@@ -80,7 +80,7 @@ export const buildConfig = config => {
     const repository = getRepository(ctx);
     const pipeline = args.pipeline || getInitialPipeline(_, args, ctx, repository);
 
-    return wrapPipeline(args, ctx)(
+    return wrapPipeline(_, args, ctx)(
       ctx.gqlQueryParser.toPipeline(args, {
         repository,
         pipeline,
