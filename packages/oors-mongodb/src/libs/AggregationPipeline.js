@@ -57,6 +57,10 @@ class AggregationPipeline {
     return this;
   }
 
+  merge(pipeline) {
+    return this.push(pipeline.toArray());
+  }
+
   project = fields =>
     this.push({
       $project: Array.isArray(fields)
