@@ -159,6 +159,22 @@ class AggregationPipeline {
   };
 
   toJSON = () => this.toArray();
+
+  toResult = async () => {
+    const pipeline = this.toArray();
+    const lastStage = last(pipeline);
+    const result = await this.repository.aggregate(pipeline);
+
+    if (lastStage.$count) {
+      return result.length > 0 ? result[0].count : 0;
+    }
+
+    if (lastStage.$limit && lastStage.$limit === 1) {
+      return result.length > 0 ? result[0] : null;
+    }
+
+    return result;
+  };
 }
 
 export default AggregationPipeline;
