@@ -30,6 +30,12 @@ const createPaginationSchema = ({ maxPerPage, defaultPerPage } = {}) => ({
 });
 
 export const buildConfig = config => {
+  if (typeof config === 'string') {
+    return buildConfig({
+      repositoryName: config,
+    });
+  }
+
   const { wrapPipeline, nodeVisitors, getInitialPipeline, repositoryName } = {
     wrapPipeline: () => identity,
     getInitialPipeline: (_, args, ctx, repository) => repository.createPipeline(),
