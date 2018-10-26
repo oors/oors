@@ -8,3 +8,5 @@ export withUser from './withUser';
 export withWrapper from './withWrapper';
 export withBefore from './withBefore';
 export withAfter from './withAfter';
+export withCache from './withCache';
+export withResult from './withResult';
