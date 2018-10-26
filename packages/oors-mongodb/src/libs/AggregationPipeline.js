@@ -165,8 +165,12 @@ class AggregationPipeline {
     const lastStage = last(pipeline);
     const result = await this.repository.aggregate(pipeline);
 
+    if (!pipeline.length) {
+      return result;
+    }
+
     if (lastStage.$count) {
-      return result.length > 0 ? result[0].count : 0;
+      return result.length > 0 ? result[0][lastStage.$count] : 0;
     }
 
     if (lastStage.$limit && lastStage.$limit === 1) {
