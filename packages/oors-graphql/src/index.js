@@ -552,4 +552,5 @@ class Gql extends Module {
 }
 
 export { Gql as default, decorators };
+export * from './decorators';
 export { default as Resolvers } from './libs/Resolvers';
