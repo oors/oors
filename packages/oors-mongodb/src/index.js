@@ -170,6 +170,17 @@ class MongoDB extends Module {
 
     this.gqlQueryParser = new GQLQueryParser(this);
 
+    this.onModule('oors.graphql', 'healthCheck', async () => {
+      await Promise.all(
+        Object.keys(this.connections).map(async name => {
+          const isConnected = await this.connections[name].isConnected();
+          if (!isConnected) {
+            throw new Error(`Connection closed - "${name}"!`);
+          }
+        }),
+      );
+    });
+
     this.exportProperties([
       'createConnection',
       'closeConnection',
