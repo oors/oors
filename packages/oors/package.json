@@ -23,7 +23,6 @@
   "dependencies": {
     "ajv": "6.5.4",
     "ajv-keywords": "3.2.0",
-    "connect-mongo": "2.0.1",
     "express": "4.16.4",
     "lodash": "4.17.11",
     "merge-descriptors": "1.0.1"
