@@ -42,7 +42,7 @@ export default compose(
       },
     },
   }),
-  withArgs((_, args, ctx, { resolve }) => ({
+  withArgs((_, args, ctx, info, { resolve }) => ({
     // move all the arguments inside a input argument
     input: args,
     post: resolve(ctx.db.findPostById(args.postId)),
@@ -75,13 +75,13 @@ see some examples on how to use them in the
 [ajv](https://github.com/epoberezkin/ajv).
 
 `withArgs(argsTransformer)` - remaps the arguments to the result of `argsTransformer` function. The
-signature of the function is `argsTransformer(parent, args, ctx, { resolve })`. The 4th argument is
+signature of the function is `argsTransformer(root, args, ctx, info, { resolve })`. The 4th argument is
 an optional object who's single property is a `resolve` function you can use to call promises.
 
 While you can do something like this:
 
 ```js
-withArgs(async (parent, args, ctx) => {
+withArgs(async (root, args, ctx) => {
   args.post = await ctx.findPostById(args.postId);
   delete args.notNeeded;
   return args;
@@ -91,7 +91,7 @@ withArgs(async (parent, args, ctx) => {
 This could be more readable and convenient:
 
 ```js
-withArgs(parent, { notNeeded, ...args }, ctx) => ({
+withArgs(root, { notNeeded, ...args }, ctx) => ({
   ...args,
   post: resolve(ctx.findPostById(args.postId))
 }))
