@@ -61,6 +61,9 @@ class AggregationPipeline {
     return this.push(pipeline.toArray());
   }
 
+  match = query =>
+    typeof query !== 'object' || !Object.keys(query).length ? this : this.push({ $match: query });
+
   project = fields =>
     this.push({
       $project: Array.isArray(fields)
