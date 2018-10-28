@@ -172,7 +172,7 @@ export const createMany = config => {
 
 export const updateOne = config => {
   const { getRepository, getLoaders, createPipeline, canUpdate } = buildConfig(config);
-  return async (_, args, ctx) => {
+  return async (_, args, ctx, info) => {
     const { input } = args;
     const Repository = getRepository(ctx);
     let { item } = args.item;
@@ -186,7 +186,7 @@ export const updateOne = config => {
       throw new Error('Unable to find item!');
     }
 
-    if (!canUpdate(ctx.user, item)) {
+    if (!canUpdate(_, args, ctx, info, item)) {
       throw new Error('Not Allowed!');
     }
 
@@ -215,7 +215,7 @@ export const updateOne = config => {
 
 export const deleteOne = config => {
   const { getRepository, getLoaders, createPipeline, canDelete } = buildConfig(config);
-  return async (_, args, ctx) => {
+  return async (_, args, ctx, info) => {
     const Repository = getRepository(ctx);
     let { item } = args.item;
 
@@ -228,7 +228,7 @@ export const deleteOne = config => {
       throw new Error('Unable to find item!');
     }
 
-    if (!canDelete(ctx.user, item)) {
+    if (!canDelete(_, args, ctx, info, item)) {
       throw new Error('Not Allowed!');
     }
 
