@@ -2,7 +2,7 @@ import { updateOne } from '../../../../../../../../packages/oors-mongodb/build/l
 import { compose, withArgs } from '../../../../../../../../packages/oors-graphql/build/decorators';
 
 export default compose(
-  withArgs((_, { input, id }, { user, loaders }, { resolve }) => ({
+  withArgs((_, { input, id }, { user, loaders }, info, { resolve }) => ({
     input: {
       ...input,
       [id ? 'updatedBy' : 'createdBy']: user._id,

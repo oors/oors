@@ -23,7 +23,7 @@ export default compose(
       },
     },
   }),
-  withArgs((_, { input, id }, { user, loaders }, { resolve }) => ({
+  withArgs((_, { input, id }, { user, loaders }, info, { resolve }) => ({
     input: {
       ...input,
       [id ? 'updatedBy' : 'createdBy']: user._id,
