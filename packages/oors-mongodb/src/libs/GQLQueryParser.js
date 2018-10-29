@@ -50,6 +50,8 @@ class GQLQueryParser {
       $regex: `.*${escapeRegexp(value)}$`,
       $options: 'i',
     }));
+    this.addOperator(['all', 'every'], value => ({ $all: value }));
+    this.addOperator(['any', 'some'], value => ({ $elemMatch: value }));
 
     this.nodeVisitors.push(node => {
       if (
