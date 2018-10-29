@@ -10,3 +10,4 @@ export withBefore from './withBefore';
 export withAfter from './withAfter';
 export withCache from './withCache';
 export withResult from './withResult';
+export withValidate from './withValidate';
