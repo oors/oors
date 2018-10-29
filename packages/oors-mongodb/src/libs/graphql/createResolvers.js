@@ -38,7 +38,7 @@ export const buildConfig = config => {
 
   const { wrapPipeline, nodeVisitors, getInitialPipeline, repositoryName } = {
     wrapPipeline: () => identity,
-    getInitialPipeline: (_, args, ctx, repository) => repository.createPipeline(),
+    getInitialPipeline: (_, args, ctx, info, repository) => repository.createPipeline(),
     canDelete: () => true,
     canUpdate: () => true,
     nodeVisitors: [],
@@ -82,9 +82,9 @@ export const buildConfig = config => {
       ? ctx => ctx.getRepository(config.getRepository)
       : config.getRepository;
 
-  const createPipeline = (_, args, ctx) => {
+  const createPipeline = (_, args, ctx, info) => {
     const repository = getRepository(ctx);
-    const pipeline = args.pipeline || getInitialPipeline(_, args, ctx, repository);
+    const pipeline = args.pipeline || getInitialPipeline(_, args, ctx, info, repository);
 
     return wrapPipeline(_, args, ctx)(
       ctx.gqlQueryParser.toPipeline(args, {
@@ -118,8 +118,10 @@ export const findOne = config => {
       },
     },
     required: ['where'],
-  })(async (_, args, ctx) => {
-    const results = await getLoaders(ctx).aggregate.load(createPipeline(_, args, ctx).limit(1));
+  })(async (_, args, ctx, info) => {
+    const results = await getLoaders(ctx).aggregate.load(
+      createPipeline(_, args, ctx, info).limit(1),
+    );
     return results.length > 0 ? ctx.fromMongo(results[0]) : null;
   });
 };
@@ -136,7 +138,7 @@ export const findMany = config => {
         default: {},
       },
     },
-  })(async (_, args, ctx) => {
+  })(async (_, args, ctx, info) => {
     const pivot = args.before || args.after;
 
     if (pivot) {
@@ -146,15 +148,17 @@ export const findMany = config => {
     }
 
     return getLoaders(ctx)
-      .aggregate.load(createPipeline(_, args, ctx))
+      .aggregate.load(createPipeline(_, args, ctx, info))
       .then(ctx.fromMongoArray);
   });
 };
 
 export const count = config => {
   const { getLoaders, createPipeline } = buildConfig(config);
-  return async (_, args, ctx) => {
-    const results = await getLoaders(ctx).aggregate.load(createPipeline(_, args, ctx).count());
+  return async (_, args, ctx, info) => {
+    const results = await getLoaders(ctx).aggregate.load(
+      createPipeline(_, args, ctx, info).count(),
+    );
     return Array.isArray(results) && results.length > 0 ? results[0].count : 0;
   };
 };
@@ -178,7 +182,9 @@ export const updateOne = config => {
     let { item } = args.item;
 
     if (item === undefined) {
-      const results = await getLoaders(ctx).aggregate.load(createPipeline(_, args, ctx).limit(1));
+      const results = await getLoaders(ctx).aggregate.load(
+        createPipeline(_, args, ctx, info).limit(1),
+      );
       item = Array.isArray(results) && results.length > 0 ? results[0] : undefined;
     }
 
@@ -220,7 +226,9 @@ export const deleteOne = config => {
     let { item } = args.item;
 
     if (item === undefined) {
-      const results = await getLoaders(ctx).aggregate.load(createPipeline(_, args, ctx).limit(1));
+      const results = await getLoaders(ctx).aggregate.load(
+        createPipeline(_, args, ctx, info).limit(1),
+      );
       item = Array.isArray(results) && results.length > 0 ? results[0] : undefined;
     }
 
