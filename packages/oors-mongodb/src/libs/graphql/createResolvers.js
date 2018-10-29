@@ -38,7 +38,7 @@ export const buildConfig = config => {
 
   const { wrapPipeline, nodeVisitors, getInitialPipeline, repositoryName } = {
     wrapPipeline: () => identity,
-    getInitialPipeline: (_, args, ctx, info, repository) => repository.createPipeline(),
+    getInitialPipeline: (_, args, ctx, info, pipeline) => pipeline,
     canDelete: () => true,
     canUpdate: () => true,
     nodeVisitors: [],
@@ -84,7 +84,8 @@ export const buildConfig = config => {
 
   const createPipeline = (_, args, ctx, info) => {
     const repository = getRepository(ctx);
-    const pipeline = args.pipeline || getInitialPipeline(_, args, ctx, info, repository);
+    const pipeline =
+      args.pipeline || getInitialPipeline(_, args, ctx, info, repository.createPipeline());
 
     return wrapPipeline(_, args, ctx)(
       ctx.gqlQueryParser.toPipeline(args, {
