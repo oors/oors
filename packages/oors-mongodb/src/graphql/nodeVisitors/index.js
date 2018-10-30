@@ -3,3 +3,4 @@ export fieldToMongo from './fieldToMongo';
 export negate from './negate';
 export parseValue from './parseValue';
 export toId from './toId';
+export ignore from './ignore';
