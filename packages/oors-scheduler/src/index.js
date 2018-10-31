@@ -30,6 +30,8 @@ class SchedulerModule extends Module {
 
   name = 'oors.scheduler';
 
+  jobsToSave = [];
+
   async setup({ isWorker }) {
     await this.loadDependencies(['oors.mongodb', 'oors.logger']);
 
@@ -59,6 +61,8 @@ class SchedulerModule extends Module {
     if (isWorker) {
       await this.agenda.start();
     }
+
+    this.on('after:setup', async () => Promise.all(this.jobsToSave.map(job => job.save(this))));
   }
 
   teardown = () => this.agenda.stop();
@@ -144,13 +148,10 @@ class SchedulerModule extends Module {
           return;
         }
 
-        await Promise.all(
-          files.map(file => {
-            const Job = require(file).default; // eslint-disable-line global-require, import/no-dynamic-require
-            const job = new Job(this.agenda, module);
-            return job.save(this);
-          }),
-        );
+        files.forEach(file => {
+          const Job = require(file).default; // eslint-disable-line global-require, import/no-dynamic-require
+          this.jobsToSave.push(new Job(this.agenda, module));
+        });
 
         resolve();
       });
