@@ -108,7 +108,9 @@ class RADModule extends Module {
           const Service = require(file).default; // eslint-disable-line global-require, import/no-dynamic-require
           const service = new Service(module);
           if (!service.name) {
-            throw new Error(`Unable to register a service without a name! ${service}`);
+            throw new Error(
+              `Unable to register a service without a name! "${file}" in "${module.name}" module`,
+            );
           }
           this.registerModuleService(module, service);
         });
