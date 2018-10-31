@@ -3,11 +3,11 @@ import Job from '../../../../../../packages/oors-scheduler/build/libs/Job';
 
 class DoNothing extends Job {
   config = {
-    interval: '10 minutes',
+    interval: '25 minutes',
   };
 
   run = () => {
-    console.log(this.module.doNothingMessage);
+    console.log(this.module.takeABreak);
   };
 }
 
