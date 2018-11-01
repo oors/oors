@@ -15,7 +15,7 @@ class Module {
       .match(/\((.*.js)/)[1];
 
     this.hooks = {};
-    this.config = merge({}, this.constructor.defaultConfig || {}, config);
+    this.config = merge({}, this.constructor.defaultConfig || {}, config, this.config || {});
     this.deps = {};
   }
 
@@ -62,7 +62,7 @@ class Module {
     }
 
     if (typeof name === 'string') {
-      this.manager.exportMap[this.name][name] = value;
+      setPath(this.manager.exportMap[this.name], name, value);
       return;
     }
 
@@ -82,7 +82,7 @@ class Module {
       throw new Error(`Unable to get exported value for "${key}" key in "${this.name}" module!`);
     }
 
-    return this.manager.exportMap[this.name][key];
+    return getPath(this.manager.exportMap[this.name], key);
   }
 
   connect(manager) {
