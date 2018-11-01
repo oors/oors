@@ -134,6 +134,8 @@ class AggregationPipeline {
 
   count = (outputField = 'count') => this.push({ $count: outputField });
 
+  clone = pipeline => new this.constructor(this.repository, pipeline || [...this.pipeline]);
+
   toArray = () => {
     if (this.pipeline.length <= 1) {
       return this.pipeline;
