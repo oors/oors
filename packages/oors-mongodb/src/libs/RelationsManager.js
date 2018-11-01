@@ -1,3 +1,6 @@
+/**
+ * stores relations between database collections
+ */
 class RelationsManager {
   static RELATION_TYPE = {
     ONE: 'one',

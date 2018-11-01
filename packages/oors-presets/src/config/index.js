@@ -64,6 +64,7 @@ config.add({
       logQueries: config.ref('isDev'),
       migrationsDir: config.ref(() => path.resolve(config.get('rootDir'), './migrations')),
       addTimestamps: true,
+      autoloadRepositories: false,
     },
     'oors.user': {
       rootURL: config.ref('rootURL'),

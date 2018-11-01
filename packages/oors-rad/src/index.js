@@ -57,9 +57,20 @@ class RADModule extends Module {
 
     if (autoCreateLoaders) {
       const { loaders } = this.deps['oors.graphql'];
-      this.on('module:oors.mongodb:repository', ({ repository, key }) => {
+      const { repositoryStore } = this.deps['oors.mongodb'];
+
+      // creating loaders for repositories that have been added already
+      Object.keys(repositoryStore.repositories).forEach(repositoryName => {
+        this.deps['oors.graphql'].addLoaders(
+          createLoaders(repositoryStore.repositories[repositoryName]),
+          this.getLoadersName(repositoryName),
+        );
+      });
+
+      this.onModule('oors.mongodb', 'repository', ({ repository, key }) => {
         this.deps['oors.graphql'].addLoaders(createLoaders(repository), this.getLoadersName(key));
       });
+
       this.export({
         getLoaders: repositoryName => loaders[this.getLoadersName(repositoryName)],
       });

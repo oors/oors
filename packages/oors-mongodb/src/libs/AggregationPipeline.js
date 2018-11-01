@@ -84,6 +84,12 @@ class AggregationPipeline {
       });
     }
 
+    if (!this.repository.hasRelation(relation)) {
+      throw new Error(
+        `Missing "${relation}" relation in the "${this.repository.constructor.name}" repository!`,
+      );
+    }
+
     const { type } = this.repository.getRelation(relation);
 
     this.push({

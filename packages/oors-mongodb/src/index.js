@@ -1,4 +1,3 @@
-import camelCase from 'lodash/camelCase';
 import Ajv from 'ajv';
 import glob from 'glob';
 import fse from 'fs-extra';
@@ -97,7 +96,7 @@ class MongoDB extends Module {
       },
       autoloadRepositories: {
         type: 'boolean',
-        default: false,
+        default: true,
       },
       moduleRepositoriesDir: {
         type: 'string',
@@ -108,6 +107,16 @@ class MongoDB extends Module {
   };
 
   name = 'oors.mongodb';
+
+  config = {
+    oors: {
+      mongodb: {
+        repositories: {
+          autoload: false,
+        },
+      },
+    },
+  };
 
   connections = {};
 
@@ -162,6 +171,7 @@ class MongoDB extends Module {
           add: this.relationsManager.add,
           relations: this.relationsManager.relations,
           RELATION_TYPE: this.relationsManager.constructor.RELATION_TYPE,
+          getRepository: this.getRepository,
         }),
       relationToLookup: this.relationsManager.toLookup,
     });
@@ -220,11 +230,15 @@ class MongoDB extends Module {
       bindRepositories: this.repositoryStore.bind,
       bindRepository: this.repositoryStore.bind,
     });
+    this.repositoryStore.configure();
   };
 
   collectFromModule = async module => {
     if (
-      !module.getConfig('oors.mongodb.autoloadRepositories', this.getConfig('autoloadRepositories'))
+      !module.getConfig(
+        'oors.mongodb.repositories.autoload',
+        this.getConfig('autoloadRepositories'),
+      )
     ) {
       return;
     }
@@ -259,7 +273,13 @@ class MongoDB extends Module {
           const ModuleRepository = require(file).default; // eslint-disable-line global-require, import/no-dynamic-require
           const repository = new ModuleRepository();
           repository.module = module;
-          this.addRepository(camelCase(repository.name || repository.constructor.name), repository);
+          const name =
+            repository.name ||
+            `${module.getConfig('oors.mongodb.repositories.prefix', module.name)}.${
+              repository.constructor.name
+            }`;
+          this.addRepository(name, repository);
+          module.export(`repositories.${name}`, repository);
         });
 
         resolve();

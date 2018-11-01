@@ -18,13 +18,20 @@ class FileStorage extends Module {
 
   name = 'oors.fileStorage';
 
-  constructor(...args) {
-    super(...args);
-
-    Object.assign(this.config, {
-      'oors.rad.autoload.services': false,
-    });
-  }
+  config = {
+    oors: {
+      mongodb: {
+        repositories: {
+          autoload: false,
+        },
+      },
+      rad: {
+        autoload: {
+          services: false,
+        },
+      },
+    },
+  };
 
   initialize({ uploadDir }) {
     const uploadMiddleware = createUploadMiddleware({

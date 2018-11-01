@@ -77,17 +77,24 @@ class UserModule extends Module {
 
   name = 'oors.user';
 
+  config = {
+    oors: {
+      mongodb: {
+        repositories: {
+          autoload: false,
+        },
+      },
+      rad: {
+        autoload: {
+          services: false,
+        },
+      },
+    },
+  };
+
   hooks = {
     'oors.router.load': () => {},
   };
-
-  constructor(...args) {
-    super(...args);
-
-    Object.assign(this.config, {
-      'oors.rad.autoload.services': false,
-    });
-  }
 
   initialize({ jwtSecret, emailTemplates }) {
     this.jwtMiddleware = jwtMiddleware({

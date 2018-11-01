@@ -1,13 +1,10 @@
-import set from 'lodash/set';
-import get from 'lodash/get';
-import has from 'lodash/has';
 import invariant from 'invariant';
 import Repository from './Repository';
 
 class RepositoryStore {
   constructor(module) {
-    this.repositories = {};
     this.module = module;
+    this.repositories = {};
   }
 
   create = ({ methods = {}, connectionName, ...options }) => {
@@ -46,11 +43,8 @@ class RepositoryStore {
         ...options,
       }),
       getRelation: name => this.module.get('relations')[repository.collectionName][name],
-      getRelations: () => this.module.get('relations')[repository.collectionName],
-    });
-
-    repository.configure({
-      getRepository: this.get,
+      hasRelation: name =>
+        this.module.get('relations')[repository.collectionName][name] !== undefined,
     });
 
     return repository;
@@ -65,18 +59,45 @@ class RepositoryStore {
 
     this.module.emit('repository', payload);
 
-    set(this.repositories, payload.key, this.bind(payload.repository, options.connectionName));
+    this.repositories[payload.key] = this.bind(payload.repository, options.connectionName);
 
-    return this.get(payload.key);
+    return this.repositories[payload.key];
   };
 
   get = key => {
-    if (!has(this.repositories, key)) {
+    if (!this.repositories[key]) {
       throw new Error(`Unable to find "${key}" repository!`);
     }
 
-    return get(this.repositories, key);
+    return this.repositories[key];
   };
+
+  configure() {
+    Object.keys(this.repositories).forEach(key => {
+      const repository = this.repositories[key];
+
+      repository.configure({
+        getRepository: this.get,
+      });
+
+      const relations = repository.relations || repository.constructor.relations || {};
+
+      Object.keys(relations).forEach(relationName => {
+        this.module.get('addRelation')({
+          from: {
+            repository,
+            field: relations[relationName].localField,
+            name: 'relationName',
+          },
+          to: {
+            repository: this.get(relations[relationName].repositoryName),
+            field: relations[relationName].foreignField,
+          },
+          type: relations[relationName].type,
+        });
+      });
+    });
+  }
 }
 
 export default RepositoryStore;
