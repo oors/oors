@@ -1,4 +1,8 @@
+import camelCase from 'lodash/camelCase';
 import Ajv from 'ajv';
+import glob from 'glob';
+import fse from 'fs-extra';
+import path from 'path';
 import ajvKeywords from 'ajv-keywords';
 import { MongoClient, ObjectID } from 'mongodb';
 import { Module } from 'oors';
@@ -91,6 +95,14 @@ class MongoDB extends Module {
         },
         default: {},
       },
+      autoloadRepositories: {
+        type: 'boolean',
+        default: false,
+      },
+      moduleRepositoriesDir: {
+        type: 'string',
+        default: 'repositories',
+      },
     },
     required: ['connections'],
   };
@@ -154,6 +166,7 @@ class MongoDB extends Module {
       relationToLookup: this.relationsManager.toLookup,
     });
 
+    this.collectRepositories();
     this.setupValidator();
     this.setupMigration();
     await this.setupSeeding();
@@ -200,6 +213,59 @@ class MongoDB extends Module {
     Promise.all(
       Object.keys(this.connections).map(connectionName => this.closeConnection(connectionName)),
     );
+
+  collectRepositories = async () => {
+    await this.runHook('loadRepositories', this.collectFromModule, {
+      createRepository: this.repositoryStore.create,
+      bindRepositories: this.repositoryStore.bind,
+      bindRepository: this.repositoryStore.bind,
+    });
+  };
+
+  collectFromModule = async module => {
+    if (
+      !module.getConfig('oors.mongodb.autoloadRepositories', this.getConfig('autoloadRepositories'))
+    ) {
+      return;
+    }
+
+    await this.loadModuleRepositories(module);
+  };
+
+  async loadModuleRepositories(module) {
+    const dirPath = path.resolve(
+      path.dirname(module.filePath),
+      this.getConfig('moduleRepositoriesDir'),
+    );
+
+    try {
+      const stat = await fse.stat(dirPath);
+      const isDirectory = stat && stat.isDirectory();
+      if (!isDirectory) {
+        return;
+      }
+    } catch (err) {
+      return;
+    }
+
+    await new Promise((resolve, reject) => {
+      glob(path.resolve(dirPath, '*.js'), { nodir: true }, async (err, files) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        files.forEach(file => {
+          const ModuleRepository = require(file).default; // eslint-disable-line global-require, import/no-dynamic-require
+          const repository = new ModuleRepository();
+          repository.module = module;
+          this.addRepository(camelCase(repository.name || repository.constructor.name), repository);
+        });
+
+        resolve();
+      });
+    });
+  }
 
   setupValidator() {
     this.ajv = new Ajv({
