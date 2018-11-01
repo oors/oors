@@ -1,4 +1,4 @@
-export default (comment, args, { loaders }) => loaders.blogComments.findMany.load({
+export default (comment, args, { loaders }) => loaders.oorsBlogComments.findMany.load({
   query: {
     parentId: comment.id,
   },

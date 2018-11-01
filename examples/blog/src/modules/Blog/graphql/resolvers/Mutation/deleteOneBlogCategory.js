@@ -3,6 +3,6 @@ import { withUserStamps } from '../../decorators';
 
 export default withUserStamps(
   deleteOne({
-    repositoryName: 'blogCategory',
+    repositoryName: 'oors.blog.Category',
   }),
 );

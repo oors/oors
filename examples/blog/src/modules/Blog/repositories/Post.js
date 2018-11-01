@@ -2,7 +2,7 @@ import { Repository } from '../../../../../../packages/oors-mongodb';
 
 const statuses = ['DRAFT', 'PUBLISHED'];
 
-class PostRepository extends Repository {
+class Post extends Repository {
   static statuses = statuses;
 
   static schema = {
@@ -54,6 +54,15 @@ class PostRepository extends Repository {
   };
 
   static collectionName = 'BlogPost';
+
+  static relations = {
+    category: {
+      repositoryName: 'oors.blog.Category',
+      localField: 'categoryId',
+      foreignField: '_id',
+      type: 'one',
+    },
+  };
 }
 
-export default PostRepository;
+export default Post;

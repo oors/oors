@@ -3,6 +3,8 @@ import Application from '../../../packages/oors-presets/build/applications/Stand
 import config from '../../../packages/oors-presets/build/config';
 import BlogModule from './modules/Blog';
 
+config.set('modules.oors.mongodb.autoloadRepositories', true);
+
 const app = new Application(config);
 
 app.addModules(new BlogModule());

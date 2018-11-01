@@ -1,1 +1,1 @@
-export default (comment, args, { loaders }) => loaders.blogPosts.findById.load(comment.postId);
+export default (comment, args, { loaders }) => loaders.oorsBlogPosts.findById.load(comment.postId);

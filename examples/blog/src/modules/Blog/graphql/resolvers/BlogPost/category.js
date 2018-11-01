@@ -1,1 +1,1 @@
-export default (post, args, { loaders }) => loaders.blogCategories.findById.load(post.categoryId);
+export default (post, args, { loaders }) => loaders.oorsBlogCategories.findById.load(post.categoryId);

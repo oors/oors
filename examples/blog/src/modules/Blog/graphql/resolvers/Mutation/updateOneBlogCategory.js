@@ -3,6 +3,6 @@ import { withUserStamps } from '../../decorators';
 
 export default withUserStamps(
   updateOne({
-    repositoryName: 'blogCategory',
+    repositoryName: 'oors.blog.Category',
   }),
 );

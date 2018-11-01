@@ -31,7 +31,7 @@ export default compose(
     },
     // if we have a categoryId, we need to make sure it points to an existing database entry
     category: input.categoryId
-      ? resolve(loaders.blogCategories.findById.load(input.categoryId))
+      ? resolve(loaders.oorsBlogCategories.findById.load(input.categoryId))
       : null,
   })),
   withSchema({
@@ -44,6 +44,6 @@ export default compose(
   }),
 )(
   createOne({
-    repositoryName: 'blogPost',
+    repositoryName: 'oors.blog.Post',
   }),
 );

@@ -28,8 +28,8 @@ export default compose(
       ...input,
       [id ? 'updatedBy' : 'createdBy']: user._id,
     },
-    parent: input.parentId ? resolve(loaders.blogComments.findById.load(input.parentId)) : null,
-    post: input.postId ? resolve(loaders.blogPosts.findById.load(input.postId)) : null,
+    parent: input.parentId ? resolve(loaders.oorsBlogComments.findById.load(input.parentId)) : null,
+    post: input.postId ? resolve(loaders.oorsBlogPosts.findById.load(input.postId)) : null,
   })),
   withSchema({
     type: 'object',
@@ -45,6 +45,6 @@ export default compose(
   }),
 )(
   createOne({
-    repositoryName: 'blogComment',
+    repositoryName: 'oors.blog.Comment',
   }),
 );

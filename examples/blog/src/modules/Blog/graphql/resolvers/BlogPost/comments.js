@@ -1,4 +1,4 @@
-export default (post, { offset = 0, limit = 10 }, { loaders }) => loaders.blogComments.findMany.load({
+export default (post, { offset = 0, limit = 10 }, { loaders }) => loaders.oorsBlogComments.findMany.load({
   query: {
     postId: post._id,
   },

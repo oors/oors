@@ -1,6 +1,6 @@
 import { Repository } from '../../../../../../packages/oors-mongodb';
 
-class CategoryRepository extends Repository {
+class Category extends Repository {
   static schema = {
     type: 'object',
     properties: {
@@ -19,12 +19,21 @@ class CategoryRepository extends Repository {
 
   static collectionName = 'BlogCategory';
 
+  static relations = {
+    posts: {
+      repositoryName: 'oors.blog.Post',
+      localField: '_id',
+      foreignField: 'categoryId',
+      type: 'many',
+    },
+  };
+
   getAllWithPostsWithCategory() {
     return this.aggregate(pipeline => pipeline
       .lookup('posts')
       .unwind({ path: '$posts', preserveNullAndEmptyArrays: true })
       .lookup(
-        this.getRepository('blogPost').relationToLookup('category', {
+        this.getRepository('oors.blog.Post').relationToLookup('category', {
           localField: 'posts.categoryId',
           as: 'posts.category',
         }),
@@ -32,4 +41,4 @@ class CategoryRepository extends Repository {
   }
 }
 
-export default CategoryRepository;
+export default Category;

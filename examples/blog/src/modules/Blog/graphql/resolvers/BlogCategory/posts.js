@@ -1,4 +1,4 @@
-export default (category, args, { loaders }) => loaders.blogPosts.findMany.load({
+export default (category, args, { loaders }) => loaders.oorsBlogPosts.findMany.load({
   query: {
     categoryId: category._id,
   },

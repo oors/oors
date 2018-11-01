@@ -1,6 +1,6 @@
 import { Repository } from '../../../../../../packages/oors-mongodb';
 
-class CommentRepository extends Repository {
+class Comment extends Repository {
   static schema = {
     type: 'object',
     properties: {
@@ -27,4 +27,4 @@ class CommentRepository extends Repository {
   static collectionName = 'BlogComment';
 }
 
-export default CommentRepository;
+export default Comment;
