@@ -140,7 +140,7 @@ class MongoDB extends Module {
     },
   };
 
-  initialize({ connections, defaultConnection }) {
+  initialize({ connections, defaultConnection, logQueries, addTimestamps }) {
     this.defaultConnectionName = defaultConnection || connections[0].name;
 
     const names = connections.map(({ name }) => name);
@@ -152,9 +152,19 @@ class MongoDB extends Module {
         })" - can't be found through the list of available connections (${names})`,
       );
     }
+
+    this.onModule(this.name, 'repository', ({ repository }) => {
+      if (logQueries) {
+        withLogger()(repository);
+      }
+
+      if (addTimestamps) {
+        withTimestamps()(repository);
+      }
+    });
   }
 
-  async setup({ connections, logQueries, addTimestamps }) {
+  async setup({ connections }) {
     await Promise.all(connections.map(this.createConnection));
 
     this.repositoryStore = new RepositoryStore(this);
@@ -180,16 +190,6 @@ class MongoDB extends Module {
     await this.collectRepositories();
     this.setupMigration();
     await this.setupSeeding();
-
-    this.onModule(this.name, 'repository', ({ repository }) => {
-      if (logQueries) {
-        withLogger()(repository);
-      }
-
-      if (addTimestamps) {
-        withTimestamps()(repository);
-      }
-    });
 
     this.gqlQueryParser = new GQLQueryParser(this);
 
