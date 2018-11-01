@@ -176,8 +176,8 @@ class MongoDB extends Module {
       relationToLookup: this.relationsManager.toLookup,
     });
 
-    this.collectRepositories();
     this.setupValidator();
+    await this.collectRepositories();
     this.setupMigration();
     await this.setupSeeding();
 
@@ -278,8 +278,13 @@ class MongoDB extends Module {
             `${module.getConfig('oors.mongodb.repositories.prefix', module.name)}.${
               repository.constructor.name
             }`;
+
           this.addRepository(name, repository);
-          module.export(`repositories.${name}`, repository);
+
+          module.export(
+            `repositories.${repository.name || repository.constructor.name}`,
+            repository,
+          );
         });
 
         resolve();

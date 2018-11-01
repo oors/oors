@@ -83,17 +83,18 @@ class RepositoryStore {
       const relations = repository.relations || repository.constructor.relations || {};
 
       Object.keys(relations).forEach(relationName => {
+        const { localField, repositoryName, foreignField, type } = relations[relationName];
         this.module.get('addRelation')({
           from: {
             repository,
-            field: relations[relationName].localField,
-            name: 'relationName',
+            field: localField,
+            name: relationName,
           },
           to: {
-            repository: this.get(relations[relationName].repositoryName),
-            field: relations[relationName].foreignField,
+            repository: this.get(repositoryName),
+            field: foreignField,
           },
-          type: relations[relationName].type,
+          type,
         });
       });
     });

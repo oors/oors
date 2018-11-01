@@ -3,6 +3,7 @@ import util from 'util';
 import pick from 'lodash/pick';
 import getPath from 'lodash/get';
 import setPath from 'lodash/set';
+import hasPath from 'lodash/has';
 import merge from 'lodash/merge';
 import camelCase from 'lodash/camelCase';
 
@@ -78,7 +79,7 @@ class Module {
   }
 
   get(key) {
-    if (!Object.keys(this.manager.exportMap[this.name]).includes(key)) {
+    if (!hasPath(this.manager.exportMap[this.name], key)) {
       throw new Error(`Unable to get exported value for "${key}" key in "${this.name}" module!`);
     }
 
