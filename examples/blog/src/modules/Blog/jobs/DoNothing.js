@@ -7,7 +7,7 @@ class DoNothing extends Job {
   };
 
   run = () => {
-    console.log(this.module.takeABreak);
+    console.log(this.module.get('takeABreak')());
   };
 }
 
