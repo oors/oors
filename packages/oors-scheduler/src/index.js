@@ -142,9 +142,9 @@ class SchedulerModule extends Module {
     }
 
     const files = await fg(path.resolve(dirPath, '*.js'));
-    const imports = await Promise.all(files.map(file => import(file)));
 
-    imports.forEach(({ default: Job }) => {
+    files.forEach(file => {
+      const Job = require(file).default; // eslint-disable-line global-require, import/no-dynamic-require
       this.jobsToSave.push(new Job(this.agenda, module));
     });
   }

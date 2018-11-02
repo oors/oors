@@ -309,15 +309,14 @@ class Gql extends Module {
       this.addResolvers(resolvers);
     } catch (err) {
       const resolversPath = await fg(path.resolve(`${dirPath}/resolvers`, '**/*.js'));
-      const imports = await Promise.all(resolversPath.map(file => import(file)));
-      const resolvers = imports.reduce((acc, { default: resolver }, index) => {
+      const resolvers = resolversPath.reduce((acc, resolverPath) => {
         const resolverName = path
-          .relative(`${dirPath}/resolvers`, resolversPath[index])
+          .relative(`${dirPath}/resolvers`, resolverPath)
           .slice(0, -3)
           .split(path.sep)
           .join('.');
 
-        set(acc, resolverName, resolver);
+        set(acc, resolverName, require(resolverPath).default);
 
         return acc;
       }, {});

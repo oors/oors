@@ -109,15 +109,13 @@ class RADModule extends Module {
     }
 
     const files = await fg(path.resolve(dirPath, '*.js'));
-    const imports = await Promise.all(files.map(file => import(file)));
 
-    imports.forEach(({ default: Service }, index) => {
+    files.forEach(file => {
+      const Service = require(file).default; // eslint-disable-line global-require, import/no-dynamic-require
       const service = new Service(module);
       if (!service.name) {
         throw new Error(
-          `Unable to register a service without a name! "${files[index]}" in "${
-            module.name
-          }" module`,
+          `Unable to register a service without a name! "${file}" in "${module.name}" module`,
         );
       }
       this.registerModuleService(module, service);
@@ -139,10 +137,10 @@ class RADModule extends Module {
     }
 
     const files = await fg(path.resolve(dirPath, '*.js'));
-    const imports = await Promise.all(files.map(file => import(file)));
 
-    imports.forEach(({ default: method }, index) => {
-      const { name } = path.parse(files[index]);
+    files.forEach(file => {
+      const method = require(file).default; // eslint-disable-line global-require, import/no-dynamic-require
+      const { name } = path.parse(file);
 
       if (typeof method !== 'function') {
         throw new Error(

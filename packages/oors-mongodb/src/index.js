@@ -263,9 +263,9 @@ class MongoDB extends Module {
     }
 
     const files = await fg(path.resolve(dirPath, '*.js'));
-    const imports = await Promise.all(files.map(file => import(file)));
 
-    imports.forEach(({ default: ModuleRepository }) => {
+    files.forEach(file => {
+      const ModuleRepository = require(file).default; // eslint-disable-line global-require, import/no-dynamic-require
       const repository = new ModuleRepository();
       repository.module = module;
       const name =
