@@ -5,8 +5,8 @@
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "fast-glob": "2.2.3",
     "fs-extra": "^7.0.0",
+    "glob": "7.1.3",
     "lodash": "4.17.11",
     "oors": "^1.13.0",
     "oors-mongodb": "^2.26.1",

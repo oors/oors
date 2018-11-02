@@ -1,6 +1,6 @@
 /* eslint-disable no-empty, import/no-dynamic-require, global-require */
 import { graphql } from 'graphql';
-import fg from 'fast-glob';
+import glob from 'glob';
 import path from 'path';
 import fse from 'fs-extra';
 import get from 'lodash/get';
@@ -275,23 +275,21 @@ class Gql extends Module {
   };
 
   loadFromDir = async dirPath => {
-    try {
-      const stats = await fse.stat(dirPath);
-      const isDirectory = stats && stats.isDirectory();
-      if (!isDirectory) {
-        return;
-      }
-    } catch (err) {
-      return;
-    }
+    await Promise.all([
+      this.loadTypeDefsFromDir(dirPath),
+      this.loadResolversFromDir(dirPath),
+      this.loadDirectivesFromDir(dirPath),
+    ]);
+  };
 
+  loadTypeDefsFromDir = async dirPath => {
     try {
       // try to load /graphql/typeDefs/**/*.graphl
       const typeDefsDirPath = path.join(dirPath, 'typeDefs');
       const stats = await fse.stat(typeDefsDirPath);
       if (stats.isDirectory()) {
-        const filePaths = await fg(path.resolve(typeDefsDirPath, '**/*.graphql'));
-        await Promise.all(filePaths.map(filePath => this.addTypeDefsByPath(filePath)));
+        const files = glob.sync(path.resolve(typeDefsDirPath, '**/*.graphql'));
+        await Promise.all(files.map(file => this.addTypeDefsByPath(file)));
       }
     } catch {
       // try to load /graphql/typeDefs.graphl
@@ -299,7 +297,9 @@ class Gql extends Module {
         await this.addTypeDefsByPath(path.join(dirPath, 'typeDefs.graphql'));
       } catch {}
     }
+  };
 
+  loadResolversFromDir = async dirPath => {
     try {
       const resolvers = require(`${dirPath}/resolvers`);
       if (resolvers.default) {
@@ -308,7 +308,7 @@ class Gql extends Module {
       }
       this.addResolvers(resolvers);
     } catch (err) {
-      const resolversPath = await fg(path.resolve(`${dirPath}/resolvers`, '**/*.js'));
+      const resolversPath = glob.sync(path.resolve(`${dirPath}/resolvers`, '**/*.js'));
       const resolvers = resolversPath.reduce((acc, resolverPath) => {
         const resolverName = path
           .relative(`${dirPath}/resolvers`, resolverPath)
@@ -320,10 +320,11 @@ class Gql extends Module {
 
         return acc;
       }, {});
-
       this.addResolvers(resolvers);
     }
+  };
 
+  loadDirectivesFromDir = async dirPath => {
     try {
       const directives = require(`${dirPath}/directives`);
       if (directives.default) {

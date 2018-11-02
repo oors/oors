@@ -1,6 +1,5 @@
 import Ajv from 'ajv';
-import fg from 'fast-glob';
-import fse from 'fs-extra';
+import glob from 'glob';
 import path from 'path';
 import ajvKeywords from 'ajv-keywords';
 import { MongoClient, ObjectID } from 'mongodb';
@@ -252,17 +251,9 @@ class MongoDB extends Module {
       this.getConfig('moduleRepositoriesDir'),
     );
 
-    try {
-      const stat = await fse.stat(dirPath);
-      const isDirectory = stat && stat.isDirectory();
-      if (!isDirectory) {
-        return;
-      }
-    } catch (err) {
-      return;
-    }
-
-    const files = await fg(path.resolve(dirPath, '*.js'));
+    const files = await glob.sync(path.resolve(dirPath, '*.js'), {
+      nodir: true,
+    });
 
     files.forEach(file => {
       const ModuleRepository = require(file).default; // eslint-disable-line global-require, import/no-dynamic-require

@@ -1,6 +1,5 @@
 import { Module } from 'oors';
-import fg from 'fast-glob';
-import fse from 'fs-extra';
+import glob from 'glob';
 import path from 'path';
 import Agenda from 'agenda';
 
@@ -130,18 +129,7 @@ class SchedulerModule extends Module {
 
   async loadModuleJobs(module) {
     const dirPath = path.resolve(path.dirname(module.filePath), this.getConfig('moduleJobsDir'));
-
-    try {
-      const stat = await fse.stat(dirPath);
-      const isDirectory = stat && stat.isDirectory();
-      if (!isDirectory) {
-        return;
-      }
-    } catch (err) {
-      return;
-    }
-
-    const files = await fg(path.resolve(dirPath, '*.js'));
+    const files = glob.sync(path.resolve(dirPath, '*.js'));
 
     files.forEach(file => {
       const Job = require(file).default; // eslint-disable-line global-require, import/no-dynamic-require
