@@ -1,7 +1,7 @@
 import pluralize from 'pluralize';
 import { Module } from 'oors';
 import camelCase from 'lodash/camelCase';
-import glob from 'glob';
+import fg from 'fast-glob';
 import fse from 'fs-extra';
 import path from 'path';
 import { createLoaders } from 'oors-mongodb/build/libs/graphql';
@@ -108,26 +108,19 @@ class RADModule extends Module {
       return;
     }
 
-    await new Promise((resolve, reject) => {
-      glob(path.resolve(dirPath, '*.js'), { nodir: true }, (err, files) => {
-        if (err) {
-          reject(err);
-          return;
-        }
+    const files = await fg(path.resolve(dirPath, '*.js'));
+    const imports = await Promise.all(files.map(file => import(file)));
 
-        files.forEach(file => {
-          const Service = require(file).default; // eslint-disable-line global-require, import/no-dynamic-require
-          const service = new Service(module);
-          if (!service.name) {
-            throw new Error(
-              `Unable to register a service without a name! "${file}" in "${module.name}" module`,
-            );
-          }
-          this.registerModuleService(module, service);
-        });
-
-        resolve();
-      });
+    imports.forEach(({ default: Service }, index) => {
+      const service = new Service(module);
+      if (!service.name) {
+        throw new Error(
+          `Unable to register a service without a name! "${files[index]}" in "${
+            module.name
+          }" module`,
+        );
+      }
+      this.registerModuleService(module, service);
     });
   }
 
@@ -145,30 +138,21 @@ class RADModule extends Module {
       return;
     }
 
-    await new Promise((resolve, reject) => {
-      glob(path.resolve(dirPath, '*.js'), { nodir: true }, (err, files) => {
-        if (err) {
-          reject(err);
-          return;
-        }
+    const files = await fg(path.resolve(dirPath, '*.js'));
+    const imports = await Promise.all(files.map(file => import(file)));
 
-        files.forEach(file => {
-          const method = require(file).default; // eslint-disable-line global-require, import/no-dynamic-require
-          const { name } = path.parse(file);
+    imports.forEach(({ default: method }, index) => {
+      const { name } = path.parse(files[index]);
 
-          if (typeof method !== 'function') {
-            throw new Error(
-              `Unable to register "${name}" method for ${module.name} module! (not a function)`,
-            );
-          }
+      if (typeof method !== 'function') {
+        throw new Error(
+          `Unable to register "${name}" method for ${module.name} module! (not a function)`,
+        );
+      }
 
-          module.export(name, (...args) =>
-            method.call(module, { args, module, getService: this.getService }),
-          );
-        });
-
-        resolve();
-      });
+      module.export(name, (...args) =>
+        method.call(module, { args, module, getService: this.getService }),
+      );
     });
   }
 

@@ -1,6 +1,6 @@
 /* eslint-disable no-empty, import/no-dynamic-require, global-require */
 import { graphql } from 'graphql';
-import glob from 'glob';
+import fg from 'fast-glob';
 import path from 'path';
 import fse from 'fs-extra';
 import get from 'lodash/get';
@@ -290,17 +290,8 @@ class Gql extends Module {
       const typeDefsDirPath = path.join(dirPath, 'typeDefs');
       const stats = await fse.stat(typeDefsDirPath);
       if (stats.isDirectory()) {
-        await new Promise((resolve, reject) => {
-          glob(path.resolve(typeDefsDirPath, '**/*.graphql'), { nodir: true }, (err, filePaths) => {
-            if (err) {
-              return reject(err);
-            }
-
-            return resolve(
-              Promise.all(filePaths.map(filePath => this.addTypeDefsByPath(filePath))),
-            );
-          });
-        });
+        const filePaths = await fg(path.resolve(typeDefsDirPath, '**/*.graphql'));
+        await Promise.all(filePaths.map(filePath => this.addTypeDefsByPath(filePath)));
       }
     } catch {
       // try to load /graphql/typeDefs.graphl
@@ -317,27 +308,19 @@ class Gql extends Module {
       }
       this.addResolvers(resolvers);
     } catch (err) {
-      const resolvers = await new Promise((resolve, reject) => {
-        glob(path.resolve(`${dirPath}/resolvers`, '**/*.js'), (globErr, resolversPath) => {
-          if (globErr) {
-            reject(err);
-          } else {
-            resolve(
-              resolversPath.reduce((acc, resolverPath) => {
-                const resolverName = path
-                  .relative(`${dirPath}/resolvers`, resolverPath)
-                  .slice(0, -3)
-                  .split(path.sep)
-                  .join('.');
+      const resolversPath = await fg(path.resolve(`${dirPath}/resolvers`, '**/*.js'));
+      const imports = await Promise.all(resolversPath.map(file => import(file)));
+      const resolvers = imports.reduce((acc, { default: resolver }, index) => {
+        const resolverName = path
+          .relative(`${dirPath}/resolvers`, resolversPath[index])
+          .slice(0, -3)
+          .split(path.sep)
+          .join('.');
 
-                set(acc, resolverName, require(resolverPath).default);
+        set(acc, resolverName, resolver);
 
-                return acc;
-              }, {}),
-            );
-          }
-        });
-      });
+        return acc;
+      }, {});
 
       this.addResolvers(resolvers);
     }
