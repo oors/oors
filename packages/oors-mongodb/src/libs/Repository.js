@@ -6,14 +6,15 @@ import AggregationPipeline from './AggregationPipeline';
 
 class Repository extends Store {
   static getCollectionName() {
-    return this.collectionName || this.name.substr(0, this.name.indexOf('Repository'));
+    return this.collectionName || this.name.replace(/Repository$/, '');
   }
 
-  constructor({ collection, schema, collectionName } = {}) {
+  constructor({ collection, schema, collectionName, relations = {} } = {}) {
     super(collection);
     this.schema = schema || this.schema || this.constructor.schema;
     this.collectionName =
       collectionName || this.collectionName || this.constructor.getCollectionName();
+    this.relations = relations;
   }
 
   // eslint-disable-next-line

@@ -80,7 +80,10 @@ class RepositoryStore {
         getRepository: this.get,
       });
 
-      const relations = repository.relations || repository.constructor.relations || {};
+      const relations = {
+        ...(repository.constructor.relations || {}),
+        ...(repository.relations || {}),
+      };
 
       Object.keys(relations).forEach(relationName => {
         const { localField, repositoryName, foreignField, type } = relations[relationName];
