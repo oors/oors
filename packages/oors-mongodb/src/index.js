@@ -251,7 +251,7 @@ class MongoDB extends Module {
       this.getConfig('moduleRepositoriesDir'),
     );
 
-    const files = await glob.sync(path.resolve(dirPath, '*.js'), {
+    const files = glob.sync(path.resolve(dirPath, '*.js'), {
       nodir: true,
     });
 
