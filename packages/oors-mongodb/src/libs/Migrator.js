@@ -1,5 +1,5 @@
 import path from 'path';
-import glob from 'glob';
+import fg from 'fast-glob';
 import { getTimestampFromMigrationFile } from './helpers';
 
 class Migrator {
@@ -25,16 +25,7 @@ class Migrator {
     this.silent = silent;
   }
 
-  loadFiles = () =>
-    new Promise((resolve, reject) => {
-      glob(path.join(this.migrationsDir, '*.js'), (err, files) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(files);
-        }
-      });
-    });
+  loadFiles = () => fg(path.join(this.migrationsDir, '*.js'));
 
   print = message => {
     if (this.silent) {

@@ -1,5 +1,5 @@
 import Ajv from 'ajv';
-import glob from 'glob';
+import fg from 'fast-glob';
 import fse from 'fs-extra';
 import path from 'path';
 import ajvKeywords from 'ajv-keywords';
@@ -262,33 +262,21 @@ class MongoDB extends Module {
       return;
     }
 
-    await new Promise((resolve, reject) => {
-      glob(path.resolve(dirPath, '*.js'), { nodir: true }, async (err, files) => {
-        if (err) {
-          reject(err);
-          return;
-        }
+    const files = await fg(path.resolve(dirPath, '*.js'));
+    const imports = await Promise.all(files.map(file => import(file)));
 
-        files.forEach(file => {
-          const ModuleRepository = require(file).default; // eslint-disable-line global-require, import/no-dynamic-require
-          const repository = new ModuleRepository();
-          repository.module = module;
-          const name =
-            repository.name ||
-            `${module.getConfig('oors.mongodb.repositories.prefix', module.name)}.${
-              repository.constructor.name
-            }`;
+    imports.forEach(({ default: ModuleRepository }) => {
+      const repository = new ModuleRepository();
+      repository.module = module;
+      const name =
+        repository.name ||
+        `${module.getConfig('oors.mongodb.repositories.prefix', module.name)}.${
+          repository.constructor.name
+        }`;
 
-          this.addRepository(name, repository);
+      this.addRepository(name, repository);
 
-          module.export(
-            `repositories.${repository.name || repository.constructor.name}`,
-            repository,
-          );
-        });
-
-        resolve();
-      });
+      module.export(`repositories.${repository.name || repository.constructor.name}`, repository);
     });
   }
 

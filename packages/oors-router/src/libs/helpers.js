@@ -1,3 +1,5 @@
+export { toBSON, idPattern } from 'oors-mongodb/build/libs/helpers';
+
 export const wrapHandler = handler => (req, res, next) =>
   Promise.resolve(handler(req, res, next))
     .then(response => {
@@ -6,5 +8,3 @@ export const wrapHandler = handler => (req, res, next) =>
       }
     })
     .catch(next);
-
-export { toBSON, idPattern } from 'oors-mongodb/build/libs/helpers';

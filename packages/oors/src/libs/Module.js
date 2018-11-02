@@ -79,6 +79,10 @@ class Module {
   }
 
   get(key) {
+    if (!key) {
+      return this.manager.exportMap[this.name];
+    }
+
     if (!hasPath(this.manager.exportMap[this.name], key)) {
       throw new Error(`Unable to get exported value for "${key}" key in "${this.name}" module!`);
     }
