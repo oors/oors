@@ -1,11 +1,17 @@
 import { Module } from 'oors';
+import minimatch from 'minimatch';
 import glob from 'glob';
 import path from 'path';
 
 class AutoloaderModule extends Module {
   static schema = {
     type: 'object',
-    properties: {},
+    properties: {
+      scan: {
+        type: 'boolean',
+        default: false,
+      },
+    },
     required: [],
   };
 
@@ -13,12 +19,14 @@ class AutoloaderModule extends Module {
 
   filesTree = {};
 
-  async setup() {
-    // await this.runHook('scan', module => this.scan(module, '**/*.js'));
+  async setup({ scan }) {
+    if (scan) {
+      await this.runHook('scan', module => this.scan(module, '**/*.js'));
+    }
 
     this.export({
       wrap: module =>
-        ['glob', 'import', 'hasPath', 'relative'].reduce(
+        ['glob', 'import', 'hasPath', 'relative', 'find'].reduce(
           (acc, method) => ({
             ...acc,
             [method]: (...args) => this[method](module, ...args),
@@ -43,9 +51,12 @@ class AutoloaderModule extends Module {
       });
     });
 
-  scan = async (module, pattern = '**/*.js', options) => {
+  find = async (module, pattern) =>
+    (await this.scan(module)).filter(minimatch.filter(this.relative(module, pattern)));
+
+  scan = async module => {
     if (!this.filesTree[module.name]) {
-      this.filesTree[module.name] = await this.glob(module, pattern, options);
+      this.filesTree[module.name] = this.glob(module, '**/*.js');
     }
 
     return this.filesTree[module.name];
@@ -59,7 +70,7 @@ class AutoloaderModule extends Module {
       return resolveDefault ? imported.default : imported;
     });
 
-  hasPath = (module, searchedPath) => this.filesTree[module][searchedPath];
+  pathExists = async (module, pathToFind) => (await this.scan(module))[pathToFind];
 }
 
 export default AutoloaderModule;
