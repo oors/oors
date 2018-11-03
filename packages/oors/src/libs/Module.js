@@ -150,7 +150,7 @@ class Module {
     return this.manager.asyncEmit(`module:${this.name}:${event}`, ...args.concat([this]));
   }
 
-  runHook(hook, handler, context) {
+  runHook(hook, handler, context = this) {
     return this.manager.run(`${this.name}.${hook}`, handler, context);
   }
 
