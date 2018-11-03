@@ -21,12 +21,12 @@ class AutoloaderModule extends Module {
 
   async setup({ scan }) {
     if (scan) {
-      await this.runHook('scan', module => this.scan(module, '**/*.js'));
+      await this.runHook('scan', module => this.scan(module));
     }
 
     this.export({
       wrap: module =>
-        ['glob', 'import', 'hasPath', 'relative', 'find'].reduce(
+        ['glob', 'import', 'pathExists', 'relative', 'find'].reduce(
           (acc, method) => ({
             ...acc,
             [method]: (...args) => this[method](module, ...args),
