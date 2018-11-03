@@ -4,10 +4,25 @@ import { Repository } from 'oors-mongodb';
 import { hashPassword } from '../libs/helpers';
 import schema from '../schemas/user';
 
-class UserRepository extends Repository {
+class User extends Repository {
   static schema = schema;
 
   static collectionName = 'userUser';
+
+  static relations = {
+    account: {
+      repositoryName: 'oors.user.Account',
+      localField: 'accountId',
+      foreignField: '_id',
+      type: 'one',
+    },
+    logins: {
+      repositoryName: 'oors.user.UserLogin',
+      localField: '_id',
+      foreignField: 'userId',
+      type: 'many',
+    },
+  };
 
   findOneByUsername(username) {
     return this.findOne({
@@ -85,4 +100,4 @@ class UserRepository extends Repository {
   }
 }
 
-export default UserRepository;
+export default User;

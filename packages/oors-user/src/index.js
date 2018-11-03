@@ -2,10 +2,6 @@ import { Module } from 'oors';
 import upperFirst from 'lodash/upperFirst';
 import camelCase from 'lodash/camelCase';
 import pivotSchema from 'oors/build/schemas/pivot';
-import { createLoaders } from 'oors-mongodb/build/libs/graphql';
-import UserRepositoryClass from './repositories/User';
-import AccountRepositoryClass from './repositories/Account';
-import UserLoginRepositoryClass from './repositories/UserLogin';
 import UserService from './services/User';
 import AccountService from './services/Account';
 import router from './router';
@@ -81,7 +77,7 @@ class UserModule extends Module {
     oors: {
       mongodb: {
         repositories: {
-          autoload: false,
+          autoload: true,
         },
       },
       rad: {
@@ -115,7 +111,6 @@ class UserModule extends Module {
       jwtMiddleware: this.jwtMiddleware,
     };
 
-    await this.setupRepositories();
     this.setupServices();
     this.setupPermissions();
 
@@ -134,32 +129,6 @@ class UserModule extends Module {
     }
 
     this.deps['oors.router'].addRouter('userRouter', router(routerConfig));
-  }
-
-  async setupRepositories() {
-    const { bindRepository } = this.deps[this.getConfig('storageModule')];
-    const { addLoaders } = this.deps['oors.graphql'];
-
-    const repositories = {
-      UserRepository: bindRepository(new UserRepositoryClass()),
-      AccountRepository: bindRepository(new AccountRepositoryClass()),
-      UserLoginRepository: bindRepository(new UserLoginRepositoryClass()),
-    };
-
-    await this.runHook('touchRepositories', () => {}, { repositories });
-
-    const { UserRepository, AccountRepository, UserLoginRepository } = repositories;
-
-    const loaders = {
-      users: addLoaders(createLoaders(UserRepository), 'users'),
-      accounts: addLoaders(createLoaders(AccountRepository), 'accounts'),
-      userLogins: addLoaders(createLoaders(UserLoginRepository), 'userLogins'),
-    };
-
-    this.export({
-      repositories,
-      loaders,
-    });
   }
 
   configurePassport(routerConfig) {
