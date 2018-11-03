@@ -1,8 +1,28 @@
 import { Repository } from 'oors-mongodb';
-import schema from '../schemas/account';
 
 class Account extends Repository {
-  static schema = schema;
+  static schema = {
+    type: 'object',
+    properties: {
+      name: {
+        type: 'string',
+      },
+      isActive: {
+        type: 'boolean',
+        default: true,
+      },
+      isDeleted: {
+        type: 'boolean',
+      },
+      isConfirmed: {
+        type: 'boolean',
+        default: false,
+      },
+      deletedAt: {
+        instanceof: 'Date',
+      },
+    },
+  };
 
   static collectionName = 'userAccount';
 

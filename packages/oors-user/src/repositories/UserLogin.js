@@ -1,8 +1,27 @@
 import { Repository } from 'oors-mongodb';
-import schema from '../schemas/userLogin';
 
 class UserLogin extends Repository {
-  static schema = schema;
+  static schema = {
+    type: 'object',
+    properties: {
+      userId: {
+        isObjectId: true,
+      },
+      ip: {
+        type: 'string',
+      },
+      browser: {
+        type: 'string',
+      },
+      os: {
+        type: 'string',
+      },
+      platform: {
+        type: 'string',
+      },
+    },
+    required: ['userId', 'ip', 'browser', 'os', 'platform'],
+  };
 
   static collectionName = 'userUserLogin';
 
