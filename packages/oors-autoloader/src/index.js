@@ -56,7 +56,7 @@ class AutoloaderModule extends Module {
 
   scan = async module => {
     if (!this.filesTree[module.name]) {
-      this.filesTree[module.name] = this.glob(module, '**/*.js');
+      this.filesTree[module.name] = await this.glob(module, '**/*.js');
     }
 
     return this.filesTree[module.name];
