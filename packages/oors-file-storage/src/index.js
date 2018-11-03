@@ -1,6 +1,5 @@
 import { Module } from 'oors';
 import File from './services/File';
-import FileRepository from './repositories/File';
 import router from './router';
 import createUploadMiddleware from './middlewares/upload';
 import uploadSchema from './schemas/upload';
@@ -22,7 +21,7 @@ class FileStorage extends Module {
     oors: {
       mongodb: {
         repositories: {
-          autoload: false,
+          autoload: true,
         },
       },
       rad: {
@@ -48,19 +47,19 @@ class FileStorage extends Module {
   }
 
   async setup() {
-    const [{ addRepository }] = await this.dependencies(['oors.mongodb']);
+    await this.dependencies(['oors.mongodb']);
 
-    const fileRepository = addRepository('File', new FileRepository());
+    const FileRepository = this.get('repositories.File');
+
     const fileService = new File({
       uploadDir: this.getConfig('uploadDir'),
-      FileRepository: fileRepository,
+      FileRepository,
       validateUpload: this.manager.compileSchema(uploadSchema),
     });
-    fileRepository.File = fileService;
+    FileRepository.File = fileService;
 
     this.export({
       File: fileService,
-      FileRepository: fileRepository,
     });
   }
 }

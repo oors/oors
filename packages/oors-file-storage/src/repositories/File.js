@@ -1,9 +1,32 @@
 import { ObjectID as objectId } from 'mongodb';
 import { Repository } from 'oors-mongodb';
-import schema from '../schemas/file';
 
-class FileRepository extends Repository {
-  static schema = schema;
+class File extends Repository {
+  static schema = {
+    type: 'object',
+    properties: {
+      filename: {
+        type: 'string',
+      },
+      mimeType: {
+        type: 'string',
+      },
+      extension: {
+        type: 'string',
+      },
+      size: {
+        type: 'number',
+      },
+      uploadedAt: {
+        instanceof: 'Date',
+      },
+      meta: {
+        type: 'object',
+        default: {},
+      },
+    },
+    required: ['filename', 'mimeType', 'extension', 'size'],
+  };
 
   static collectionName = 'oorsFile';
 
@@ -42,4 +65,4 @@ class FileRepository extends Repository {
   }
 }
 
-export default FileRepository;
+export default File;
