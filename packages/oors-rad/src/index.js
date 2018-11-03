@@ -1,7 +1,6 @@
 import pluralize from 'pluralize';
 import { Module } from 'oors';
 import camelCase from 'lodash/camelCase';
-import glob from 'glob';
 import path from 'path';
 import { createLoaders } from 'oors-mongodb/build/libs/graphql';
 
@@ -43,7 +42,7 @@ class RADModule extends Module {
   };
 
   async setup({ autoCreateLoaders }) {
-    const dependencies = [];
+    const dependencies = ['oors.autoloader'];
     if (autoCreateLoaders) {
       dependencies.push('oors.graphql', 'oors.mongodb');
     }
@@ -78,13 +77,14 @@ class RADModule extends Module {
 
   collectFromModule = async module => {
     const tasks = [];
+    const wrapper = this.deps['oors.autoloader'].wrap(module);
 
     if (module.getConfig('oors.rad.autoload.services', this.getConfig('autoload.services'))) {
-      tasks.push(this.loadModuleServices(module));
+      tasks.push(this.loadModuleServices(wrapper));
     }
 
     if (module.getConfig('oors.rad.autoload.methods', this.getConfig('autoload.methods'))) {
-      tasks.push(this.loadModuleMethods(module));
+      tasks.push(this.loadModuleMethods(wrapper));
     }
 
     if (!tasks.length) {
@@ -94,9 +94,8 @@ class RADModule extends Module {
     await Promise.all(tasks);
   };
 
-  async loadModuleServices(module) {
-    const dirPath = path.resolve(path.dirname(module.filePath), 'services');
-    const files = glob.sync(path.resolve(dirPath, '*.js'), {
+  async loadModuleServices({ module, glob }) {
+    const files = await glob('services/*.js', {
       nodir: true,
     });
 
@@ -113,9 +112,8 @@ class RADModule extends Module {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  async loadModuleMethods(module) {
-    const dirPath = path.resolve(path.dirname(module.filePath), 'methods');
-    const files = glob.sync(path.resolve(dirPath, '*.js'), {
+  async loadModuleMethods({ module, glob }) {
+    const files = await glob('methods/*.js', {
       nodir: true,
     });
 

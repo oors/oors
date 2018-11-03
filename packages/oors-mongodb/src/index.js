@@ -1,6 +1,4 @@
 import Ajv from 'ajv';
-import glob from 'glob';
-import path from 'path';
 import ajvKeywords from 'ajv-keywords';
 import { MongoClient, ObjectID } from 'mongodb';
 import { Module } from 'oors';
@@ -164,6 +162,7 @@ class MongoDB extends Module {
   }
 
   async setup({ connections }) {
+    await this.loadDependencies(['oors.autoloader']);
     await Promise.all(connections.map(this.createConnection));
 
     this.repositoryStore = new RepositoryStore(this);
@@ -246,12 +245,8 @@ class MongoDB extends Module {
   };
 
   async loadModuleRepositories(module) {
-    const dirPath = path.resolve(
-      path.dirname(module.filePath),
-      this.getConfig('moduleRepositoriesDir'),
-    );
-
-    const files = glob.sync(path.resolve(dirPath, '*.js'), {
+    const { glob } = this.deps['oors.autoloader'].wrap(module);
+    const files = await glob(`${this.getConfig('moduleRepositoriesDir')}/*.js`, {
       nodir: true,
     });
 

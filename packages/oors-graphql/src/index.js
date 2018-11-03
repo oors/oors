@@ -34,6 +34,17 @@ import LoadersMap from './libs/LoadersMap';
 import * as decorators from './decorators';
 import Server from './libs/Server';
 
+const asyncGlob = (...args) =>
+  new Promise((resolve, reject) => {
+    glob(...args, (err, files) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(files);
+      }
+    });
+  });
+
 class Gql extends Module {
   static schema = {
     type: 'object',
@@ -288,7 +299,7 @@ class Gql extends Module {
       const typeDefsDirPath = path.join(dirPath, 'typeDefs');
       const stats = await fse.stat(typeDefsDirPath);
       if (stats.isDirectory()) {
-        const files = glob.sync(path.resolve(typeDefsDirPath, '**/*.graphql'));
+        const files = await asyncGlob(path.resolve(typeDefsDirPath, '**/*.graphql'));
         await Promise.all(files.map(file => this.addTypeDefsByPath(file)));
       }
     } catch {
@@ -308,7 +319,7 @@ class Gql extends Module {
       }
       this.addResolvers(resolvers);
     } catch (err) {
-      const resolversPath = glob.sync(path.resolve(`${dirPath}/resolvers`, '**/*.js'));
+      const resolversPath = await asyncGlob(path.resolve(`${dirPath}/resolvers`, '**/*.js'));
       const resolvers = resolversPath.reduce((acc, resolverPath) => {
         const resolverName = path
           .relative(`${dirPath}/resolvers`, resolverPath)

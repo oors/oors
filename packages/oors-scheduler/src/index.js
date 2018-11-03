@@ -1,6 +1,4 @@
 import { Module } from 'oors';
-import glob from 'glob';
-import path from 'path';
 import Agenda from 'agenda';
 
 class SchedulerModule extends Module {
@@ -32,7 +30,7 @@ class SchedulerModule extends Module {
   jobsToSave = [];
 
   async setup({ isWorker }) {
-    await this.loadDependencies(['oors.mongodb', 'oors.logger']);
+    await this.loadDependencies(['oors.mongodb', 'oors.logger', 'oors.autoloader']);
 
     this.agenda = new Agenda({
       mongo: this.deps['oors.mongodb'].getConnectionDb(),
@@ -128,8 +126,10 @@ class SchedulerModule extends Module {
   };
 
   async loadModuleJobs(module) {
-    const dirPath = path.resolve(path.dirname(module.filePath), this.getConfig('moduleJobsDir'));
-    const files = glob.sync(path.resolve(dirPath, '*.js'));
+    const { glob } = this.deps['oors.autoloader'].wrap(module);
+    const files = await glob(`${this.getConfig('moduleJobsDir')}/*.js`, {
+      nodir: true,
+    });
 
     files.forEach(file => {
       const Job = require(file).default; // eslint-disable-line global-require, import/no-dynamic-require

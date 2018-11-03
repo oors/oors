@@ -29,6 +29,7 @@
     "morgan": "1.9.1",
     "node-notifier": "5.3.0",
     "oors": "^1.13.1",
+    "oors-autoloader": "*",
     "oors-cache": "^0.6.1",
     "oors-config": "^2.2.1",
     "oors-file-storage": "^1.21.3",
