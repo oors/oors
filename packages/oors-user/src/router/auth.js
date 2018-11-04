@@ -30,8 +30,10 @@ export default ({ jwtMiddleware }) => {
       },
     }),
     wrapHandler(async (req, res) => {
-      const { User, UserLoginRepository } = req.services;
+      const { User } = req.services;
+      const UserLoginRepository = req.services['repositories.UserLogin'];
       let result;
+
       try {
         result = await User.login(req.body);
       } catch (err) {
@@ -195,7 +197,7 @@ export default ({ jwtMiddleware }) => {
       },
     }),
     wrapHandler(async req => {
-      await req.services.UserRepository.updateOne({
+      await req.services['repositories.User'].updateOne({
         query: {
           _id: req.user._id,
         },

@@ -5,7 +5,7 @@ import RouterModule from 'oors-router';
 import MongoDBModule from 'oors-mongodb';
 import GQLModule from 'oors-graphql';
 import MailerModule from 'oors-mailer';
-import FileStorageModule from 'oors-file-storage';
+import UploadModule from 'oors-upload';
 import HealthModule from 'oors-health';
 import UserModule from 'oors-user';
 import CacheModule from 'oors-cache';
@@ -57,7 +57,7 @@ class StandardApplication extends BaseApplication {
       new LoggerModule(),
       new MongoDBModule(),
       new MailerModule(),
-      new FileStorageModule(),
+      new UploadModule(),
       new HealthModule(),
       new GQLModule(),
       new RouterModule(),

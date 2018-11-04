@@ -32,7 +32,7 @@
     "oors-autoloader": "^0.1.0",
     "oors-cache": "^0.6.1",
     "oors-config": "^2.2.1",
-    "oors-file-storage": "^1.21.4",
+    "oors-upload": "*",
     "oors-graphql": "^2.20.3",
     "oors-health": "^1.11.1",
     "oors-logger": "^1.15.1",

@@ -396,6 +396,15 @@ class MongoDB extends Module {
   getRepository = (...args) => this.repositoryStore.get(...args);
 
   addRepository = (...args) => this.repositoryStore.add(...args);
+
+  addRepositories = repositories =>
+    Object.keys(repositories).reduce(
+      (acc, repositoryName) => ({
+        ...acc,
+        [repositoryName]: this.addRepository(repositoryName, repositories[repositoryName]),
+      }),
+      {},
+    );
 }
 
 export { MongoDB as default, Repository, helpers, decorators, Migration };

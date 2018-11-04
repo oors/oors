@@ -96,7 +96,7 @@ config.add({
         before: 'isMethod',
       },
     },
-    'oors.fileStorage': {
+    'oors.upload': {
       uploadDir: config.ref(() => path.resolve(config.get('rootDir'), './uploads')),
     },
     'oors.graphql': {

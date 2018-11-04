@@ -146,7 +146,8 @@ class UserModule extends Module {
 
   setupServices() {
     const { jwtSecret, jwtConfig, emailTemplates, rootURL } = this.getConfig();
-    const { UserRepository, AccountRepository } = this.get('repositories');
+    const AccountRepository = this.get('repositories.Account');
+    const UserRepository = this.get('repositories.User');
     const { Mail } = this.deps['oors.mailer'];
 
     const User = new UserService({

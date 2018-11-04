@@ -21,7 +21,7 @@ export default ({ uploadMiddleware }) => {
     }
 
     try {
-      const file = await req.services.FileRepository.findById(id);
+      const file = await req.services['repositories.File'].findById(id);
 
       if (!file) {
         return next(Boom.notFound(`Unable to find entity with id ${rawId}`));

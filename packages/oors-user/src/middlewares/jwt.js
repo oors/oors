@@ -10,9 +10,9 @@ export default createMiddleware({
   factory: params => [
     jwt(params),
     async (req, res, next) => {
-      const { UserRepository, AccountRepository, User } = req.app.modules.get(
-        'oors.user',
-      );
+      const { User } = req.app.modules.get('oors.user');
+      const UserRepository = req.app.modules.get('oors.user.repositories.User');
+      const AccountRepository = req.app.modules.get('oors.user.repositories.Account');
 
       try {
         const { id } = req.jwtPayload;

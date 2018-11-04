@@ -2,8 +2,8 @@ import inject from 'oors/build/middlewares/inject';
 
 export default inject('oors.user')([
   'Account',
-  'AccountRepository',
+  'repositories.Account',
   'User',
-  'UserRepository',
-  'UserLoginRepository',
+  'repositories.User',
+  'repositories.UserLogin',
 ]);

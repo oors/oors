@@ -1,11 +1,11 @@
 {
-  "name": "oors-file-storage",
-  "version": "1.21.4",
-  "description": "oors file storage",
+  "name": "oors-upload",
+  "version": "0.1.0",
+  "description": "oors file upload",
   "main": "build/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/viczam/oors/tree/master/packages/oors-file-storage"
+    "url": "https://github.com/viczam/oors/tree/master/packages/oors-upload"
   },
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "MIT",

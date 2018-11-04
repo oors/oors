@@ -72,9 +72,9 @@ class RepositoryStore {
     return this.repositories[key];
   };
 
-  configure() {
-    Object.keys(this.repositories).forEach(key => {
-      const repository = this.repositories[key];
+  configure(repositories = this.repositories) {
+    Object.keys(repositories).forEach(key => {
+      const repository = repositories[key];
 
       repository.configure({
         getRepository: this.get,
@@ -86,7 +86,7 @@ class RepositoryStore {
       };
 
       Object.keys(relations).forEach(relationName => {
-        const { localField, repositoryName, foreignField, type } = relations[relationName];
+        const { localField, foreignField, type, ...restOptions } = relations[relationName];
         this.module.get('addRelation')({
           from: {
             repository,
@@ -94,7 +94,7 @@ class RepositoryStore {
             name: relationName,
           },
           to: {
-            repository: this.get(repositoryName),
+            ...restOptions,
             field: foreignField,
           },
           type,

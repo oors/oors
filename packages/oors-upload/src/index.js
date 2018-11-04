@@ -4,7 +4,7 @@ import router from './router';
 import createUploadMiddleware from './middlewares/upload';
 import uploadSchema from './schemas/upload';
 
-class FileStorage extends Module {
+class UploadModule extends Module {
   static schema = {
     type: 'object',
     properties: {
@@ -15,7 +15,7 @@ class FileStorage extends Module {
     required: ['uploadDir'],
   };
 
-  name = 'oors.fileStorage';
+  name = 'oors.upload';
 
   config = {
     oors: {
@@ -64,4 +64,4 @@ class FileStorage extends Module {
   }
 }
 
-export default FileStorage;
+export default UploadModule;
