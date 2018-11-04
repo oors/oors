@@ -34,14 +34,15 @@ export default compose(
       ? resolve(loaders.oorsBlogCategories.findById.load(input.categoryId))
       : null,
   })),
-  withSchema({
+  withSchema((_, { input: { categoryId } }) => ({
     type: 'object',
     properties: {
       category: {
-        type: 'object',
+        type: ['object', 'null'],
       },
     },
-  }),
+    required: [...(categoryId ? ['category'] : [])],
+  })),
 )(
   createOne({
     repositoryName: 'oors.blog.Post',
