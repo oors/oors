@@ -1,5 +1,0 @@
-{
-  "verbose": false,
-  "watch": ["src"],
-  "ext": "js jsx json graphql"
-}
