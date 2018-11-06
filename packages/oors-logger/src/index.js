@@ -49,28 +49,34 @@ class LoggerModule extends Module {
     level: defaultLevel,
     logGqlErrors,
   }) {
+    const transports = [
+      new winston.transports.File({
+        level: 'error',
+        filename: path.join(logsDir, 'errors.log'),
+        maxsize: 5000000,
+        maxFiles: 10,
+        tailable: true,
+        format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
+      }),
+    ];
+
+    if (process.env.NODE_ENV !== 'production') {
+      transports.push(
+        new winston.transports.Console({
+          format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.colorize(),
+            winston.format.simple(),
+          ),
+        }),
+      );
+    }
+
     const logger = this.getConfig(
       'logger',
       winston.createLogger({
         defaultLevel,
-        transports: [
-          new winston.transports.Console({
-            format: winston.format.combine(
-              winston.format.timestamp(),
-              winston.format.colorize(),
-              winston.format.simple(),
-            ),
-          }),
-          new winston.transports.File({
-            level: 'error',
-            filename: path.join(logsDir, 'errors.log'),
-            maxsize: 5000000,
-            maxFiles: 10,
-            tailable: true,
-
-            format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
-          }),
-        ],
+        transports,
         exceptionHandlers: [
           new winston.transports.File({
             filename: path.join(logsDir, 'exceptions.log'),
