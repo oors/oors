@@ -5,8 +5,8 @@
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "catbox": "10.0.3",
-    "catbox-memory": "3.1.2",
+    "catbox": "10.0.5",
+    "catbox-memory": "4.0.1",
     "lodash": "4.17.11",
     "oors": "^1.13.2"
   }

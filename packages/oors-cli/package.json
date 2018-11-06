@@ -20,7 +20,7 @@
   "url": "https://github.com/viczam/oors/tree/master/packages/oors-cli/readme.md",
   "dependencies": {
     "@babel/core": "^7.1.2",
-    "ajv": "6.5.4",
+    "ajv": "6.5.5",
     "chokidar": "2.0.4",
     "dotenv": "6.1.0",
     "fs-extra": "^7.0.0",

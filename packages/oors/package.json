@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/viczam/oors/tree/master/packages/oors/readme.md",
   "dependencies": {
-    "ajv": "6.5.4",
+    "ajv": "6.5.5",
     "ajv-keywords": "3.2.0",
     "express": "4.16.4",
     "glob": "7.1.3",
