@@ -21,7 +21,7 @@ class GQLQueryParser {
   configure() {
     this.addOperator('not', value => ({ $ne: value }));
     this.addOperator('in', value => ({ $in: value }));
-    this.addOperator('notIn', value => ({ $nin: value }));
+    this.addOperator(['nin', 'notIn'], value => ({ $nin: value }));
     this.addOperator(['lt', 'lowerThan'], value => ({ $lt: value }));
     this.addOperator(['lte', 'lowerThanOrEqual'], value => ({ $lte: value }));
     this.addOperator(['gt', 'greaterThan'], value => ({ $gt: value }));
@@ -95,7 +95,7 @@ class GQLQueryParser {
       node.children = this.parseQuery(value, this.relations[collectionName][field].collectionName);
     } else {
       node.type = this.constructor.NODE_TYPES.FIELD;
-      const match = field.match(new RegExp(`^(.*)_(${Object.keys(this.operators).join('|')})$`));
+      const match = field.match(new RegExp(`^([^_]*)_(${Object.keys(this.operators).join('|')})$`));
 
       if (match) {
         node.fieldName = match[1];
