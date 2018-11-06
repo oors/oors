@@ -148,9 +148,7 @@ export const findMany = config => {
       });
     }
 
-    return getLoaders(ctx)
-      .aggregate.load(createPipeline(_, args, ctx, info))
-      .then(ctx.fromMongoArray);
+    return getLoaders(ctx).aggregate.load(createPipeline(_, args, ctx, info));
   });
 };
 

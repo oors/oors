@@ -39,7 +39,8 @@ export default Repository => ({
     },
   },
   aggregate: {
-    loader: pipelines => Promise.all(pipelines.map(pipeline => Repository.aggregate(pipeline))),
+    loader: pipelines =>
+      Promise.all(pipelines.map(pipeline => Repository.aggregate(pipeline).then(fromMongoArray))),
     options: {
       cacheKeyFn: key => JSON.stringify(Repository.toMongoPipeline(key)),
     },
