@@ -99,7 +99,10 @@ class LoggerModule extends Module {
         .reduce(
           (acc, level) => ({
             ...acc,
-            [level]: (...args) => logger[level](...args),
+            [level]: (message, meta) =>
+              logger[level](message, {
+                meta,
+              }),
           }),
           {},
         ),
