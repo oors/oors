@@ -163,7 +163,7 @@ class LoggerModule extends Module {
     });
   }
 
-  logError = error => this.logger.error(error.message, { error });
+  logError = error => this.logger.error(error.message, { meta: { error } });
 }
 
 export { LoggerModule as default };
