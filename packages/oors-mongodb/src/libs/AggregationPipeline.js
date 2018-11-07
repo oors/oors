@@ -138,13 +138,13 @@ class AggregationPipeline {
 
   clone = pipeline => new this.constructor(this.repository, pipeline || [...this.pipeline]);
 
-  toArray = () => {
+  optimize = () => {
     if (this.pipeline.length <= 1) {
-      return this.pipeline;
+      return this;
     }
 
     // merge successive $match calls
-    return this.pipeline.reduce((pipeline, next, index) => {
+    this.pipeline = this.pipeline.reduce((pipeline, next, index) => {
       // ignore empty $match calls
       if (next.$match && isEmpty(next.$match)) {
         return pipeline;
@@ -158,10 +158,7 @@ class AggregationPipeline {
 
       if (current.$match && next.$match) {
         current.$match = {
-          $and: [
-            ...(Array.isArray(current.$match.$and) ? current.$match.$and : [current.$match]),
-            next.$match,
-          ],
+          $and: [current.$match, next.$match],
         };
       } else {
         pipeline.push({ ...next });
@@ -169,7 +166,11 @@ class AggregationPipeline {
 
       return pipeline;
     }, []);
+
+    return this;
   };
+
+  toArray = () => this.pipeline;
 
   toJSON = () => this.toArray();
 
