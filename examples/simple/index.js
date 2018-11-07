@@ -1,6 +1,6 @@
-import Application from '../../packages/oors-presets/src/applications/Standard';
-import Module from '../../packages/oors/src/libs/Module';
-import withSchema from '../../packages/oors-graphql/src/decorators/withSchema';
+import Application from '../../packages/oors-presets/build/applications/Standard';
+import Module from '../../packages/oors/build/libs/Module';
+import withSchema from '../../packages/oors-graphql/build/decorators/withSchema';
 
 class SimpleModule extends Module {
   hooks = {
