@@ -1,5 +1,4 @@
 import last from 'lodash/last';
-import isEmpty from 'lodash/isEmpty';
 
 class AggregationPipeline {
   static stages = [
@@ -137,38 +136,6 @@ class AggregationPipeline {
   one = () => this.limit(1);
 
   clone = pipeline => new this.constructor(this.repository, pipeline || [...this.pipeline]);
-
-  optimize = () => {
-    if (this.pipeline.length <= 1) {
-      return this;
-    }
-
-    // merge successive $match calls
-    this.pipeline = this.pipeline.reduce((pipeline, next, index) => {
-      // ignore empty $match calls
-      if (next.$match && isEmpty(next.$match)) {
-        return pipeline;
-      }
-
-      if (index === 0) {
-        return [{ ...next }];
-      }
-
-      const current = last(pipeline);
-
-      if (current.$match && next.$match) {
-        current.$match = {
-          $and: [current.$match, next.$match],
-        };
-      } else {
-        pipeline.push({ ...next });
-      }
-
-      return pipeline;
-    }, []);
-
-    return this;
-  };
 
   toArray = () => this.pipeline;
 
