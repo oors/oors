@@ -1,6 +1,6 @@
 {
   "name": "oors-web",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "oors module integrating next.js",
   "main": "build/index.js",
   "repository": {
@@ -18,7 +18,7 @@
     "lodash": "^4.17.11",
     "next": "7.0.2",
     "next-routes": "1.4.2",
-    "oors": "^1.13.2",
+    "oors": "^1.13.3",
     "serve-favicon": "2.5.0"
   }
 }

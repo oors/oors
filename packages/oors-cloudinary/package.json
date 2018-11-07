@@ -1,12 +1,12 @@
 {
   "name": "oors-cloudinary",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "build/index.js",
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "ISC",
   "dependencies": {
     "cloudinary": "1.11.0",
     "lodash": "4.17.11",
-    "oors": "^1.13.2"
+    "oors": "^1.13.3"
   }
 }
