@@ -441,6 +441,7 @@ class Gql extends Module {
             user: req.user,
           }
         : {}),
+      ...(connection ? connection.context || {} : {}),
     };
 
     this.contextExtenders.forEach(extender => extender(context));
