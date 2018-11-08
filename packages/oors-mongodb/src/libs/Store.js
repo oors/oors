@@ -160,7 +160,7 @@ class Store {
   }
 
   count({ query = {}, options = {} } = {}) {
-    return this.collection.count(query, options);
+    return this.collection.countDocuments(query, options);
   }
 
   toId(id) {
