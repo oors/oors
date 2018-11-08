@@ -24,7 +24,7 @@
     "express-react-views": "0.10.5",
     "express-session": "1.15.6",
     "express-useragent": "1.0.12",
-    "helmet": "3.14.0",
+    "helmet": "3.15.0",
     "lodash": "4.17.11",
     "morgan": "1.9.1",
     "node-notifier": "5.3.0",
