@@ -1,6 +1,6 @@
 {
   "name": "oors-scheduler",
-  "version": "0.7.5",
+  "version": "0.7.6",
   "main": "build/index.js",
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "ISC",
@@ -8,6 +8,6 @@
     "agenda": "2.0.2",
     "fs-extra": "^7.0.0",
     "lodash": "4.17.11",
-    "oors": "^1.13.3"
+    "oors": "^1.13.4"
   }
 }
