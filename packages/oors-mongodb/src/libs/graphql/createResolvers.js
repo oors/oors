@@ -39,8 +39,6 @@ export const buildConfig = config => {
   const { wrapPipeline, nodeVisitors, getInitialPipeline, repositoryName } = {
     wrapPipeline: () => identity,
     getInitialPipeline: (_, args, ctx, info, pipeline) => pipeline,
-    canDelete: () => true,
-    canUpdate: () => true,
     nodeVisitors: [],
     ...config,
     pagination: {
@@ -99,6 +97,8 @@ export const buildConfig = config => {
   return {
     createPipeline,
     getRepository,
+    canDelete: () => true,
+    canUpdate: () => true,
     ...config,
   };
 };
