@@ -6,7 +6,8 @@
   "scripts": {},
   "bin": {
     "oors-build": "./build/scripts/build.js",
-    "oors-watch": "./build/scripts/watch.js"
+    "oors-watch": "./build/scripts/watch.js",
+    "oors-watch-dir": "./build/scripts/watchDir.js"
   },
   "repository": {
     "type": "git",
