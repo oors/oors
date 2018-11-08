@@ -41,11 +41,6 @@ export const buildConfig = config => {
     getInitialPipeline: (_, args, ctx, info, pipeline) => pipeline,
     nodeVisitors: [],
     ...config,
-    pagination: {
-      maxPerPage: 20,
-      defaultPerPage: 10,
-      ...(config.pagination || {}),
-    },
   };
 
   if (repositoryName) {
@@ -100,6 +95,11 @@ export const buildConfig = config => {
     canDelete: () => true,
     canUpdate: () => true,
     ...config,
+    pagination: {
+      maxPerPage: 20,
+      defaultPerPage: 10,
+      ...(config.pagination || {}),
+    },
   };
 };
 
