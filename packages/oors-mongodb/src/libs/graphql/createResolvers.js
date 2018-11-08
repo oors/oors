@@ -179,8 +179,8 @@ export const updateOne = config => {
   const { getRepository, getLoaders, createPipeline, canUpdate } = buildConfig(config);
   return async (_, args, ctx, info) => {
     const { input } = args;
+    let { item } = args;
     const Repository = getRepository(ctx);
-    let { item } = args.item;
 
     if (item === undefined) {
       const results = await getLoaders(ctx).aggregate.load(
@@ -224,7 +224,7 @@ export const deleteOne = config => {
   const { getRepository, getLoaders, createPipeline, canDelete } = buildConfig(config);
   return async (_, args, ctx, info) => {
     const Repository = getRepository(ctx);
-    let { item } = args.item;
+    let { item } = args;
 
     if (item === undefined) {
       const results = await getLoaders(ctx).aggregate.load(
