@@ -25,7 +25,7 @@ class Application extends ExpressApplication {
   async shutdown() {
     this.emit('before:shutdown');
 
-    if (this.server) {
+    if (this.server && this.server.listening) {
       await new Promise((resolve, reject) => {
         this.server.close(err => {
           if (err) {
