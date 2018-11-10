@@ -23,7 +23,7 @@ export default (
       typeof message === 'function'
         ? await message(_, args, ctx, info, { result })
         : {
-            message,
+            message: message || info.fieldName,
             args,
             result,
           };
@@ -33,7 +33,7 @@ export default (
       typeof message === 'function'
         ? await message(_, args, ctx, info, { error })
         : {
-            message,
+            message: message || info.fieldName,
             args,
             error,
           };
