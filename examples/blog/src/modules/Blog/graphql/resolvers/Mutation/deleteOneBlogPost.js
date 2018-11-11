@@ -1,4 +1,4 @@
-import { deleteOne } from '../../../../../../../../packages/oors-mongodb/build/libs/graphql/createResolvers';
+import { deleteOne } from '../../../../../../../../packages/oors-mongodb/build/graphql/createResolvers';
 
 export default deleteOne({
   repositoryName: 'oors.blog.Post',

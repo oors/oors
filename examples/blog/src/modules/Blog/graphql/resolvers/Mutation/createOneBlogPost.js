@@ -1,4 +1,4 @@
-import { createOne } from '../../../../../../../../packages/oors-mongodb/build/libs/graphql/createResolvers';
+import { createOne } from '../../../../../../../../packages/oors-mongodb/build/graphql/createResolvers';
 import {
   compose,
   withArgs,
