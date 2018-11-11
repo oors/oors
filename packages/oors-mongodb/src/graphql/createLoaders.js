@@ -1,5 +1,5 @@
 import { ObjectID as objectId } from 'mongodb';
-import { fromMongo, fromMongoArray } from '../helpers';
+import { fromMongo, fromMongoArray } from '../libs/helpers';
 
 export default Repository => ({
   findById: {

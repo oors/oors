@@ -1,8 +1,21 @@
 import Repository from '../libs/Repository';
-import schema from '../schemas/migration';
 
 class MigrationRepository extends Repository {
-  static schema = schema;
+  static schema = {
+    type: 'object',
+    properties: {
+      timestamp: {
+        type: 'string',
+      },
+      name: {
+        type: 'string',
+      },
+      duration: {
+        type: 'integer',
+      },
+    },
+    required: ['timestamp'],
+  };
 
   static collectionName = 'Migration';
 }

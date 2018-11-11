@@ -12,7 +12,7 @@ import Seeder from './libs/Seeder';
 import withLogger from './decorators/withLogger';
 import withTimestamps from './decorators/withTimestamps';
 import Migration from './libs/Migration';
-import GQLQueryParser from './libs/GQLQueryParser';
+import GQLQueryParser from './graphql/GQLQueryParser';
 import Migrator from './libs/Migrator';
 import RelationsManager from './libs/RelationsManager';
 

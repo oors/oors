@@ -2,7 +2,7 @@ import pluralize from 'pluralize';
 import { Module } from 'oors';
 import camelCase from 'lodash/camelCase';
 import path from 'path';
-import { createLoaders } from 'oors-mongodb/build/libs/graphql';
+import { createLoaders } from 'oors-mongodb/build/graphql';
 
 class RADModule extends Module {
   static schema = {
