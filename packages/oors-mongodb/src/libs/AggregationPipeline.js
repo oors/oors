@@ -76,7 +76,7 @@ class AggregationPipeline {
         : fields,
     });
 
-  lookup = (relation, { as = relation, match = false, projectOne = true } = {}) => {
+  lookup = (relation, { as = relation, match = false, projectOne = true, ...rest } = {}) => {
     if (typeof relation === 'object') {
       return this.push({
         $lookup: relation,
@@ -92,7 +92,7 @@ class AggregationPipeline {
     const { type } = this.repository.getRelation(relation);
 
     this.push({
-      $lookup: this.repository.relationToLookup(relation, { as }),
+      $lookup: this.repository.relationToLookup(relation, { as, ...rest }),
     });
 
     if (match) {
