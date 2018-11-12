@@ -1,6 +1,6 @@
 {
   "name": "oors-presets",
-  "version": "1.29.17",
+  "version": "1.30.0",
   "description": "oors presets",
   "main": "build/index.js",
   "repository": {
@@ -36,11 +36,11 @@
     "oors-health": "^1.11.4",
     "oors-logger": "^1.15.6",
     "oors-mailer": "^1.10.4",
-    "oors-mongodb": "^2.26.15",
-    "oors-rad": "^0.16.15",
-    "oors-router": "^1.20.15",
+    "oors-mongodb": "^2.27.0",
+    "oors-rad": "^0.17.0",
+    "oors-router": "^1.21.0",
     "oors-scheduler": "^0.7.6",
-    "oors-upload": "^0.1.11",
-    "oors-user": "^1.21.15"
+    "oors-upload": "^0.2.0",
+    "oors-user": "^1.22.0"
   }
 }
