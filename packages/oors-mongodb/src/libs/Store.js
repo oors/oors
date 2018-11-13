@@ -144,13 +144,7 @@ class Store {
       : this.createOne(data);
   }
 
-  async deleteOne(params) {
-    const { query, options } = {
-      query: {},
-      options: {},
-      ...params,
-    };
-
+  async deleteOne({ query = {}, options = {} } = {}) {
     const result = await this.collection.findOneAndDelete(query, options);
     return result.value;
   }
