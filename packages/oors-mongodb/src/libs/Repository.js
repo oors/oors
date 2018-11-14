@@ -61,8 +61,8 @@ class Repository extends Store {
   aggregate = (pipeline, options = {}) =>
     this.collection.aggregate(this.toMongoPipeline(pipeline), options).toArray();
 
-  createPipeline = (initialPipeline = []) =>
-    new AggregationPipeline(this, this.toMongoPipeline(initialPipeline));
+  createPipeline = (initialPipeline = [], options) =>
+    new AggregationPipeline(this, this.toMongoPipeline(initialPipeline), options);
 
   watchChanges = (onChange, ...args) => {
     const changeStream = this.watch(...args);
