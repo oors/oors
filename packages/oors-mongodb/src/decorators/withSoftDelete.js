@@ -1,11 +1,19 @@
 import set from 'lodash/set';
 
-const toSoftDeleteFilter = ({ noSoftDeleteFilter, propertyName }) =>
-  noSoftDeleteFilter
-    ? {}
-    : {
-        [propertyName]: false,
-      };
+const withSoftDeleteFilter = (
+  propertyName,
+  { query = {}, noSoftDeleteFilter, ...restArgs } = {},
+) => ({
+  query: {
+    ...(noSoftDeleteFilter
+      ? {}
+      : {
+          [propertyName]: false,
+        }),
+    ...query,
+  },
+  ...restArgs,
+});
 
 export default ({ propertyName = 'isDeleted' } = {}) => repository => {
   const {
@@ -27,30 +35,9 @@ export default ({ propertyName = 'isDeleted' } = {}) => repository => {
   });
 
   Object.assign(repository, {
-    findOne: ({ query = {}, noSoftDeleteFilter, ...restArgs } = {}) =>
-      findOne.call(repository, {
-        query: {
-          ...toSoftDeleteFilter({ propertyName, noSoftDeleteFilter }),
-          ...query,
-        },
-        ...restArgs,
-      }),
-    findMany: ({ query = {}, noSoftDeleteFilter, ...restArgs } = {}) =>
-      findMany.call(repository, {
-        query: {
-          ...toSoftDeleteFilter({ propertyName, noSoftDeleteFilter }),
-          ...query,
-        },
-        ...restArgs,
-      }),
-    count: ({ query = {}, noSoftDeleteFilter, ...restArgs } = {}) =>
-      count.call(repository, {
-        query: {
-          ...toSoftDeleteFilter({ propertyName, noSoftDeleteFilter }),
-          ...query,
-        },
-        ...restArgs,
-      }),
+    findOne: args => findOne.call(repository, withSoftDeleteFilter(propertyName, args)),
+    findMany: args => findMany.call(repository, withSoftDeleteFilter(propertyName, args)),
+    count: args => count.call(repository, withSoftDeleteFilter(propertyName, args)),
     deleteOne: ({ query = {}, noSoftDeleteFilter, ...restArgs } = {}) =>
       noSoftDeleteFilter
         ? deleteOne.call(repository, {
