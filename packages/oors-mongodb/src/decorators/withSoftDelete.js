@@ -1,5 +1,3 @@
-import set from 'lodash/set';
-
 const withSoftDeleteFilter = (
   propertyName,
   { query = {}, noSoftDeleteFilter, ...restArgs } = {},
@@ -15,7 +13,7 @@ const withSoftDeleteFilter = (
   ...restArgs,
 });
 
-export default ({ propertyName = 'isDeleted' } = {}) => repository => {
+export default ({ propertyName = 'isDeleted', timestampName = 'deletedAt' } = {}) => repository => {
   const {
     findOne,
     findMany,
@@ -29,10 +27,19 @@ export default ({ propertyName = 'isDeleted' } = {}) => repository => {
     createPipeline,
   } = repository;
 
-  set(repository, `schema.properties.${propertyName}`, {
-    type: 'boolean',
-    default: false,
-  });
+  repository.updateSchema(schema => ({
+    ...schema,
+    properties: {
+      ...(schema.properties || {}),
+      [propertyName]: {
+        type: 'boolean',
+        default: false,
+      },
+      [timestampName]: {
+        instanceof: 'Date',
+      },
+    },
+  }));
 
   Object.assign(repository, {
     findOne: args => findOne.call(repository, withSoftDeleteFilter(propertyName, args)),
@@ -49,6 +56,7 @@ export default ({ propertyName = 'isDeleted' } = {}) => repository => {
             update: {
               $set: {
                 [propertyName]: true,
+                [timestampName]: new Date(),
               },
             },
           }),
@@ -63,6 +71,7 @@ export default ({ propertyName = 'isDeleted' } = {}) => repository => {
             update: {
               $set: {
                 [propertyName]: true,
+                [timestampName]: new Date(),
               },
             },
           }),

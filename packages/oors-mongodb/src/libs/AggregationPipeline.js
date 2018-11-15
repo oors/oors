@@ -41,6 +41,16 @@ class AggregationPipeline {
     });
   }
 
+  setOptions(options) {
+    if (typeof options === 'function') {
+      this.options = options(this.options);
+    } else {
+      Object.assign(this.options, options);
+    }
+
+    return this;
+  }
+
   unshift(...operations) {
     operations.reverse().forEach(operation => {
       this.pipeline.unshift(...(Array.isArray(operation) ? operation : [operation]));

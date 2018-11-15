@@ -25,6 +25,15 @@ class Repository extends Store {
     throw new Error('Not available! You need to bind the repository first.');
   }
 
+  validate(data) {
+    return this.validateBySchema ? this.validateBySchema(data) : true;
+  }
+
+  updateSchema(update) {
+    this.schema = update(this.schema);
+    this.validateBySchema = this.ajv.compile(this.schema);
+  }
+
   async parse(data) {
     if (!this.validate(data)) {
       throw new ValidationError(this.validate.errors);

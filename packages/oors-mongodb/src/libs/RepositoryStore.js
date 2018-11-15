@@ -34,9 +34,7 @@ class RepositoryStore {
         ? this.module.getConnectionDb(connectionName).collection(repository.collectionName)
         : repository.collection,
       ajv: this.module.ajv,
-      validate:
-        repository.validate ||
-        (repository.schema ? this.module.ajv.compile(repository.schema) : () => true),
+      validateBySchema: this.module.ajv.compile(repository.schema),
       getRepository: this.get,
       relationToLookup: (name, options = {}) => ({
         ...this.module.get('relationToLookup')(repository.collectionName, name),
