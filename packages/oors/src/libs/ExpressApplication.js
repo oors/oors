@@ -1,5 +1,6 @@
 import { application, request, response } from 'express';
-import { Server } from 'http';
+import { Server as HTTPServer } from 'http';
+import { Server as HTTPSServer } from 'https';
 import mixin from 'merge-descriptors';
 import EventEmitter from 'events';
 import omit from 'lodash/omit';
@@ -18,7 +19,11 @@ class ExpressApplication extends EventEmitter {
 
   get server() {
     if (!this.httpServer) {
-      this.httpServer = new Server(this.handle.bind(this));
+      const options = this.get('serverOptions');
+      const Server = this.get('ssl') ? HTTPSServer : HTTPServer;
+      this.httpServer = options
+        ? new Server(options, this.handle.bind(this))
+        : new Server(this.handle.bind(this));
     }
 
     return this.httpServer;
