@@ -15,7 +15,7 @@
   "homepage": "https://github.com/viczam/oors#readme",
   "dependencies": {
     "express": "4.16.4",
-    "fs-extra": "^7.0.0",
+    "fs-extra": "^7.0.1",
     "nodemailer": "4.6.8",
     "oors": "^1.13.4",
     "prop-types": "^15.6.2",
