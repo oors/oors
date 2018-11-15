@@ -24,7 +24,6 @@ export default ({ propertyName = 'isDeleted', timestampName = 'deletedAt' } = {}
     deleteMany,
     toMongoPipeline,
     aggregate,
-    createPipeline,
   } = repository;
 
   repository.updateSchema(schema => ({
@@ -87,21 +86,6 @@ export default ({ propertyName = 'isDeleted', timestampName = 'deletedAt' } = {}
                 },
               },
               ...toMongoPipeline.call(repository, pipeline),
-            ],
-        restOptions,
-      ),
-    createPipeline: (initialPipeline = [], { noSoftDeleteFilter, ...restOptions }) =>
-      createPipeline.call(
-        repository,
-        noSoftDeleteFilter
-          ? initialPipeline
-          : [
-              {
-                $match: {
-                  [propertyName]: false,
-                },
-              },
-              ...initialPipeline,
             ],
         restOptions,
       ),
