@@ -34,7 +34,8 @@ input BlogCategoryFilter {
   OR: [BlogCategoryFilter!]
   id: ID
   id_in: [ID!]
-  id_not_in: [ID!]
+  name: String
+  id_notIn: [ID!]
   name_contains: String
   name_startsWith: String
 }
