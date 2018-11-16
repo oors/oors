@@ -1,6 +1,6 @@
 {
   "name": "oors-autoloader",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "main": "build/index.js",
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "ISC",
@@ -9,6 +9,6 @@
     "glob": "7.1.3",
     "lodash": "4.17.11",
     "minimatch": "3.0.4",
-    "oors": "^1.13.4"
+    "oors": "^1.13.5"
   }
 }
