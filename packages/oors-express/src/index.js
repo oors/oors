@@ -52,7 +52,6 @@ class ExpressModule extends Module {
 
   async setup({ settings, middlewares }) {
     this.middlewares = new MiddlewareStore();
-    this.exportProperties(['middlewares']);
     this.middlewares.push(...middlewares);
     this.app = this.createApplication(
       {
@@ -63,9 +62,9 @@ class ExpressModule extends Module {
     this.server = this.createServer(this.app.handle.bind(this.app));
     this.app.modules = this.manager;
     this.app.server = this.server;
-    this.exportProperties(['app', 'server', 'listen']);
+    this.exportProperties(['app', 'server', 'listen', 'middlewares']);
 
-    this.runHook('middlewares', () => {}, {
+    await this.runHook('middlewares', () => {}, {
       middlewares: this.middlewares,
     });
   }
