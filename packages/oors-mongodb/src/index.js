@@ -291,7 +291,7 @@ class MongoDB extends Module {
     this.migrator = new Migrator({
       migrationsDir: this.getConfig('migration.dir'),
       context: {
-        app: this.app,
+        modules: this.manager,
         db: this.getConnectionDb(),
       },
       MigrationRepository: migrationRepository,

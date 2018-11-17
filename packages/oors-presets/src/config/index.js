@@ -1,6 +1,7 @@
 import path from 'path';
 import dotenv from 'dotenv';
 import Config from '../libs/Config';
+import * as middlewares from '../middlewares';
 
 dotenv.config();
 
@@ -14,40 +15,48 @@ config.add({
   isDev: process.env.NODE_ENV === 'development',
   port: 3000,
   hostname: 'localhost',
-  middlewares: {
-    useragent: {},
-    cors: {},
-    helmet: {},
-    morgan: {
-      params: 'dev',
-      enabled: config.ref('isDev'),
-    },
-    compression: {
-      enabled: config.ref(() => !config.get('isDev')),
-    },
-    bodyParserJSON: {
-      params: { limit: '20mb' },
-    },
-    bodyParserURLEncoded: {},
-    cookieParser: {
-      params: {
-        secret: 'THIS_IS_MY_SECRET',
-      },
-    },
-    isMethod: {},
-    validationErrorHandler: {},
-    boomErrorHandler: {
-      params: {
-        isDev: config.ref('isDev'),
-      },
-    },
-    errorHandler: {
-      params: {
-        isDev: config.ref('isDev'),
-      },
-    },
-  },
   modules: {
+    'oors.express': {
+      middlewares: config.ref(() => [
+        middlewares.cors,
+        middlewares.useragent,
+        middlewares.helmet,
+        {
+          ...middlewares.morgan,
+          params: 'dev',
+          enabled: config.get('isDev'),
+        },
+        {
+          ...middlewares.compression,
+          enabled: !config.get('isDev'),
+        },
+        {
+          ...middlewares.bodyParserJSON,
+          params: { limit: '20mb' },
+        },
+        middlewares.bodyParserURLEncoded,
+        {
+          ...middlewares.cookieParser,
+          params: {
+            secret: 'THIS_IS_MY_SECRET',
+          },
+        },
+        middlewares.isMethod,
+        middlewares.validationErrorHandler,
+        {
+          ...middlewares.boomErrorHandler,
+          params: {
+            isDev: config.get('isDev'),
+          },
+        },
+        {
+          ...middlewares.errorHandler,
+          params: {
+            isDev: config.get('isDev'),
+          },
+        },
+      ]),
+    },
     'oors.rad': {
       autoload: {
         services: true,

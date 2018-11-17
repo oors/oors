@@ -4,8 +4,9 @@ import ms from 'ms';
 const router = Router();
 
 router.get('/health', (req, res) => {
-  const startTime = req.app.get('startTime');
-  const upTime = Date.now() - req.app.get('startTime');
+  // @TODO: fixme
+  const { startTime } = req.app.modules.get('oors.health');
+  const upTime = Date.now() - startTime;
 
   res.json({
     startTime,

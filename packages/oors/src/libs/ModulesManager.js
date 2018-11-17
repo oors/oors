@@ -115,7 +115,7 @@ class ModulesManager extends EventEmitter {
       throw new Error(`Cyclic dependency detected - module "${from}" waits for itself to load!`);
     }
 
-    if (!this.hasModule(to)) {
+    if (!this.has(to)) {
       throw new Error(
         `Can't find module "${to}" required by "${from}" through the list of registered modules: "${this.getModuleNames()}"!`,
       );
@@ -148,7 +148,7 @@ class ModulesManager extends EventEmitter {
     return this.modules[name];
   }
 
-  hasModule(name) {
+  has(name) {
     return this.getModuleNames().includes(name);
   }
 
@@ -162,9 +162,8 @@ class ModulesManager extends EventEmitter {
   async run(commandName, command, context) {
     await this.invoke(`before:${commandName}`, context);
     const results = await Promise.all(
-      this.getModules().map(
-        module =>
-          module.hooks[commandName] ? module.hooks[commandName](context) : command(module, context),
+      this.getModules().map(module =>
+        module.hooks[commandName] ? module.hooks[commandName](context) : command(module, context),
       ),
     );
     await this.invoke(`after:${commandName}`, context);

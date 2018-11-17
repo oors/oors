@@ -1,7 +1,7 @@
 class Service {
   constructor(module) {
     this.module = module;
-    this.app = module.app;
+    this.modules = module.manager;
     if (!this.name) {
       this.name = this.constructor.name;
     }

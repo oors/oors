@@ -1,9 +1,9 @@
 /* eslint-disable class-methods-use-this */
 
 class Migration {
-  constructor({ app, db }) {
-    this.app = app;
-    this.db = db || this.app.modules.get('oors.mongodb').getConnectionDb();
+  constructor({ modules, db }) {
+    this.modules = modules;
+    this.db = db || this.modules.get('oors.mongodb').getConnectionDb();
   }
 
   createCollection(...args) {
@@ -19,7 +19,7 @@ class Migration {
   }
 
   getRepository(name) {
-    return this.app.modules.get('oors.mongodb').getRepository(name);
+    return this.modules.get('oors.mongodb').getRepository(name);
   }
 
   getCollectionName(repository) {

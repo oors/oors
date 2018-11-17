@@ -20,9 +20,10 @@
     "celebrate": "9.0.1",
     "express": "4.16.4",
     "lodash": "^4.17.11",
-    "mongodb": "3.1.9",
+    "mongodb": "3.1.10",
     "mongodb-extended-json": "1.10.0",
     "oors": "^1.13.5",
+    "oors-express": "*",
     "oors-mongodb": "^2.27.1"
   }
 }

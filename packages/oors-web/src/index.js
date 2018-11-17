@@ -54,21 +54,24 @@ class Web extends Module {
 
   name = 'oors.web';
 
-  initialize({ nextMiddlewareConfig, nextMiddlewarePivot }) {
-    this.app.middlewares.insert(
-      nextMiddlewarePivot,
-      {
-        ...nextInstallMiddleware,
-        ...nextMiddlewareConfig,
-      },
-      nextRenderMiddleware,
-    );
-  }
+  hooks = {
+    'oors.express.middlewares': ({ middlewares }) => {
+      middlewares.insert(
+        this.getConfig('nextMiddlewarePivot'),
+        {
+          ...nextInstallMiddleware,
+          ...this.getConfig('nextMiddlewareConfig'),
+        },
+        nextRenderMiddleware,
+      );
+    },
+  };
 
   async setup() {
+    await this.loadDendencies(['oors.express']);
     const router = Router();
 
-    this.app.middlewares.insert('nextInstall', {
+    this.deps['oors.express'].middlewares.insert('nextInstall', {
       path: '/',
       id: 'webRouter',
       factory: () => router,

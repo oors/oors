@@ -1,5 +1,5 @@
 import multer from 'multer';
-import { helpers } from 'oors';
+import { helpers } from 'oors-express';
 
 const { createMiddleware } = helpers;
 

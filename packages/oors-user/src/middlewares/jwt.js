@@ -1,7 +1,7 @@
 import Boom from 'boom';
 import jwt from 'express-jwt';
 import { ObjectID as objectId } from 'mongodb';
-import { helpers } from 'oors';
+import { helpers } from 'oors-express';
 
 const { createMiddleware } = helpers;
 

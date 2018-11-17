@@ -18,9 +18,10 @@
     "fs-extra": "^7.0.1",
     "nodemailer": "4.6.8",
     "oors": "^1.13.5",
+    "oors-express": "*",
     "prop-types": "^15.6.2",
-    "react": "16.6.0",
-    "react-dom": "16.6.0",
+    "react": "16.6.3",
+    "react-dom": "16.6.3",
     "serve-index": "1.9.1"
   }
 }

@@ -6,6 +6,7 @@
   "license": "MIT",
   "dependencies": {
     "oors": "^1.13.5",
+    "oors-express": "*",
     "raven": "2.6.4"
   }
 }

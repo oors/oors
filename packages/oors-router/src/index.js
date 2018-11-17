@@ -1,7 +1,7 @@
 import { Module } from 'oors';
 import path from 'path';
 import { Router as ExpressRouter } from 'express';
-import pivotSchema from 'oors/build/schemas/pivot';
+import pivotSchema from 'oors-express/build/schemas/pivot';
 import BaseRouter from './libs/Router';
 import * as helpers from './libs/helpers';
 import generateRESTRouter from './libs/generateRESTRouter';
@@ -41,6 +41,12 @@ class Router extends Module {
 
   name = 'oors.router';
 
+  hooks = {
+    'oors.express.middlewares': ({ middlewares }) => {
+      middlewares.insert(this.getConfig('validatorMiddlewarePivot'), validatorMiddleware);
+    },
+  };
+
   initialize() {
     this.validateModule = this.manager.compileSchema(this.constructor.moduleSchema);
   }
@@ -52,7 +58,7 @@ class Router extends Module {
 
     const [pathPrefix, id, router] = args;
 
-    this.app.middlewares.insert(this.getConfig('middlewarePivot'), {
+    this.deps['oors.express'].middlewares.insert(this.getConfig('middlewarePivot'), {
       path: pathPrefix,
       id,
       factory: () => router,
@@ -89,7 +95,8 @@ class Router extends Module {
     }
   };
 
-  async setup({ autoload, validatorMiddlewarePivot }) {
+  async setup({ autoload }) {
+    await this.loadDependencies(['oors.express']);
     const { addRouter } = this;
     const router = ExpressRouter();
 
@@ -99,8 +106,6 @@ class Router extends Module {
         router,
       });
     }
-
-    this.app.middlewares.insert(validatorMiddlewarePivot, validatorMiddleware);
 
     addRouter('mainRouter', router);
 

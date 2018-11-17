@@ -1,7 +1,7 @@
 import { Module } from 'oors';
 import upperFirst from 'lodash/upperFirst';
 import camelCase from 'lodash/camelCase';
-import pivotSchema from 'oors/build/schemas/pivot';
+import pivotSchema from 'oors-express/build/schemas/pivot';
 import UserService from './services/User';
 import AccountService from './services/Account';
 import router from './router';
@@ -105,7 +105,13 @@ class UserModule extends Module {
   }
 
   async setup({ mockUserMiddlewarePivot, mockUserConfig, storageModule }) {
-    await this.loadDependencies([storageModule, 'oors.router', 'oors.mailer', 'oors.graphql']);
+    await this.loadDependencies([
+      storageModule,
+      'oors.router',
+      'oors.mailer',
+      'oors.graphql',
+      'oors.express',
+    ]);
 
     const routerConfig = {
       jwtMiddleware: this.jwtMiddleware,
@@ -122,7 +128,7 @@ class UserModule extends Module {
     this.configurePassport(routerConfig);
 
     if (mockUserConfig.enabled) {
-      this.app.middlewares.insert(mockUserMiddlewarePivot, {
+      this.deps['oors.express'].middlewares.insert(mockUserMiddlewarePivot, {
         ...mockUser,
         ...mockUserConfig,
       });
@@ -139,7 +145,11 @@ class UserModule extends Module {
     }
 
     const passport = passportFactory({ jwtSecret });
-    this.app.middlewares.insert(passportMiddlewarePivot, passportInitialize, passportSession);
+    this.deps['oors.express'].middlewares.insert(
+      passportMiddlewarePivot,
+      passportInitialize,
+      passportSession,
+    );
     this.export({ passport });
     Object.assign(routerConfig, { passport });
   }

@@ -52,8 +52,8 @@ export const buildConfig = config => {
 
     if (!config.getLoaders) {
       Object.assign(config, {
-        getLoaders: ({ app, loaders }) =>
-          loaders[app.modules.get('oors.rad').getLoadersName(repositoryName)],
+        getLoaders: ({ modules, loaders }) =>
+          loaders[modules.get('oors.rad').getLoadersName(repositoryName)],
       });
     }
   }

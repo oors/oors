@@ -18,9 +18,10 @@
     "boom": "7.2.2",
     "express": "4.16.4",
     "fs-extra": "^7.0.1",
-    "mongodb": "3.1.9",
+    "mongodb": "3.1.10",
     "multer": "1.4.1",
     "oors": "^1.13.5",
+    "oors-express": "*",
     "oors-mongodb": "^2.27.1",
     "oors-router": "^1.21.1"
   }

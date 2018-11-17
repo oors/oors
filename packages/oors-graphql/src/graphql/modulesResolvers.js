@@ -1,8 +1,8 @@
 export default {
   Query: {
-    modules: (_, args, { app }) => app.modules.getModuleNames().map(name => ({ name })),
-    module: (_, { name }, { app }) => {
-      if (!app.modules.getModuleNames().includes(name)) {
+    modules: (_, args, { modules }) => modules.getModuleNames().map(name => ({ name })),
+    module: (_, { name }, { modules }) => {
+      if (!modules.getModuleNames().includes(name)) {
         throw new Error('Not found!');
       }
 
@@ -10,7 +10,7 @@ export default {
     },
   },
   Module: {
-    dependencies: ({ name }, args, { app }) =>
-      app.modules.dependencyGraph[name].map(module => ({ name: module })),
+    dependencies: ({ name }, args, { modules }) =>
+      modules.dependencyGraph[name].map(module => ({ name: module })),
   },
 };

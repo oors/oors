@@ -25,14 +25,15 @@
     "jsonwebtoken": "8.4.0",
     "lodash": "4.17.11",
     "moment": "2.22.2",
-    "mongodb": "3.1.9",
+    "mongodb": "3.1.10",
     "oors": "^1.13.5",
+    "oors-express": "*",
     "oors-mongodb": "^2.27.1",
     "oors-router": "^1.21.1",
     "passport": "0.4.0",
     "passport-jwt": "^4.0.0",
     "passport-local": "1.0.0",
     "prop-types": "^15.6.2",
-    "react": "16.6.0"
+    "react": "16.6.3"
   }
 }

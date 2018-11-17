@@ -1,9 +1,9 @@
 import omit from 'lodash/omit';
 
 export default (
-  log = (_, args, { app, req }, info, data) => {
-    if (app.modules.hasModule('oors.logger')) {
-      app.modules.get('oors.logger')[data.error ? 'error' : 'info'](data.message, {
+  log = (_, args, { modules, req }, info, data) => {
+    if (modules.has('oors.logger')) {
+      modules.get('oors.logger')[data.error ? 'error' : 'info'](data.message, {
         ...omit(data, ['message']),
         userId: req.user ? req.user._id : null,
         IP: req.ip,

@@ -1,4 +1,7 @@
 import path from 'path';
+import notifier from 'node-notifier';
+import chalk from 'chalk';
+import ExpressModule from 'oors-express';
 import RADModule from 'oors-rad';
 import LoggerModule from 'oors-logger';
 import RouterModule from 'oors-router';
@@ -11,8 +14,7 @@ import UserModule from 'oors-user';
 import CacheModule from 'oors-cache';
 import SchedulerModule from 'oors-scheduler';
 import AutoloaderModule from 'oors-autoloader';
-import BaseApplication from './Base';
-import * as middlewares from '../middlewares';
+import BaseApplication from './Application';
 import config from '../config';
 
 if (process.env.NODE_ENV === 'development') {
@@ -37,22 +39,8 @@ class StandardApplication extends BaseApplication {
       this.config.set('rootDir', path.resolve(filePath, '../..'));
     }
 
-    this.addMiddlewares(
-      middlewares.cors,
-      middlewares.useragent,
-      middlewares.helmet,
-      middlewares.morgan,
-      middlewares.compression,
-      middlewares.bodyParserJSON,
-      middlewares.bodyParserURLEncoded,
-      middlewares.cookieParser,
-      middlewares.isMethod,
-      middlewares.validationErrorHandler,
-      middlewares.boomErrorHandler,
-      middlewares.errorHandler,
-    );
-
     this.addModules(
+      new ExpressModule(),
       new RADModule(),
       new LoggerModule(),
       new MongoDBModule(),
@@ -66,6 +54,26 @@ class StandardApplication extends BaseApplication {
       new SchedulerModule(),
       new AutoloaderModule(),
     );
+  }
+
+  async listen(port) {
+    const startTime = Date.now();
+    await this.boot();
+    const finalPort = port || this.config.get('port');
+    const result = await this.modules.get('oors.express').listen(finalPort);
+    const message = `Server started on port ${finalPort} in ${Date.now() - startTime}ms!`;
+
+    if (process.env.NODE_ENV === 'development') {
+      notifier.notify({
+        title: 'oors App',
+        message,
+        sound: true,
+      });
+    }
+
+    console.log(chalk.bgBlue.white(message)); // eslint-disable-line no-console
+
+    return result;
   }
 }
 

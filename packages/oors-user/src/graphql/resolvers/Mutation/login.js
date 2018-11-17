@@ -1,5 +1,5 @@
-export default async (_, { username, password }, { app, req, fromMongo, getRepository }) => {
-  const { User } = app.modules.get('oors.user');
+export default async (_, { username, password }, { modules, req, fromMongo, getRepository }) => {
+  const { User } = modules.get('oors.user');
   const UserLoginRepository = getRepository('oors.user.UserLogin');
 
   const { token, user } = await User.login({ username, password });

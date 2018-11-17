@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import { Module } from 'oors';
 import Raven from 'raven';
-import pivotSchema from 'oors/build/schemas/pivot';
+import pivotSchema from 'oors-express/build/schemas/pivot';
 
 class SentryModule extends Module {
   static schema = {
@@ -33,7 +33,21 @@ class SentryModule extends Module {
 
   name = 'oors.sentry';
 
-  async setup({ dsn, options, middlewarePivots, logGqlErrors }) {
+  hooks = {
+    'oors.express.middlewares': ({ middlewares }) => {
+      middlewares.insert(this.getConfig('middlewarePivots').request, {
+        id: 'sentryRequestHandler',
+        factory: () => Raven.requestHandler(),
+      });
+
+      middlewares.insert(this.getConfig('middlewarePivots').error, {
+        id: 'sentryErrorHandler',
+        factory: () => Raven.errorHandler(),
+      });
+    },
+  };
+
+  async setup({ dsn, options, logGqlErrors }) {
     await new Promise((resolve, reject) => {
       Raven.config(dsn, {
         parseUser: req => req.user._id,
@@ -46,16 +60,6 @@ class SentryModule extends Module {
           resolve();
         }
       });
-    });
-
-    this.app.middlewares.insert(middlewarePivots.request, {
-      id: 'sentryRequestHandler',
-      factory: () => Raven.requestHandler(),
-    });
-
-    this.app.middlewares.insert(middlewarePivots.error, {
-      id: 'sentryErrorHandler',
-      factory: () => Raven.errorHandler(),
     });
 
     if (logGqlErrors) {

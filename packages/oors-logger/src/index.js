@@ -141,26 +141,33 @@ class LoggerModule extends Module {
       modulesTable.push([module.name]);
     });
 
-    this.app.once('after:boot', () => {
+    this.once('after:setup', () => {
       console.log(modulesTable.toString());
     });
   }
 
   printDependencyGraph() {
-    this.app.once('after:boot', () => {
+    this.once('after:setup', () => {
       console.log(this.manager.expandedDependencyGraph);
     });
   }
 
   printMiddlewares() {
-    this.app.once('after:boot', () => {
+    if (!this.manager.has('oors.express')) {
+      return;
+    }
+
+    this.once('after:setup', () => {
       const table = new Table({
         head: ['Id', 'Path', 'Params'],
       });
 
-      this.app.middlewares.reject({ enabled: false }).forEach(({ path: mPath, id, params }) => {
-        table.push([id, mPath || '/', typeof params !== 'undefined' ? inspect(params) : 'N/A']);
-      });
+      this.manager
+        .get('oors.express')
+        .middlewares.reject({ enabled: false })
+        .forEach(({ path: mPath, id, params }) => {
+          table.push([id, mPath || '/', typeof params !== 'undefined' ? inspect(params) : 'N/A']);
+        });
 
       console.log(table.toString());
     });

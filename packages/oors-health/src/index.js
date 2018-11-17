@@ -1,6 +1,6 @@
 import { Module } from 'oors';
 import statusMonitor from 'express-status-monitor';
-import pivotSchema from 'oors/build/schemas/pivot';
+import pivotSchema from 'oors-express/build/schemas/pivot';
 import router from './router';
 
 class Health extends Module {
@@ -16,14 +16,22 @@ class Health extends Module {
 
   name = 'oors.health';
 
-  router = router;
+  hooks = {
+    'oors.express.middlewares': ({ middlewares }) => {
+      middlewares.insertBefore(this.getConfig('statusMonitorMiddlewarePivot'), {
+        id: 'statusMonitor',
+        factory: statusMonitor,
+      });
+    },
+  };
 
-  initialize({ statusMonitorMiddlewarePivot }) {
-    this.app.middlewares.insertBefore(statusMonitorMiddlewarePivot, {
-      id: 'statusMonitor',
-      factory: statusMonitor,
+  initialize() {
+    this.export({
+      startTime: Date.now(),
     });
   }
+
+  router = router;
 }
 
 export default Health;

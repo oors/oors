@@ -149,7 +149,7 @@ class Gql extends Module {
     this.gqlContext = {
       pubsub: this.pubsub,
       ajv: this.ajv,
-      app: this.app,
+      modules: this.manager,
     };
     this.loaders = new LoadersMap();
     this.contextExtenders = [];
@@ -161,6 +161,7 @@ class Gql extends Module {
   }
 
   async setup() {
+    await this.loadDependencies(['oors.express']);
     await this.runHook(
       'load',
       this.collectFromModule,
@@ -175,6 +176,10 @@ class Gql extends Module {
         'loadFromDir',
       ]),
     );
+
+    Object.assign(this.gqlContext, {
+      app: this.deps['oors.express'].app,
+    });
 
     if (this.getConfig('exposeModules')) {
       this.addResolvers(modulesResolvers);
@@ -424,7 +429,7 @@ class Gql extends Module {
     const server = new Server(config);
 
     if (config.subscriptions) {
-      server.installSubscriptionHandlers(this.app.server);
+      server.installSubscriptionHandlers(this.deps['oors.express'].server);
     }
 
     return server;
@@ -508,7 +513,7 @@ class Gql extends Module {
   };
 
   applyMiddlewares(server) {
-    this.app.middlewares.insertBefore(
+    this.deps['oors.express'].middlewares.insertBefore(
       this.getConfig('middlewarePivot'),
       this.getApolloServerMiddlewares(server),
       this.getVoyagerMiddleware(),

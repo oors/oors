@@ -3,7 +3,7 @@ import express from 'express';
 import serverIndex from 'serve-index';
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
-import pivotSchema from 'oors/build/schemas/pivot';
+import pivotSchema from 'oors-express/build/schemas/pivot';
 import MailService from './services/Mail';
 
 class Mailer extends Module {
@@ -30,28 +30,30 @@ class Mailer extends Module {
 
   name = 'oors.mailer';
 
+  hooks = {
+    'oors.express.middlewares': ({ middlewares }) => {
+      middlewares.insert(
+        this.getConfig('middlewarePivot'),
+        {
+          id: 'browseEmails',
+          path: '/emails',
+          factory: () => express.static(this.getConfig('emailsDir')),
+        },
+        {
+          id: 'serverIndexEmails',
+          path: '/emails',
+          factory: () => serverIndex(this.getConfig('emailsDir')),
+        },
+      );
+    },
+  };
+
   constructor(...args) {
     super(...args);
 
     Object.assign(this.config, {
       'oors.rad.autoload.services': false,
     });
-  }
-
-  initialize({ middlewarePivot }) {
-    this.app.middlewares.insert(
-      middlewarePivot,
-      {
-        id: 'browseEmails',
-        path: '/emails',
-        factory: () => express.static(this.getConfig('emailsDir')),
-      },
-      {
-        id: 'serverIndexEmails',
-        path: '/emails',
-        factory: () => serverIndex(this.getConfig('emailsDir')),
-      },
-    );
   }
 
   async setup({ transport, emailsDir, saveToDisk }) {

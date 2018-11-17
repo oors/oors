@@ -48,10 +48,6 @@ class Module {
     return this._manager;
   }
 
-  get app() {
-    return this.context.app;
-  }
-
   get context() {
     return this.manager.context;
   }

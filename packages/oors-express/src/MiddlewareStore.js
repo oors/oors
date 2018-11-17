@@ -1,10 +1,10 @@
 import util from 'util';
-import Ajv from 'ajv';
 import findIndex from 'lodash/findIndex';
 import filter from 'lodash/filter';
 import reject from 'lodash/reject';
+import isString from 'lodash/isString';
+import isPlainObject from 'lodash/isPlainObject';
 import find from 'lodash/find';
-import pivotSchema from '../schemas/pivot';
 
 const findIndexById = (list, id) => {
   const index = findIndex(list, { id });
@@ -14,12 +14,12 @@ const findIndexById = (list, id) => {
   return index;
 };
 
-const ajv = new Ajv();
-const validatePivot = ajv.compile(pivotSchema);
+const isValidPivot = pivot =>
+  isString(pivot) || (isPlainObject(pivot) && (isString(pivot.before) || isString(pivot.after)));
 
-class List extends Array {
+class MiddlewareStore extends Array {
   insert(pivot, ...items) {
-    if (!validatePivot(pivot)) {
+    if (!isValidPivot(pivot)) {
       throw new Error(`Invalid pivot: ${util.inspect(pivot)}!`);
     }
 
@@ -97,4 +97,4 @@ class List extends Array {
   }
 }
 
-export default List;
+export default MiddlewareStore;
