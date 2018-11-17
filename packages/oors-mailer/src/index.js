@@ -30,6 +30,16 @@ class Mailer extends Module {
 
   name = 'oors.mailer';
 
+  config = {
+    oors: {
+      rad: {
+        autoload: {
+          services: false,
+        },
+      },
+    },
+  };
+
   hooks = {
     'oors.express.middlewares': ({ middlewares }) => {
       middlewares.insert(
@@ -47,14 +57,6 @@ class Mailer extends Module {
       );
     },
   };
-
-  constructor(...args) {
-    super(...args);
-
-    Object.assign(this.config, {
-      'oors.rad.autoload.services': false,
-    });
-  }
 
   async setup({ transport, emailsDir, saveToDisk }) {
     const Mail = new MailService({
