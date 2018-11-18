@@ -9,12 +9,15 @@ class Repository extends Store {
     return this.collectionName || this.name.replace(/Repository$/, '');
   }
 
-  constructor({ collection, schema, collectionName, relations = {} } = {}) {
+  constructor({ collection, collectionName, schema, relations } = {}) {
     super(collection);
-    this.schema = schema || this.schema || this.constructor.schema;
     this.collectionName =
-      collectionName || this.collectionName || this.constructor.getCollectionName();
-    this.relations = relations;
+      (collection && collection.collectionName) ||
+      collectionName ||
+      this.collectionName ||
+      this.constructor.getCollectionName();
+    this.schema = schema || this.schema || this.constructor.schema;
+    this.relations = relations || this.relations || this.constructor.relations || {};
   }
 
   // eslint-disable-next-line

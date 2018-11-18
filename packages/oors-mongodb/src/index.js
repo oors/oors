@@ -1,8 +1,8 @@
 import Ajv from 'ajv';
+import invariant from 'invariant';
 import ajvKeywords from 'ajv-keywords';
 import { MongoClient, ObjectID } from 'mongodb';
 import { Module } from 'oors';
-import RepositoryStore from './libs/RepositoryStore';
 import Repository from './libs/Repository';
 import * as helpers from './libs/helpers';
 import idValidator from './libs/idValidator';
@@ -14,7 +14,6 @@ import withTimestamps from './decorators/withTimestamps';
 import Migration from './libs/Migration';
 import GQLQueryParser from './graphql/GQLQueryParser';
 import Migrator from './libs/Migrator';
-import RelationsManager from './libs/RelationsManager';
 
 class MongoDB extends Module {
   static schema = {
@@ -103,6 +102,11 @@ class MongoDB extends Module {
     required: ['connections'],
   };
 
+  static RELATION_TYPE = {
+    ONE: 'one',
+    MANY: 'many',
+  };
+
   name = 'oors.mongodb';
 
   config = {
@@ -116,6 +120,10 @@ class MongoDB extends Module {
   };
 
   connections = {};
+
+  relations = {};
+
+  repositories = {};
 
   hooks = {
     'oors.graphql.buildContext': ({ context }) => {
@@ -165,25 +173,6 @@ class MongoDB extends Module {
     await this.loadDependencies(['oors.autoloader']);
     await Promise.all(connections.map(this.createConnection));
 
-    this.repositoryStore = new RepositoryStore(this);
-    this.relationsManager = new RelationsManager(this);
-
-    this.export({
-      createRepository: this.repositoryStore.create,
-      bindRepositories: this.repositoryStore.bind,
-      bindRepository: this.repositoryStore.bind,
-      relations: this.relationsManager.relations,
-      addRelation: this.relationsManager.add,
-      configureRelations: configure =>
-        configure({
-          add: this.relationsManager.add,
-          relations: this.relationsManager.relations,
-          RELATION_TYPE: this.relationsManager.constructor.RELATION_TYPE,
-          getRepository: this.getRepository,
-        }),
-      relationToLookup: this.relationsManager.toLookup,
-    });
-
     this.setupValidator();
     await this.collectRepositories();
     this.setupMigration();
@@ -207,14 +196,29 @@ class MongoDB extends Module {
       'closeConnection',
       'getConnection',
       'getConnectionDb',
-      'repositoryStore',
       'toObjectId',
       'gqlQueryParser',
       'transaction',
       'backup',
+      'repositories',
+      'createRepository',
       'getRepository',
       'addRepository',
+      'bindRepository',
+      'relations',
+      'addRelation',
+      'relationToLookup',
     ]);
+
+    this.export({
+      configureRelations: configure =>
+        configure({
+          add: this.addRelation,
+          relations: this.relations,
+          RELATION_TYPE: this.constructor.RELATION_TYPE,
+          getRepository: this.getRepository,
+        }),
+    });
   }
 
   teardown = () =>
@@ -224,11 +228,11 @@ class MongoDB extends Module {
 
   collectRepositories = async () => {
     await this.runHook('loadRepositories', this.collectFromModule, {
-      createRepository: this.repositoryStore.create,
-      bindRepositories: this.repositoryStore.bind,
-      bindRepository: this.repositoryStore.bind,
+      createRepository: this.createRepository,
+      bindRepositories: this.bindRepository,
+      bindRepository: this.bindRepository,
     });
-    this.repositoryStore.configure();
+    this.configureRepositories();
   };
 
   collectFromModule = async module => {
@@ -393,9 +397,105 @@ class MongoDB extends Module {
     // https://dzone.com/articles/auto-backup-mongodb-database-with-nodejs-on-server-1
   };
 
-  getRepository = (...args) => this.repositoryStore.get(...args);
+  extractCollectionName = relationNode =>
+    relationNode.collectionName ||
+    (relationNode.repositoryName &&
+      this.getRepository(relationNode.repositoryName).collectionName) ||
+    (relationNode.repository && relationNode.repository.collectionName);
 
-  addRepository = (...args) => this.repositoryStore.add(...args);
+  addRelation = ({ type, inversedType, ...args }) => {
+    const from = {
+      ...args.from,
+      collectionName: this.extractCollectionName(args.from),
+    };
+    const to = {
+      ...args.to,
+      collectionName: this.extractCollectionName(args.to),
+    };
+
+    if (!this.relations[from.collectionName]) {
+      this.relations[from.collectionName] = {};
+    }
+
+    this.relations[from.collectionName][from.name] = {
+      collectionName: to.collectionName,
+      localField: from.field,
+      foreignField: to.field,
+      type,
+    };
+
+    if (inversedType && to.name) {
+      this.addRelation({
+        from: to,
+        to: from,
+        type: inversedType,
+      });
+    }
+  };
+
+  relationToLookup = (collectionName, name) => ({
+    from: this.relations[collectionName][name].collectionName,
+    localField: this.relations[collectionName][name].localField,
+    foreignField: this.relations[collectionName][name].foreignField,
+    as: name,
+  });
+
+  createRepository = ({ methods = {}, connectionName, ...options }) => {
+    const repository = new Repository(options);
+
+    Object.keys(methods).forEach(methodName => {
+      repository[methodName] = methods[methodName].bind(repository);
+    });
+
+    this.bindRepository(repository, connectionName);
+
+    return repository;
+  };
+
+  bindRepository = (repository, connectionName) => {
+    if (Array.isArray(repository)) {
+      return repository.map(repo => this.bind(repo, connectionName));
+    }
+
+    invariant(
+      repository.collectionName,
+      `Missing repository collection name - ${repository.constructor.name}!`,
+    );
+
+    Object.assign(repository, {
+      collection: !repository.hasCollection()
+        ? this.getConnectionDb(connectionName).collection(repository.collectionName)
+        : repository.collection,
+      ajv: this.ajv,
+      validateBySchema: this.ajv.compile(repository.schema),
+      getRepository: this.getRepository,
+      relationToLookup: (name, options = {}) => ({
+        ...this.relationToLookup(repository.collectionName, name),
+        ...options,
+      }),
+      getRelation: name => this.relations[repository.collectionName][name],
+      hasRelation: name => this.relations[repository.collectionName][name] !== undefined,
+    });
+
+    return repository;
+  };
+
+  addRepository = (key, repository, options = {}) => {
+    const payload = {
+      key,
+      repository,
+      options,
+    };
+
+    this.emit('repository', payload);
+
+    this.repositories[payload.key] = this.bindRepository(
+      payload.repository,
+      options.connectionName,
+    );
+
+    return this.repositories[payload.key];
+  };
 
   addRepositories = repositories =>
     Object.keys(repositories).reduce(
@@ -405,6 +505,43 @@ class MongoDB extends Module {
       }),
       {},
     );
+
+  getRepository = key => {
+    if (!this.repositories[key]) {
+      throw new Error(`Unable to find "${key}" repository!`);
+    }
+
+    return this.repositories[key];
+  };
+
+  configureRepositories = (repositories = this.repositories) => {
+    Object.keys(repositories).forEach(key => {
+      const repository = repositories[key];
+
+      repository.configure({
+        getRepository: this.getRepository,
+      });
+
+      Object.keys(repository.relations).forEach(relationName => {
+        const { localField, foreignField, type, ...restOptions } = repository.relations[
+          relationName
+        ];
+
+        this.addRelation({
+          from: {
+            repository,
+            field: localField,
+            name: relationName,
+          },
+          to: {
+            ...restOptions,
+            field: foreignField,
+          },
+          type,
+        });
+      });
+    });
+  };
 }
 
 export { MongoDB as default, Repository, helpers, decorators, Migration };
