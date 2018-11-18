@@ -1,6 +1,6 @@
 {
   "name": "oors-logger",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "oors logger module by the usage of winston.",
   "main": "build/index.js",
   "repository": {
@@ -15,7 +15,7 @@
   "homepage": "https://github.com/viczam/oors#readme",
   "dependencies": {
     "cli-table": "0.3.1",
-    "oors": "^2.0.0",
+    "oors": "^2.0.1",
     "winston": "3.1.0"
   }
 }
