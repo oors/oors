@@ -71,9 +71,7 @@ class UserModule extends Module {
     required: ['jwtSecret', 'jwtConfig', 'rootURL'],
   };
 
-  name = 'oors.user';
-
-  config = {
+  static defaultConfig = {
     oors: {
       mongodb: {
         repositories: {
@@ -87,6 +85,8 @@ class UserModule extends Module {
       },
     },
   };
+
+  name = 'oors.user';
 
   hooks = {
     'oors.router.load': () => {},

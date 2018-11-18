@@ -102,14 +102,7 @@ class MongoDB extends Module {
     required: ['connections'],
   };
 
-  static RELATION_TYPE = {
-    ONE: 'one',
-    MANY: 'many',
-  };
-
-  name = 'oors.mongodb';
-
-  config = {
+  static defaultConfig = {
     oors: {
       mongodb: {
         repositories: {
@@ -118,6 +111,13 @@ class MongoDB extends Module {
       },
     },
   };
+
+  static RELATION_TYPE = {
+    ONE: 'one',
+    MANY: 'many',
+  };
+
+  name = 'oors.mongodb';
 
   connections = {};
 

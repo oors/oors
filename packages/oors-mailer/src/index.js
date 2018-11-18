@@ -28,9 +28,7 @@ class Mailer extends Module {
     required: ['emailsDir'],
   };
 
-  name = 'oors.mailer';
-
-  config = {
+  static defaultConfig = {
     oors: {
       rad: {
         autoload: {
@@ -39,6 +37,8 @@ class Mailer extends Module {
       },
     },
   };
+
+  name = 'oors.mailer';
 
   hooks = {
     'oors.express.middlewares': ({ middlewares }) => {

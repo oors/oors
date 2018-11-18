@@ -16,7 +16,7 @@ class Module {
       .match(/\((.*.js)/)[1];
 
     this.hooks = {};
-    this.config = merge({}, this.constructor.defaultConfig || {}, config, this.config || {});
+    this.config = merge({}, this.constructor.defaultConfig || {}, config);
     this.deps = {};
   }
 

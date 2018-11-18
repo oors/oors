@@ -15,9 +15,7 @@ class UploadModule extends Module {
     required: ['uploadDir'],
   };
 
-  name = 'oors.upload';
-
-  config = {
+  static defaultConfig = {
     oors: {
       mongodb: {
         repositories: {
@@ -31,6 +29,8 @@ class UploadModule extends Module {
       },
     },
   };
+
+  name = 'oors.upload';
 
   initialize({ uploadDir }) {
     const uploadMiddleware = createUploadMiddleware({

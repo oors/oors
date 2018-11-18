@@ -34,7 +34,10 @@ class ModulesManager extends EventEmitter {
     return this.ajv.compile(schema);
   }
 
-  parseModuleConfig(config, schema = {}) {
+  parseModuleConfig(module) {
+    const { config } = module;
+    const schema = module.constructor.schema || {};
+
     const validate = this.compileSchema({
       type: 'object',
       ...schema,
@@ -51,7 +54,7 @@ class ModulesManager extends EventEmitter {
     });
 
     if (!validate(config)) {
-      throw new ValidationError(validate.errors);
+      throw new ValidationError(validate.errors, `Invalid "${module.name}" module schema!`);
     }
 
     return config;
@@ -74,7 +77,8 @@ class ModulesManager extends EventEmitter {
       return this;
     }
 
-    module.config = this.parseModuleConfig(module.config, module.constructor.schema); // eslint-disable-line
+    module.config = this.parseModuleConfig(module); // eslint-disable-line
+
     if (!module.config.enabled) {
       return this;
     }
