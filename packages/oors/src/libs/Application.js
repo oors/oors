@@ -16,6 +16,10 @@ class Application {
   async boot() {
     await this.modules.setup();
   }
+
+  async shutdown() {
+    await this.modules.teardown();
+  }
 }
 
 export default Application;
