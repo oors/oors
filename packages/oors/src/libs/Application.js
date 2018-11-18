@@ -1,4 +1,4 @@
-import { ModulesManager } from 'oors';
+import ModulesManager from './ModulesManager';
 
 class Application {
   constructor(config) {

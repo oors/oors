@@ -14,7 +14,7 @@ import UserModule from 'oors-user';
 import CacheModule from 'oors-cache';
 import SchedulerModule from 'oors-scheduler';
 import AutoloaderModule from 'oors-autoloader';
-import BaseApplication from './Application';
+import { Application as BaseApplication } from 'oors';
 import config from '../config';
 
 if (process.env.NODE_ENV === 'development') {
