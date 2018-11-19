@@ -86,12 +86,9 @@ class ExpressModule extends Module {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  createApplication(context = {}, settings) {
-    const app = new ExpressApplication(context);
+  createApplication(context, settings) {
+    const app = new ExpressApplication(context, settings);
     app.disable('x-powered-by');
-    Object.keys(settings).forEach(key => {
-      app.set(key, settings[key]);
-    });
     app.engine('js', expressReactViews.createEngine());
     return app;
   }
@@ -103,11 +100,11 @@ class ExpressModule extends Module {
   };
 
   listen = async port => {
-    await this.applyMiddlewares(this.app);
+    await this.applyMiddlewares();
     return new Promise(resolve => this.app.listen(port, resolve));
   };
 
-  applyMiddlewares = async app => {
+  applyMiddlewares = async () => {
     const middlewares = await Promise.all(
       this.middlewares
         .reject({ enabled: false })
@@ -125,11 +122,11 @@ class ExpressModule extends Module {
 
     middlewares.forEach(({ middleware, path, apply }) => {
       if (apply) {
-        apply({ app, path, middleware });
+        apply({ app: this.app, path, middleware });
       } else if (path) {
-        app.use(path, middleware);
+        this.app.use(path, middleware);
       } else {
-        app.use(middleware);
+        this.app.use(middleware);
       }
     });
   };
