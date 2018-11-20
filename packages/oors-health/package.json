@@ -1,6 +1,6 @@
 {
   "name": "oors-health",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "oors health module.",
   "main": "build/index.js",
   "repository": {
@@ -18,6 +18,6 @@
     "express-status-monitor": "1.2.3",
     "ms": "2.1.1",
     "oors": "^2.0.1",
-    "oors-express": "^1.0.1"
+    "oors-express": "^1.1.0"
   }
 }
