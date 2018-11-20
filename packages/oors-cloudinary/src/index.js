@@ -1,6 +1,8 @@
+import { promisify } from 'util';
 import snakeCase from 'lodash/snakeCase';
 import { Module } from 'oors';
 import cloudinary from 'cloudinary';
+import MulterStorage from './MulterStorage';
 
 const objToSnakeCase = obj =>
   Object.keys(obj).reduce(
@@ -52,29 +54,44 @@ class CloudinaryModule extends Module {
     ].reduce(
       (acc, method) => ({
         ...acc,
-        [method]: (...args) =>
-          new Promise((resolve, reject) =>
-            this.cloudinary.v2.uploader[snakeCase(method)](...args, (err, result) => {
-              if (err) {
-                reject(err);
-              } else {
-                resolve(result);
-              }
-            }),
-          ),
+        [method]: promisify(
+          this.cloudinary.v2.uploader[snakeCase(method)].bind(this.cloudinary.v2.uploader),
+        ),
       }),
       {},
     );
 
-    this.exportProperties(['cloudinary', 'uploader', 'upload', 'rename', 'remove', 'manageTags']);
+    this.uploader.uploadStream = (stream, options = {}) =>
+      new Promise((resolve, reject) => {
+        stream.pipe(
+          this.cloudinary.v2.uploader.upload_stream(options, (err, result) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(result);
+            }
+          }),
+        );
+      });
+
+    this.exportProperties([
+      'cloudinary',
+      'uploader',
+      'upload',
+      'rename',
+      'remove',
+      'manageTags',
+      'createMulterStorage',
+    ]);
   }
 
-  upload = (file, options = {}) => this.uploader.upload(file, objToSnakeCase(options));
+  upload = (file, { stream, ...options } = {}) =>
+    this.uploader[stream ? 'uploadStream' : 'upload'](file, objToSnakeCase(options));
 
   rename = (fromPublicId, toPublicId, options = {}) =>
     this.uploader.rename(fromPublicId, toPublicId, objToSnakeCase(options));
 
-  remove = publicId => this.uploader.destroy(publicId);
+  remove = (publicId, options = {}) => this.uploader.destroy(publicId, options);
 
   manageTags = fn => {
     fn({
@@ -88,6 +105,12 @@ class CloudinaryModule extends Module {
         this.uploader.replaceTag(tag, publicIds, objToSnakeCase(options)),
     });
   };
+
+  createMulterStorage = (options = {}) =>
+    new MulterStorage({
+      ...options,
+      cloudinary: this,
+    });
 }
 
 export default CloudinaryModule;
