@@ -16,7 +16,7 @@
   "dependencies": {
     "express": "4.16.4",
     "fs-extra": "^7.0.1",
-    "nodemailer": "4.6.8",
+    "nodemailer": "4.7.0",
     "oors": "^2.0.1",
     "oors-express": "^1.1.0",
     "prop-types": "^15.6.2",
