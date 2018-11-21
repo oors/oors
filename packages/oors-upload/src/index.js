@@ -1,7 +1,7 @@
 import { Module } from 'oors';
 import File from './services/File';
 import router from './router';
-import createUploadMiddleware from './middlewares/upload';
+import createUploadMiddleware from './middlewares/createUploadMiddleware';
 import uploadSchema from './schemas/upload';
 
 class UploadModule extends Module {

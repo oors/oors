@@ -2,6 +2,8 @@ import { promisify } from 'util';
 import snakeCase from 'lodash/snakeCase';
 import { Module } from 'oors';
 import cloudinary from 'cloudinary';
+import multer from 'multer';
+import { helpers } from 'oors-express';
 import MulterStorage from './MulterStorage';
 
 const objToSnakeCase = obj =>
@@ -110,6 +112,15 @@ class CloudinaryModule extends Module {
     new MulterStorage({
       ...options,
       cloudinary: this,
+    });
+
+  createUploadMiddleware = (id, params = {}) =>
+    helpers.createMiddleware({
+      id,
+      factory: multer,
+    })({
+      storage: this.createMulterStorage(),
+      ...params,
     });
 }
 
