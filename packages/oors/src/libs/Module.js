@@ -4,7 +4,7 @@ import pick from 'lodash/pick';
 import getPath from 'lodash/get';
 import setPath from 'lodash/set';
 import hasPath from 'lodash/has';
-import merge from 'lodash/merge';
+import defaultsDeep from 'lodash/defaultsDeep';
 import camelCase from 'lodash/camelCase';
 
 class Module {
@@ -16,7 +16,7 @@ class Module {
       .match(/\((.*.js)/)[1];
 
     this.hooks = {};
-    this.config = merge({}, this.constructor.defaultConfig || {}, config);
+    this.config = defaultsDeep(config, this.constructor.defaultConfig || {});
     this.deps = {};
   }
 
