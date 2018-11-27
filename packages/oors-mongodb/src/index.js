@@ -341,7 +341,10 @@ class MongoDB extends Module {
   createConnection = async ({ name, url, options }) => {
     this.connections[name] = await MongoClient.connect(
       url,
-      options,
+      {
+        ...options,
+        useNewUrlParser: true,
+      },
     );
     return this.connections[name];
   };
@@ -467,7 +470,8 @@ class MongoDB extends Module {
         ? this.getConnectionDb(connectionName).collection(repository.collectionName)
         : repository.collection,
       ajv: this.ajv,
-      validateBySchema: this.ajv.compile(repository.schema),
+      validateBySchema:
+        typeof repository.schema === 'object' && this.ajv.compile(repository.schema),
       getRepository: this.getRepository,
       relationToLookup: (name, options = {}) => ({
         ...this.relationToLookup(repository.collectionName, name),

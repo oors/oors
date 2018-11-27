@@ -38,23 +38,28 @@ class ModulesManager extends EventEmitter {
     const { config } = module;
     const schema = module.constructor.schema || {};
 
-    const validate = this.compileSchema({
-      type: 'object',
-      ...schema,
-      properties: {
-        ...(schema.properties || {}),
-        name: {
-          type: 'string',
+    const validate =
+      module.constructor.validateConfig ||
+      this.compileSchema({
+        type: 'object',
+        ...schema,
+        properties: {
+          enabled: {
+            type: 'boolean',
+            default: true,
+          },
+          ...(schema.properties || {}),
+          name: {
+            type: 'string',
+          },
         },
-        enabled: {
-          type: 'boolean',
-          default: true,
-        },
-      },
-    });
+      });
 
     if (!validate(config)) {
-      throw new ValidationError(validate.errors, `Invalid "${module.name}" module schema!`);
+      throw new ValidationError(
+        validate.errors || [validate.error],
+        `Invalid "${module.name}" module schema!`,
+      );
     }
 
     return config;

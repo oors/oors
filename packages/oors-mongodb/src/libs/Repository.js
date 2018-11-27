@@ -29,7 +29,11 @@ class Repository extends Store {
   }
 
   validate(data) {
-    return this.validateBySchema ? this.validateBySchema(data) : true;
+    if (this.validateBySchema) {
+      return this.validateBySchema(data);
+    }
+
+    return true;
   }
 
   updateSchema(update) {
@@ -39,7 +43,7 @@ class Repository extends Store {
 
   async parse(data) {
     if (!this.validate(data)) {
-      throw new ValidationError(this.validate.errors);
+      throw new ValidationError(this.validate.errors || [this.validate.error]);
     }
 
     return data;

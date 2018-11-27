@@ -16,7 +16,9 @@ class Module {
       .match(/\((.*.js)/)[1];
 
     this.hooks = {};
-    this.config = defaultsDeep(config, this.constructor.defaultConfig || {});
+    this.config = defaultsDeep(config, this.constructor.defaultConfig || {}, {
+      enabled: true,
+    });
     this.deps = {};
   }
 
