@@ -1,3 +1,4 @@
+import { test, validators as v } from 'easevalidation';
 import { promisify } from 'util';
 import snakeCase from 'lodash/snakeCase';
 import { Module } from 'oors';
@@ -16,27 +17,18 @@ const objToSnakeCase = obj =>
   );
 
 class CloudinaryModule extends Module {
-  static schema = {
-    type: 'object',
-    properties: {
-      config: {
-        type: 'object',
-        properties: {
-          cloudName: {
-            type: 'string',
-          },
-          apiKey: {
-            type: 'string',
-          },
-          apiSecret: {
-            type: 'string',
-          },
-        },
-        required: ['cloudName', 'apiKey', 'apiSecret'],
-      },
-    },
-    required: ['config'],
-  };
+  static validateConfig = test(
+    v.isSchema({
+      config: [
+        v.isRequired(),
+        v.isSchema({
+          cloudName: [v.isRequired(), v.isString()],
+          apiKey: [v.isRequired(), v.isString()],
+          apiSecret: [v.isRequired(), v.isString()],
+        }),
+      ],
+    }),
+  );
 
   name = 'oors.cloudinary';
 

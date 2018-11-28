@@ -1,29 +1,37 @@
+import { test, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import path from 'path';
 import { Router as ExpressRouter } from 'express';
-import pivotSchema from 'oors-express/build/schemas/pivot';
 import BaseRouter from './libs/Router';
 import * as helpers from './libs/helpers';
 import generateRESTRouter from './libs/generateRESTRouter';
 import validatorMiddleware from './middlewares/validator';
 
 class Router extends Module {
-  static schema = {
-    type: 'object',
-    properties: {
-      middlewarePivot: pivotSchema,
-      validatorMiddlewarePivot: {
-        ...pivotSchema,
-        default: {
+  static validateConfig = test(
+    v.isSchema({
+      middlewarePivot: v.isAny(
+        v.isString(),
+        v.isSchema({
+          before: v.isAny(v.isString(), v.isUndefined()),
+          after: v.isAny(v.isString(), v.isUndefined()),
+        }),
+      ),
+      validatorMiddlewarePivot: [
+        v.isDefault({
           before: 'isMethod',
-        },
-      },
-      autoload: {
-        type: 'boolean',
-        default: true,
-      },
-    },
-  };
+        }),
+        v.isAny(
+          v.isString(),
+          v.isSchema({
+            before: v.isAny(v.isString(), v.isUndefined()),
+            after: v.isAny(v.isString(), v.isUndefined()),
+          }),
+        ),
+      ],
+      autoload: [v.isDefault(true), v.isBoolean()],
+    }),
+  );
 
   static moduleSchema = {
     type: 'object',

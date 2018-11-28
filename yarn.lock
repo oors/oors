@@ -4178,7 +4178,7 @@ dataloader@1.4.0:
   resolved "https://registry.yarnpkg.com/dataloader/-/dataloader-1.4.0.tgz#bca11d867f5d3f1b9ed9f737bd15970c65dff5c8"
   integrity sha512-68s5jYdlvasItOJnCuI2Q9s4q98g0pCyL3HrcKJu8KNugUl8ahgmZYg38ysLTgQjjXX3H8CJLkAvWrclWfcalw==
 
-date-fns@^1.27.2:
+date-fns@1.29.0, date-fns@^1.27.2:
   version "1.29.0"
   resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-1.29.0.tgz#12e609cdcb935127311d04d33334e2960a2a54e6"
   integrity sha512-lbTXWZ6M20cWH8N9S6afb0SBm6tMk+uUg6z3MqHPKE9atmsY3kJkTm8vKe93izJ2B2+q5MV990sM2CHgtAZaOw==
@@ -4518,6 +4518,15 @@ duplexify@^3.4.2, duplexify@^3.6.0:
     inherits "^2.0.1"
     readable-stream "^2.0.0"
     stream-shift "^1.0.0"
+
+easevalidation@0.12.0:
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/easevalidation/-/easevalidation-0.12.0.tgz#ecb4534441ccaa87e8bde2c110d3dfbf31536a4d"
+  integrity sha512-Om1wP0yuiIbdYx1ev7KWUPl+dUe4zo0CrLfK7jdadnYkdxGq35wkwW9VGyA3Q9tStmFyr/1psOPeOzTfqhgSHw==
+  dependencies:
+    date-fns "1.29.0"
+    lodash "4.17.11"
+    validator "10.9.0"
 
 ecc-jsbn@~0.1.1:
   version "0.1.1"
@@ -11553,6 +11562,11 @@ validate-npm-package-name@^3.0.0:
   integrity sha1-X6kS2B630MdK/BQN5zF/DKffQ34=
   dependencies:
     builtins "^1.0.3"
+
+validator@10.9.0:
+  version "10.9.0"
+  resolved "https://registry.yarnpkg.com/validator/-/validator-10.9.0.tgz#d10c11673b5061fb7ccf4c1114412411b2bac2a8"
+  integrity sha512-hZJcZSWz9poXBlAkjjcsNAdrZ6JbjD3kWlNjq/+vE7RLLS/+8PAj3qVVwrwsOz/WL8jPmZ1hYkRvtlUeZAm4ug==
 
 validator@^10.2.0:
   version "10.7.1"

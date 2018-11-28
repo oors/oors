@@ -1,27 +1,19 @@
+import { test, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import { Client, Policy } from 'catbox';
 import MemoryEngine from 'catbox-memory';
 
 class Cache extends Module {
-  static schema = {
-    type: 'object',
-    properties: {
-      defaultCache: {
-        type: 'object',
-        properties: {
-          name: {
-            type: 'string',
-          },
-          options: {
-            type: 'object',
-            default: {},
-          },
-        },
-        required: ['name'],
-        default: {},
-      },
-    },
-  };
+  static validateConfig = test(
+    v.isSchema({
+      defaultCache: [
+        v.isSchema({
+          name: [v.isRequired(), v.isString()],
+          options: [v.isDefault({}), v.isObject()],
+        }),
+      ],
+    }),
+  );
 
   name = 'oors.cache';
 

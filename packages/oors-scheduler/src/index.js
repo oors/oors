@@ -1,29 +1,16 @@
+import { test, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import Agenda from 'agenda';
 
 class SchedulerModule extends Module {
-  static schema = {
-    type: 'object',
-    properties: {
-      agendaConfig: {
-        type: 'object',
-        default: {},
-      },
-      autoloadJobs: {
-        type: 'boolean',
-        default: true,
-      },
-      moduleJobsDir: {
-        type: 'string',
-        default: 'jobs',
-      },
-      isWorker: {
-        type: 'boolean',
-        default: true,
-      },
-    },
-    required: [],
-  };
+  static validateConfig = test(
+    v.isSchema({
+      agendaConfig: [v.isDefault({}), v.isObject()],
+      autoloadJobs: [v.isDefault(true), v.isBoolean()],
+      moduleJobsDir: [v.isDefault('jobs'), v.isString()],
+      isWorker: [v.isDefault(true), v.isBoolean()],
+    }),
+  );
 
   name = 'oors.scheduler';
 

@@ -1,3 +1,4 @@
+import { test, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import { Server as HTTPServer } from 'http';
 import { Server as HTTPSServer } from 'https';
@@ -5,48 +6,36 @@ import expressReactViews from 'express-react-views';
 import ExpressApplication from './ExpressApplication';
 import MiddlewareStore from './MiddlewareStore';
 import * as helpers from './helpers';
-import middlewareSchema from './schemas/middleware';
 
 class ExpressModule extends Module {
-  static schema = {
-    type: 'object',
-    properties: {
-      server: {
-        type: 'object',
-        properties: {
-          options: {
-            type: ['object', 'null'],
-            default: null,
-          },
-          ssl: {
-            type: 'boolean',
-            default: false,
-          },
-        },
-        default: {},
-      },
-      settings: {
-        type: 'object',
-        properties: {
-          views: {
-            type: 'string',
-            default: '',
-          },
-          'view engine': {
-            type: 'string',
-            default: 'js',
-          },
-        },
-        default: {},
-      },
-      middlewares: {
-        type: 'array',
-        items: middlewareSchema,
-        default: [],
-      },
-    },
-    required: [],
-  };
+  static validateConfig = test(
+    v.isSchema({
+      server: [
+        v.isDefault({}),
+        v.isSchema({
+          options: [v.isDefault(null), v.isAny(v.isObject(), v.isNull())],
+          ssl: [v.isDefault(false), v.isBoolean()],
+        }),
+      ],
+      settings: [
+        v.isDefault({}),
+        v.isSchema({
+          views: [v.isDefault(''), v.isString()],
+          'view engine': [v.isDefault('js'), v.isString()],
+        }),
+      ],
+      middlewares: v.isArray(
+        v.isSchema({
+          id: v.isString(),
+          path: [v.isDefault('/'), v.isString()],
+          factory: v.isFunction(),
+          apply: v.isAny(v.isFunction(), v.isUndefined()),
+          params: v.isDefault({}),
+          enabled: [v.isDefault(true), v.isBoolean()],
+        }),
+      ),
+    }),
+  );
 
   name = 'oors.express';
 

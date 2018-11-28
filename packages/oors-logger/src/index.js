@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import { test, validators as v } from 'easevalidation';
 import path from 'path';
 import Table from 'cli-table';
 import { inspect } from 'util';
@@ -6,38 +7,17 @@ import { Module } from 'oors';
 import * as winston from 'winston';
 
 class LoggerModule extends Module {
-  static schema = {
-    type: 'object',
-    properties: {
-      level: {
-        type: 'string',
-        default: 'info',
-      },
-      printModules: {
-        type: 'boolean',
-        default: true,
-      },
-      printDependencyGraph: {
-        type: 'boolean',
-        default: true,
-      },
-      printMiddlewares: {
-        type: 'boolean',
-        default: true,
-      },
-      logger: {
-        type: 'object',
-      },
-      logsDir: {
-        type: 'string',
-      },
-      logGqlErrors: {
-        type: 'boolean',
-        default: true,
-      },
-    },
-    required: ['logsDir'],
-  };
+  static validateConfig = test(
+    v.isSchema({
+      level: [v.isDefault('info'), v.isString()],
+      printModules: [v.isDefault(true), v.isBoolean()],
+      printDependencyGraph: [v.isDefault(true), v.isBoolean()],
+      printMiddlewares: [v.isDefault(true), v.isBoolean()],
+      logger: v.isAny(v.isUndefined(), v.isObject()),
+      logsDir: [v.isRequired(), v.isString()],
+      logGqlErrors: [v.isDefault(true), v.isBoolean()],
+    }),
+  );
 
   name = 'oors.logger';
 

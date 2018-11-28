@@ -1,32 +1,31 @@
+import { test, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import express from 'express';
 import serverIndex from 'serve-index';
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
-import pivotSchema from 'oors-express/build/schemas/pivot';
 import MailService from './services/Mail';
 
 class Mailer extends Module {
-  static schema = {
-    type: 'object',
-    properties: {
-      transport: {
-        type: 'object',
-        default: {
+  static validateConfig = test(
+    v.isSchema({
+      transport: [
+        v.isDefault({
           jsonTransport: true,
-        },
-      },
-      saveToDisk: {
-        type: 'boolean',
-        default: 'false',
-      },
-      emailsDir: {
-        type: 'string',
-      },
-      middlewarePivot: pivotSchema,
-    },
-    required: ['emailsDir'],
-  };
+        }),
+        v.isObject(),
+      ],
+      saveToDisk: [v.isDefault(false), v.isBoolean()],
+      emailsDir: [v.isRequired(), v.isString()],
+      middlewarePivot: v.isAny(
+        v.isString(),
+        v.isSchema({
+          before: v.isAny(v.isString(), v.isUndefined()),
+          after: v.isAny(v.isString(), v.isUndefined()),
+        }),
+      ),
+    }),
+  );
 
   static defaultConfig = {
     oors: {

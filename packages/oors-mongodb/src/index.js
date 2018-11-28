@@ -1,3 +1,4 @@
+import { test, validators as v } from 'easevalidation';
 import Ajv from 'ajv';
 import invariant from 'invariant';
 import ajvKeywords from 'ajv-keywords';
@@ -16,91 +17,49 @@ import GQLQueryParser from './graphql/GQLQueryParser';
 import Migrator from './libs/Migrator';
 
 class MongoDB extends Module {
-  static schema = {
-    type: 'object',
-    properties: {
-      connections: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: {
-            name: {
-              type: 'string',
-            },
-            database: {
-              type: 'string',
-            },
-            url: {
-              type: 'string',
-            },
-            options: {
-              type: 'object',
-              default: {},
-            },
-          },
-          required: ['name', 'url'],
-        },
-        minItems: 1,
-      },
-      defaultConnection: {
-        type: 'string',
-      },
-      migration: {
-        type: 'object',
-        properties: {
-          isEnabled: {
-            type: 'boolean',
-            default: false,
-          },
-          dir: {
-            type: 'string',
-          },
-          isSilent: {
-            type: 'boolean',
-            default: false,
-          },
-        },
-        default: {},
-      },
-      logQueries: {
-        type: 'boolean',
-        default: true,
-      },
-      addTimestamps: {
-        type: 'boolean',
-        default: true,
-      },
-      seeding: {
-        type: 'object',
-        properties: {
-          isEnabled: {
-            type: 'boolean',
-            default: false,
-          },
-        },
-        default: {},
-      },
-      transaction: {
-        type: 'object',
-        properties: {
-          isEnabled: {
-            type: 'boolean',
-            default: false,
-          },
-        },
-        default: {},
-      },
-      autoloadRepositories: {
-        type: 'boolean',
-        default: true,
-      },
-      moduleRepositoriesDir: {
-        type: 'string',
-        default: 'repositories',
-      },
-    },
-    required: ['connections'],
-  };
+  static validateConfig = test(
+    v.isSchema({
+      connections: [
+        v.isRequired(),
+        v.isArray(
+          v.isSchema({
+            name: [v.isRequired(), v.isString()],
+            database: v.isAny(v.isString(), v.isUndefined()),
+            url: [v.isRequired(), v.isString()],
+            options: [v.isDefault({}), v.isObject()],
+          }),
+        ),
+        v.isLength({
+          min: 1,
+        }),
+      ],
+      defaultConnection: v.isAny(v.isString(), v.isUndefined()),
+      migration: [
+        v.isDefault({}),
+        v.isSchema({
+          isEnabled: [v.isDefault(false), v.isBoolean()],
+          dir: v.isAny(v.isString(), v.isUndefined()),
+          isSilent: [v.isDefault(false), v.isBoolean()],
+        }),
+      ],
+      logQueries: [v.isDefault(true), v.isBoolean()],
+      addTimestamps: [v.isDefault(true), v.isBoolean()],
+      seeding: [
+        v.isDefault({}),
+        v.isSchema({
+          isEnabled: [v.isDefault(false), v.isBoolean()],
+        }),
+      ],
+      transaction: [
+        v.isDefault({}),
+        v.isSchema({
+          isEnabled: [v.isDefault(false), v.isBoolean()],
+        }),
+      ],
+      autoloadRepositories: [v.isDefault(true), v.isBoolean()],
+      moduleRepositoriesDir: [v.isDefault('repositories'), v.isString()],
+    }),
+  );
 
   static defaultConfig = {
     oors: {

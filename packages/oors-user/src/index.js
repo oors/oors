@@ -1,7 +1,7 @@
+import { test, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import upperFirst from 'lodash/upperFirst';
 import camelCase from 'lodash/camelCase';
-import pivotSchema from 'oors-express/build/schemas/pivot';
 import UserService from './services/User';
 import AccountService from './services/Account';
 import router from './router';
@@ -17,59 +17,43 @@ import PermissionsManager from './libs/PermissionsManager';
 import { roles } from './constants/user';
 
 class UserModule extends Module {
-  static schema = {
-    type: 'object',
-    properties: {
-      jwtSecret: {
-        type: 'string',
-      },
-      jwtConfig: {
-        type: 'object',
-      },
-      passportMiddlewarePivot: pivotSchema,
-      mockUserMiddlewarePivot: pivotSchema,
-      mockUserConfig: {
-        type: 'object',
-        properties: {
-          path: {
-            type: 'string',
-            default: '/',
-          },
-          enabled: {
-            type: 'boolean',
-            default: false,
-          },
-          params: {
-            type: 'object',
-            default: {},
-          },
-        },
-        default: {},
-      },
-      passportConfig: {
-        type: 'object',
-        properties: {
-          enabled: {
-            type: 'boolean',
-            default: false,
-          },
-        },
-        default: {},
-      },
-      emailTemplates: {
-        type: 'object',
-        default: {},
-      },
-      rootURL: {
-        type: 'string',
-      },
-      storageModule: {
-        type: 'string',
-        default: 'oors.mongodb',
-      },
-    },
-    required: ['jwtSecret', 'jwtConfig', 'rootURL'],
-  };
+  static validateConfig = test(
+    v.isSchema({
+      jwtSecret: [v.isRequired(), v.isString()],
+      jwtConfig: [v.isRequired(), v.isObject()],
+      passportMiddlewarePivot: v.isAny(
+        v.isString(),
+        v.isSchema({
+          before: v.isAny(v.isString(), v.isUndefined()),
+          after: v.isAny(v.isString(), v.isUndefined()),
+        }),
+      ),
+      mockUserMiddlewarePivot: v.isAny(
+        v.isString(),
+        v.isSchema({
+          before: v.isAny(v.isString(), v.isUndefined()),
+          after: v.isAny(v.isString(), v.isUndefined()),
+        }),
+      ),
+      mockUserConfig: [
+        v.isDefault({}),
+        v.isSchema({
+          path: [v.isDefault('/'), v.isString()],
+          enabled: [v.isDefault(false), v.isBoolean()],
+          params: [v.isDefault({}), v.isObject()],
+        }),
+      ],
+      passportConfig: [
+        v.isDefault({}),
+        v.isSchema({
+          enabled: [v.isDefault(false), v.isBoolean()],
+        }),
+      ],
+      emailTemplates: [v.isDefault({}), v.isObject()],
+      rootURL: [v.isRequired(), v.isString()],
+      storageModule: [v.isDefault('oors.mongodb'), v.isString()],
+    }),
+  );
 
   static defaultConfig = {
     oors: {

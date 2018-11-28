@@ -1,3 +1,4 @@
+import { test, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import File from './services/File';
 import router from './router';
@@ -5,15 +6,11 @@ import createUploadMiddleware from './middlewares/createUploadMiddleware';
 import uploadSchema from './schemas/upload';
 
 class UploadModule extends Module {
-  static schema = {
-    type: 'object',
-    properties: {
-      uploadDir: {
-        type: 'string',
-      },
-    },
-    required: ['uploadDir'],
-  };
+  static validateConfig = test(
+    v.isSchema({
+      uploadDir: [v.isRequired(), v.isString()],
+    }),
+  );
 
   static defaultConfig = {
     oors: {

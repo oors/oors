@@ -20,6 +20,7 @@
     "apollo-server-express": "2.2.2",
     "apollo-upload-server": "7.1.0",
     "dataloader": "1.4.0",
+    "easevalidation": "0.12.0",
     "fs-extra": "^7.0.1",
     "glob": "7.1.3",
     "graphql": "^14.0.2",

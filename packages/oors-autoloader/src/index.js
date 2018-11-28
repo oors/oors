@@ -1,19 +1,15 @@
+import { test, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import minimatch from 'minimatch';
 import glob from 'glob';
 import path from 'path';
 
 class AutoloaderModule extends Module {
-  static schema = {
-    type: 'object',
-    properties: {
-      scan: {
-        type: 'boolean',
-        default: false,
-      },
-    },
-    required: [],
-  };
+  static validateConfig = test(
+    v.isSchema({
+      scan: [v.isDefault(false), v.isBoolean()],
+    }),
+  );
 
   name = 'oors.autoloader';
 

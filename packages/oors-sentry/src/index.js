@@ -1,35 +1,41 @@
 /* eslint-disable class-methods-use-this */
+import { test, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import Raven from 'raven';
-import pivotSchema from 'oors-express/build/schemas/pivot';
 
 class SentryModule extends Module {
-  static schema = {
-    type: 'object',
-    properties: {
-      dsn: {
-        type: 'string',
-      },
-      options: {
-        type: 'object',
-        default: {},
-      },
-      middlewarePivots: {
-        type: 'object',
-        properties: {
-          request: pivotSchema,
-          error: pivotSchema,
-        },
-        default: {},
-        required: ['request', 'error'],
-      },
-      logGqlErrors: {
-        type: 'boolean',
-        default: true,
-      },
-    },
-    required: ['dsn'],
-  };
+  static validateConfig = test(
+    v.isSchema({
+      dsn: [v.isRequired(), v.isString()],
+      options: [v.isDefault({}), v.isObject()],
+      middlewarePivots: [
+        v.isDefault({}),
+        v.isSchema({
+          request: [
+            v.isRequired(),
+            v.isAny(
+              v.isString(),
+              v.isSchema({
+                before: v.isAny(v.isString(), v.isUndefined()),
+                after: v.isAny(v.isString(), v.isUndefined()),
+              }),
+            ),
+          ],
+          error: [
+            v.isRequired(),
+            v.isAny(
+              v.isString(),
+              v.isSchema({
+                before: v.isAny(v.isString(), v.isUndefined()),
+                after: v.isAny(v.isString(), v.isUndefined()),
+              }),
+            ),
+          ],
+        }),
+      ],
+      logGqlErrors: [v.isDefault(true), v.isBoolean()],
+    }),
+  );
 
   name = 'oors.sentry';
 

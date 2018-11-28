@@ -1,3 +1,4 @@
+import { test, validators as v } from 'easevalidation';
 import pluralize from 'pluralize';
 import { Module } from 'oors';
 import camelCase from 'lodash/camelCase';
@@ -5,28 +6,18 @@ import path from 'path';
 import { createLoaders } from 'oors-mongodb/build/graphql';
 
 class RADModule extends Module {
-  static schema = {
-    type: 'object',
-    properties: {
-      autoload: {
-        type: 'object',
-        properties: {
-          services: {
-            type: 'boolean',
-            default: true,
-          },
-          methods: {
-            type: 'boolean',
-            default: true,
-          },
-        },
-      },
-      autoCreateLoaders: {
-        type: 'boolean',
-        default: true,
-      },
-    },
-  };
+  static validateConfig = test(
+    v.isSchema({
+      autoload: [
+        v.isDefault({}),
+        v.isSchema({
+          services: [v.isDefault(true), v.isBoolean()],
+          methods: [v.isDefault(true), v.isBoolean()],
+        }),
+      ],
+      autoCreateLoaders: [v.isDefault(true), v.isBoolean()],
+    }),
+  );
 
   name = 'oors.rad';
 

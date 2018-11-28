@@ -1,4 +1,5 @@
 /* eslint-disable no-empty, import/no-dynamic-require, global-require */
+import { test, validators as v } from 'easevalidation';
 import { graphql } from 'graphql';
 import glob from 'glob';
 import path from 'path';
@@ -46,81 +47,46 @@ const asyncGlob = (...args) =>
   });
 
 class Gql extends Module {
-  static schema = {
-    type: 'object',
-    properties: {
-      voyager: {
-        type: 'object',
-        properties: {
-          enabled: {
-            type: 'boolean',
-            default: true,
-          },
-          params: {
-            type: 'object',
-            properties: {
-              endpointURL: {
-                type: 'string',
-                default: '/graphql',
-              },
-            },
-            default: {},
-          },
-        },
-        default: {},
-      },
-      middlewarePivot: {
-        type: 'string',
-        default: 'isMethod',
-      },
-      configureSchema: {
-        instanceof: 'Function',
-      },
-      exposeModules: {
-        type: 'boolean',
-        default: true,
-      },
-      serverOptions: {
-        type: 'object',
-        default: {},
-      },
-      pubsub: {
-        type: 'object',
-      },
-      depthLimit: {
-        type: 'object',
-        properties: {
-          limit: {
-            type: 'integer',
-            default: 10,
-          },
-          options: {
-            type: 'object',
-            properties: {
-              ignore: {
-                type: 'array',
-                default: [],
-              },
-            },
-          },
-          callback: {
-            instanceof: 'Function',
-          },
-        },
-        default: {},
-      },
-      costAnalysis: {
-        type: 'object',
-        properties: {
-          maximumCost: {
-            type: 'integer',
-            default: 1000,
-          },
-        },
-        default: {},
-      },
-    },
-  };
+  static validateConfig = test(
+    v.isSchema({
+      voyager: [
+        v.isDefault({}),
+        v.isSchema({
+          enabled: [v.isDefault(true), v.isBoolean()],
+          params: [
+            v.isDefault({}),
+            v.isSchema({
+              endpointURL: [v.isDefault('/graphql'), v.isString()],
+            }),
+          ],
+        }),
+      ],
+      middlewarePivot: [v.isDefault('isMethod'), v.isString()],
+      configureSchema: v.isAny(v.isFunction(), v.isUndefined()),
+      exposeModules: [v.isDefault(true), v.isBoolean()],
+      serverOptions: [v.isDefault({}), v.isObject()],
+      pubsub: v.isAny(v.isObject(), v.isUndefined()),
+      depthLimit: [
+        v.isDefault({}),
+        v.isSchema({
+          limit: [v.isDefault(10), v.isInteger()],
+          options: v.isAny(
+            v.isSchema({
+              ignore: [v.isDefault([]), v.isArray()],
+            }),
+            v.isUndefined(),
+          ),
+          callback: v.isAny(v.isFunction(), v.isUndefined()),
+        }),
+      ],
+      costAnalysis: [
+        v.isDefault({}),
+        v.isSchema({
+          maximumCost: [v.isDefault(1000), v.isInteger(), v.isPositive()],
+        }),
+      ],
+    }),
+  );
 
   name = 'oors.graphql';
 
