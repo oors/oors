@@ -46,7 +46,7 @@ class Repository extends Store {
       throw new ValidationError(this.validate.errors || [this.validate.error]);
     }
 
-    return data;
+    return this.validate.value || data;
   }
 
   getFields = () => Object.keys(this.schema.properties);

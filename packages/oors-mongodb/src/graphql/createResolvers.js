@@ -1,33 +1,38 @@
 /* eslint-disable no-case-declarations */
 import invariant from 'invariant';
 import identity from 'lodash/identity';
+import merge from 'lodash/merge';
 import omit from 'lodash/omit';
 import withSchema from 'oors-graphql/build/decorators/withSchema';
 
-const createPaginationSchema = ({ maxPerPage, defaultPerPage } = {}) => ({
-  skip: {
-    type: 'integer',
-    minimum: 0,
-    default: 0,
-  },
-  after: {
-    isObjectId: true,
-  },
-  before: {
-    isObjectId: true,
-  },
-  first: {
-    type: 'integer',
-    minimum: 1,
-    maximum: maxPerPage,
-    default: defaultPerPage,
-  },
-  last: {
-    type: 'integer',
-    minimum: 1,
-    maximum: maxPerPage,
-  },
-});
+const createPaginationSchema = ({ maxPerPage, defaultPerPage, schema } = {}) =>
+  merge(
+    {
+      skip: {
+        type: 'integer',
+        minimum: 0,
+        default: 0,
+      },
+      after: {
+        isObjectId: true,
+      },
+      before: {
+        isObjectId: true,
+      },
+      first: {
+        type: 'integer',
+        minimum: 1,
+        maximum: maxPerPage,
+        default: defaultPerPage,
+      },
+      last: {
+        type: 'integer',
+        minimum: 1,
+        maximum: maxPerPage,
+      },
+    },
+    schema || {},
+  );
 
 export const buildConfig = config => {
   if (typeof config === 'string') {
@@ -98,6 +103,7 @@ export const buildConfig = config => {
     pagination: {
       maxPerPage: 20,
       defaultPerPage: 10,
+      schema: {},
       ...(config.pagination || {}),
     },
   };

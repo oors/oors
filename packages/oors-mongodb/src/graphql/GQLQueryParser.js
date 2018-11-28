@@ -7,7 +7,7 @@ class GQLQueryParser {
   static NODE_TYPES = {
     FIELD: Symbol('field'),
     RELATION: Symbol('relation'),
-    LOGICAL_QUERY: Symbol('nestedQuery'),
+    LOGICAL_QUERY: Symbol('logicalQuery'),
   };
 
   constructor(module) {
@@ -220,10 +220,12 @@ class GQLQueryParser {
       pipeline.match(this.branchToMongo(matchersBranch, '', pipeline));
     }
 
-    tree.filter(node => node.type === this.constructor.NODE_TYPES.RELATION).forEach(node => {
-      pipeline.lookup(node.field);
-      pipeline.match(this.branchToMongo(node.children, `${node.field}.`), pipeline);
-    });
+    tree
+      .filter(node => node.type === this.constructor.NODE_TYPES.RELATION)
+      .forEach(node => {
+        pipeline.lookup(node.field);
+        pipeline.match(this.branchToMongo(node.children, `${node.field}.`), pipeline);
+      });
 
     if (pivot) {
       if (!orderBy.length) {
