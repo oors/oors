@@ -1,3 +1,5 @@
+// import { test, validators as v } from 'easevalidation';
+// import isObjectId from '../../../../../../packages/oors-mongodb/build/libs/isObjectId';
 import { Repository } from '../../../../../../packages/oors-mongodb';
 
 class Category extends Repository {
@@ -27,6 +29,14 @@ class Category extends Repository {
       type: 'many',
     },
   };
+
+  // validate = test(
+  //   v.isSchema({
+  //     name: [v.isRequired(), v.isString()],
+  //     createdBy: [v.isRequired(), isObjectId()],
+  //     updatedBy: v.isAny(isObjectId(), v.isUndefined()),
+  //   }),
+  // );
 
   getAllWithPostsWithCategory() {
     return this.aggregate(pipeline => pipeline
