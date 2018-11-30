@@ -1,3 +1,5 @@
+import { validators as v } from 'easevalidation';
+
 const withSoftDeleteFilter = (
   propertyName,
   { query = {}, noSoftDeleteFilter, ...restArgs } = {},
@@ -26,19 +28,12 @@ export default ({ propertyName = 'isDeleted', timestampName = 'deletedAt' } = {}
     aggregate,
   } = repository;
 
-  repository.updateSchema(schema => ({
-    ...schema,
-    properties: {
-      ...(schema.properties || {}),
-      [propertyName]: {
-        type: 'boolean',
-        default: false,
-      },
-      [timestampName]: {
-        instanceof: 'Date',
-      },
-    },
-  }));
+  repository.validators.push(
+    v.isSchema({
+      [propertyName]: [v.isDefault(false), v.isBoolean()],
+      [timestampName]: v.isAny(v.isUndefined(), v.isDate()),
+    }),
+  );
 
   Object.assign(repository, {
     findOne: args => findOne.call(repository, withSoftDeleteFilter(propertyName, args)),

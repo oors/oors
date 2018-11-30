@@ -130,7 +130,6 @@ class MongoDB extends Module {
     await this.loadDependencies(['oors.autoloader']);
     await Promise.all(connections.map(this.createConnection));
 
-    this.setupValidator();
     await this.collectRepositories();
     this.setupMigration();
     await this.setupSeeding();

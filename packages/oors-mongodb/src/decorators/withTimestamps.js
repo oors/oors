@@ -1,3 +1,4 @@
+import { validators as v } from 'easevalidation';
 import set from 'lodash/set';
 
 const addTsToUpdate = (update, updateProperty) => {
@@ -14,18 +15,18 @@ const addTsToUpdate = (update, updateProperty) => {
   };
 };
 
-export default (
-  { createProperty = 'createdAt', updateProperty = 'updatedAt' } = {},
-) => repository => {
+export default ({
+  createProperty = 'createdAt',
+  updateProperty = 'updatedAt',
+} = {}) => repository => {
   const { createOne, createMany, updateOne, updateMany, replaceOne } = repository;
 
-  set(repository, `schema.properties.${createProperty}`, {
-    instanceof: 'Date',
-  });
-
-  set(repository, `schema.properties.${updateProperty}`, {
-    instanceof: 'Date',
-  });
+  repository.validators.push(
+    v.isSchema({
+      [createProperty]: v.isAny(v.isUndefined(), v.isDate()),
+      [updateProperty]: v.isAny(v.isUndefined(), v.isDate()),
+    }),
+  );
 
   Object.assign(repository, {
     createOne(data, ...restArgs) {
