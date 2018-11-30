@@ -2,12 +2,12 @@ import { createOne } from '../../../../../../../../packages/oors-mongodb/build/g
 import {
   compose,
   withArgs,
-  withSchema,
+  withJSONSchema,
 } from '../../../../../../../../packages/oors-graphql/build/decorators';
 import PostRepository from '../../../repositories/Post';
 
 export default compose(
-  withSchema({
+  withJSONSchema({
     type: 'object',
     properties: {
       input: {
@@ -34,7 +34,7 @@ export default compose(
       ? resolve(loaders.oorsBlogCategories.findById.load(input.categoryId))
       : null,
   })),
-  withSchema((_, { input: { categoryId } }) => ({
+  withJSONSchema((_, { input: { categoryId } }) => ({
     type: 'object',
     properties: {
       category: {

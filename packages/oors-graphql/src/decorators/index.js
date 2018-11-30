@@ -4,7 +4,7 @@ export withArgs from './withArgs';
 export withDefaultArgs from './withDefaultArgs';
 export withContext from './withContext';
 export withLogger from './withLogger';
-export withSchema from './withSchema';
+export withJSONSchema from './withJSONSchema';
 export withUser from './withUser';
 export withWrapper from './withWrapper';
 export withBefore from './withBefore';

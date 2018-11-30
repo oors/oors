@@ -22,13 +22,13 @@ Then the resolver needs to deal with:
 We can achieve all of the above with decorators:
 
 ```js
-import { compose, withSchema, withArgs, withWrapper } from 'oors-graphql/build/decorators';
+import { compose, withJSONSchema, withArgs, withWrapper } from 'oors-graphql/build/decorators';
 
 const createCommentResolver = someFunctionThatWillAchieveThat;
 
 export default compose(
   // JSON schema in here
-  withSchema({
+  withJSONSchema({
     type: 'object',
     properties: {
       // we only validate what graphql can't handle
@@ -47,7 +47,7 @@ export default compose(
     input: args,
     post: resolve(ctx.db.findPostById(args.postId)),
   })),
-  withSchema({
+  withJSONSchema({
     type: 'object',
     properties: {
       // making sure the post was found in the database
@@ -71,7 +71,7 @@ see some examples on how to use them in the
 
 ---
 
-`withSchema(argsSchema)` - validates the arguments against a specified JSON schema using
+`withJSONSchema(argsSchema)` - validates the arguments against a specified JSON schema using
 [ajv](https://github.com/epoberezkin/ajv).
 
 `withArgs(argsTransformer)` - remaps the arguments to the result of `argsTransformer` function. The

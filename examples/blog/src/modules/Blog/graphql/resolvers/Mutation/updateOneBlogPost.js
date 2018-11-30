@@ -2,12 +2,12 @@ import { updateOne } from '../../../../../../../../packages/oors-mongodb/build/g
 import {
   compose,
   withArgs,
-  withSchema,
+  withJSONSchema,
 } from '../../../../../../../../packages/oors-graphql/build/decorators';
 import PostRepository from '../../../repositories/Post';
 
 export default compose(
-  withSchema({
+  withJSONSchema({
     type: 'object',
     properties: {
       input: {

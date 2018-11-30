@@ -2,11 +2,11 @@ import { createOne } from '../../../../../../../../packages/oors-mongodb/build/g
 import {
   compose,
   withArgs,
-  withSchema,
+  withJSONSchema,
 } from '../../../../../../../../packages/oors-graphql/build/decorators';
 
 export default compose(
-  withSchema({
+  withJSONSchema({
     type: 'object',
     properties: {
       input: {
@@ -31,7 +31,7 @@ export default compose(
     parent: input.parentId ? resolve(loaders.oorsBlogComments.findById.load(input.parentId)) : null,
     post: input.postId ? resolve(loaders.oorsBlogPosts.findById.load(input.postId)) : null,
   })),
-  withSchema({
+  withJSONSchema({
     type: 'object',
     properties: {
       parent: {

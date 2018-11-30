@@ -3,7 +3,7 @@ import invariant from 'invariant';
 import identity from 'lodash/identity';
 import merge from 'lodash/merge';
 import omit from 'lodash/omit';
-import withSchema from 'oors-graphql/build/decorators/withSchema';
+import withJSONSchema from 'oors-graphql/build/decorators/withJSONSchema';
 
 const createPaginationSchema = ({ maxPerPage, defaultPerPage, schema } = {}) =>
   merge(
@@ -116,7 +116,7 @@ export const findById = config => {
 
 export const findOne = config => {
   const { getLoaders, createPipeline } = buildConfig(config);
-  return withSchema({
+  return withJSONSchema({
     type: 'object',
     properties: {
       where: {
@@ -136,7 +136,7 @@ export const findOne = config => {
 export const findMany = config => {
   const { getLoaders, createPipeline, pagination } = buildConfig(config);
 
-  return withSchema({
+  return withJSONSchema({
     type: 'object',
     properties: {
       ...createPaginationSchema(pagination),

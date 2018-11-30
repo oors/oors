@@ -1,6 +1,6 @@
 import Application from '../../packages/oors-presets/build/applications/Standard';
 import Module from '../../packages/oors/build/libs/Module';
-import withSchema from '../../packages/oors-graphql/build/decorators/withSchema';
+import withJSONSchema from '../../packages/oors-graphql/build/decorators/withJSONSchema';
 
 class SimpleModule extends Module {
   hooks = {
@@ -35,7 +35,7 @@ class SimpleModule extends Module {
         },
       },
       Mutation: {
-        incrementCounter: withSchema({
+        incrementCounter: withJSONSchema({
           type: 'object',
           properties: {
             value: {

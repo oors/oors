@@ -25,8 +25,6 @@ import {
 import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
 import { importSchema } from 'graphql-import';
 import { Binding } from 'graphql-binding';
-import Ajv from 'ajv';
-import ajvKeywords from 'ajv-keywords';
 import ConstraintDirective from 'graphql-constraint-directive';
 import depthLimit from 'graphql-depth-limit';
 import mainResolvers from './graphql/resolvers';
@@ -97,14 +95,6 @@ class Gql extends Module {
   };
 
   initialize() {
-    this.ajv = new Ajv({
-      allErrors: true,
-      verbose: true,
-      async: 'es7',
-      useDefaults: true,
-    });
-    ajvKeywords(this.ajv, 'instanceof');
-
     this.typeDefs = [];
     this.directives = {
       constraint: ConstraintDirective,
@@ -114,7 +104,6 @@ class Gql extends Module {
     this.pubsub = this.getConfig('pubsub', new PubSub());
     this.gqlContext = {
       pubsub: this.pubsub,
-      ajv: this.ajv,
       modules: this.manager,
     };
     this.loaders = new LoadersMap();
