@@ -1,7 +1,5 @@
 import { test, validators as v } from 'easevalidation';
-import Ajv from 'ajv';
 import invariant from 'invariant';
-import ajvKeywords from 'ajv-keywords';
 import { MongoClient, ObjectID } from 'mongodb';
 import { Module } from 'oors';
 import Repository from './libs/Repository';
@@ -229,21 +227,6 @@ class MongoDB extends Module {
     });
   }
 
-  setupValidator() {
-    this.ajv = new Ajv({
-      allErrors: true,
-      verbose: true,
-      async: 'es7',
-      useDefaults: true,
-    });
-
-    ajvKeywords(this.ajv, 'instanceof');
-
-    this.ajv.addKeyword('isObjectId', idValidator);
-
-    this.exportProperties(['ajv']);
-  }
-
   setupMigration() {
     if (!this.getConfig('migration.isEnabled')) {
       return;
@@ -428,9 +411,6 @@ class MongoDB extends Module {
       collection: !repository.hasCollection()
         ? this.getConnectionDb(connectionName).collection(repository.collectionName)
         : repository.collection,
-      ajv: this.ajv,
-      validateBySchema:
-        typeof repository.schema === 'object' && this.ajv.compile(repository.schema),
       getRepository: this.getRepository,
       relationToLookup: (name, options = {}) => ({
         ...this.relationToLookup(repository.collectionName, name),

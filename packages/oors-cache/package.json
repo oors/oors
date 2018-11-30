@@ -7,7 +7,7 @@
   "dependencies": {
     "catbox": "10.0.5",
     "catbox-memory": "4.0.1",
-    "easevalidation": "0.12.0",
+    "easevalidation": "0.14.0",
     "lodash": "4.17.11",
     "oors": "^2.2.0"
   }

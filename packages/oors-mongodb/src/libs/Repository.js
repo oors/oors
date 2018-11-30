@@ -1,6 +1,6 @@
+import { test, validate, validators as v } from 'easevalidation';
 import identity from 'lodash/identity';
 import get from 'lodash/get';
-import ValidationError from 'oors/build/errors/ValidationError';
 import Store from './Store';
 import AggregationPipeline from './AggregationPipeline';
 
@@ -16,8 +16,15 @@ class Repository extends Store {
       collectionName ||
       this.collectionName ||
       this.constructor.getCollectionName();
-    this.schema = schema || this.schema || this.constructor.schema;
     this.relations = relations || this.relations || this.constructor.relations || {};
+    this.validators = [];
+
+    const validationSchema = schema || this.schema || this.constructor.schema;
+    if (typeof validationSchema === 'object') {
+      this.validators.push(v.isSchema(validationSchema));
+    } else if (typeof validationSchema === 'function') {
+      this.validators.push(validationSchema);
+    }
   }
 
   // eslint-disable-next-line
@@ -28,28 +35,25 @@ class Repository extends Store {
     throw new Error('Not available! You need to bind the repository first.');
   }
 
-  validate(data) {
-    if (this.validateBySchema) {
-      return this.validateBySchema(data);
+  isValid(data) {
+    if (!this.validators.length) {
+      return true;
     }
 
-    return true;
+    return test(this.validators)(data);
   }
 
-  updateSchema(update) {
-    this.schema = update(this.schema);
-    this.validateBySchema = this.ajv.compile(this.schema);
+  validate(data) {
+    if (!this.validators.length) {
+      return data;
+    }
+
+    return validate(this.validators)(data);
   }
 
   async parse(data) {
-    if (!this.validate(data)) {
-      throw new ValidationError(this.validate.errors || [this.validate.error]);
-    }
-
-    return this.validate.value || data;
+    return this.validate(data);
   }
-
-  getFields = () => Object.keys(this.schema.properties);
 
   runBulkOperation = async (callback, { ordered = false } = {}) => {
     const bulk = this.collection[`initialize${ordered ? 'Ordered' : 'Unordered'}BulkOp`]();
