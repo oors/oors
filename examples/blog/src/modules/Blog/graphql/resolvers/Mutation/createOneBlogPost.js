@@ -1,13 +1,10 @@
 import { createOne } from '../../../../../../../../packages/oors-mongodb/build/graphql/createResolvers';
-import {
-  compose,
-  withArgs,
-  withJSONSchema,
-} from '../../../../../../../../packages/oors-graphql/build/decorators';
+import { compose, withArgs } from '../../../../../../../../packages/oors-graphql/build/decorators';
 import PostRepository from '../../../repositories/Post';
+import withSchema from '../../../../../../../../packages/oors-ajv/build/graphql/decorators/withSchema';
 
 export default compose(
-  withJSONSchema({
+  withSchema({
     type: 'object',
     properties: {
       input: {
@@ -34,7 +31,7 @@ export default compose(
       ? resolve(loaders.oorsBlogCategories.findById.load(input.categoryId))
       : null,
   })),
-  withJSONSchema((_, { input: { categoryId } }) => ({
+  withSchema((_, { input: { categoryId } }) => ({
     type: 'object',
     properties: {
       category: {
