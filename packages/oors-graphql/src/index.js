@@ -1,5 +1,5 @@
 /* eslint-disable no-empty, import/no-dynamic-require, global-require */
-import { test, validators as v } from 'easevalidation';
+import { validate, validators as v } from 'easevalidation';
 import { graphql } from 'graphql';
 import glob from 'glob';
 import path from 'path';
@@ -45,7 +45,7 @@ const asyncGlob = (...args) =>
   });
 
 class Gql extends Module {
-  static validateConfig = test(
+  static validateConfig = validate(
     v.isSchema({
       voyager: [
         v.isDefault({}),

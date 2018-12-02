@@ -1,9 +1,9 @@
-import { test, validators as v } from 'easevalidation';
+import { validate, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import Agenda from 'agenda';
 
 class SchedulerModule extends Module {
-  static validateConfig = test(
+  static validateConfig = validate(
     v.isSchema({
       agendaConfig: [v.isDefault({}), v.isObject()],
       autoloadJobs: [v.isDefault(true), v.isBoolean()],

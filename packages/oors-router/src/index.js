@@ -1,14 +1,15 @@
-import { test, validators as v } from 'easevalidation';
+import { validate, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import path from 'path';
 import { Router as ExpressRouter } from 'express';
+import ErrorWrapper from 'oors/build/errors/ErrorWrapper';
 import BaseRouter from './libs/Router';
 import * as helpers from './libs/helpers';
 import generateRESTRouter from './libs/generateRESTRouter';
 import validatorMiddleware from './middlewares/validator';
 
 class Router extends Module {
-  static validateConfig = test(
+  static validateConfig = validate(
     v.isSchema({
       middlewarePivot: v.isAny(
         v.isString(),
@@ -33,20 +34,6 @@ class Router extends Module {
     }),
   );
 
-  static moduleSchema = {
-    type: 'object',
-    properties: {
-      autoload: {
-        type: 'boolean',
-        default: true,
-      },
-      prefixPath: {
-        type: 'string',
-        default: '/',
-      },
-    },
-  };
-
   name = 'oors.router';
 
   hooks = {
@@ -54,10 +41,6 @@ class Router extends Module {
       middlewares.insert(this.getConfig('validatorMiddlewarePivot'), validatorMiddleware);
     },
   };
-
-  initialize() {
-    this.validateModule = this.manager.compileSchema(this.constructor.moduleSchema);
-  }
 
   addRouter = (...args) => {
     if (args.length === 2) {
@@ -74,12 +57,17 @@ class Router extends Module {
   };
 
   loadModuleRouter = module => {
-    const moduleConfig = module.getConfig('router', {});
+    let moduleConfig;
 
-    if (!this.validateModule(moduleConfig)) {
-      throw new Error(
-        `Invalid module router configuration:\n${JSON.stringify(this.validateModule.errors)}!`,
-      );
+    try {
+      moduleConfig = validate(
+        v.isSchema({
+          autoload: [v.isDefault(true), v.isBoolean()],
+          prefixPath: [v.isDefault('/'), v.isString()],
+        }),
+      )(module.getConfig('router', {}));
+    } catch (error) {
+      throw new ErrorWrapper(error, `Invalid module "${module.name}" router configuration!`);
     }
 
     const { autoload, prefixPath } = moduleConfig;

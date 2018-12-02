@@ -1,35 +1,20 @@
 /* eslint-disable no-case-declarations */
+import { validators as v } from 'easevalidation';
 import invariant from 'invariant';
 import identity from 'lodash/identity';
 import merge from 'lodash/merge';
 import omit from 'lodash/omit';
-import withJSONSchema from 'oors-graphql/build/decorators/withJSONSchema';
+import withValidator from 'oors-graphql/build/decorators/withValidator';
+import isObjectId from '../libs/isObjectId';
 
 const createPaginationSchema = ({ maxPerPage, defaultPerPage, schema } = {}) =>
   merge(
     {
-      skip: {
-        type: 'integer',
-        minimum: 0,
-        default: 0,
-      },
-      after: {
-        isObjectId: true,
-      },
-      before: {
-        isObjectId: true,
-      },
-      first: {
-        type: 'integer',
-        minimum: 1,
-        maximum: maxPerPage,
-        default: defaultPerPage,
-      },
-      last: {
-        type: 'integer',
-        minimum: 1,
-        maximum: maxPerPage,
-      },
+      skip: [v.isDefault(0), v.isMin(0), v.isInteger()],
+      after: v.isAny(v.isUndefined(), isObjectId()),
+      before: v.isAny(v.isUndefined(), isObjectId()),
+      first: [v.isDefault(defaultPerPage), v.isMin(1), v.isMax(maxPerPage), v.isInteger()],
+      last: v.isAny(v.isUndefined(), v.isEvery(v.isMin(1), v.isMax(maxPerPage), v.isInteger())),
     },
     schema || {},
   );
@@ -116,16 +101,11 @@ export const findById = config => {
 
 export const findOne = config => {
   const { getLoaders, createPipeline } = buildConfig(config);
-  return withJSONSchema({
-    type: 'object',
-    properties: {
-      where: {
-        type: 'object',
-        default: {},
-      },
-    },
-    required: ['where'],
-  })(async (_, args, ctx, info) => {
+  return withValidator(
+    v.isSchema({
+      where: [v.isDefault({}), v.isRequired(), v.isObject()],
+    }),
+  )(async (_, args, ctx, info) => {
     const results = await getLoaders(ctx).aggregate.load(
       createPipeline(_, args, ctx, info).limit(1),
     );
@@ -136,16 +116,12 @@ export const findOne = config => {
 export const findMany = config => {
   const { getLoaders, createPipeline, pagination } = buildConfig(config);
 
-  return withJSONSchema({
-    type: 'object',
-    properties: {
+  return withValidator(
+    v.isSchema({
       ...createPaginationSchema(pagination),
-      where: {
-        type: 'object',
-        default: {},
-      },
-    },
-  })(async (_, args, ctx, info) => {
+      where: [v.isDefault({}), v.isRequired(), v.isObject()],
+    }),
+  )(async (_, args, ctx, info) => {
     const pivot = args.before || args.after;
 
     if (pivot) {

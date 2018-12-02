@@ -8,6 +8,8 @@ import defaultsDeep from 'lodash/defaultsDeep';
 import camelCase from 'lodash/camelCase';
 
 class Module {
+  static validateConfig = config => config;
+
   constructor(config = {}) {
     const { stack } = new Error();
     this.filePath = stack

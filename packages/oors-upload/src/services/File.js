@@ -1,6 +1,5 @@
 import path from 'path';
 import fs from 'fs-extra';
-import ValidationError from 'oors/build/errors/ValidationError';
 
 class File {
   constructor({ uploadDir, FileRepository, validateUpload }) {
@@ -17,10 +16,8 @@ class File {
     return fs.unlink(this.getPath({ file }));
   }
 
-  async createFromUpload(data) {
-    if (!this.validateUpload(data)) {
-      throw new ValidationError(this.validateUpload.errors);
-    }
+  async createFromUpload(initialData) {
+    const data = this.validateUpload(initialData);
 
     const {
       path: uploadPath,

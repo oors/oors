@@ -1,10 +1,10 @@
-import { test, validators as v } from 'easevalidation';
+import { validate, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import { Client, Policy } from 'catbox';
 import MemoryEngine from 'catbox-memory';
 
 class Cache extends Module {
-  static validateConfig = test(
+  static validateConfig = validate(
     v.isSchema({
       defaultCache: [
         v.isSchema({

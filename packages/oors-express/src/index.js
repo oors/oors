@@ -1,4 +1,4 @@
-import { test, validators as v } from 'easevalidation';
+import { validate, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import { Server as HTTPServer } from 'http';
 import { Server as HTTPSServer } from 'https';
@@ -8,7 +8,7 @@ import MiddlewareStore from './MiddlewareStore';
 import * as helpers from './helpers';
 
 class ExpressModule extends Module {
-  static validateConfig = test(
+  static validateConfig = validate(
     v.isSchema({
       server: [
         v.isDefault({}),

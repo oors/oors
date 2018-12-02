@@ -1,10 +1,10 @@
-import { test, validators as v } from 'easevalidation';
+import { validate, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import statusMonitor from 'express-status-monitor';
 import router from './router';
 
 class Health extends Module {
-  static validateConfig = test(
+  static validateConfig = validate(
     v.isSchema({
       statusMonitorMiddlewarePivot: [
         v.isDefault('isMethod'),

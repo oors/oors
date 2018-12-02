@@ -1,11 +1,12 @@
 /* eslint-disable class-methods-use-this */
+import { validate, validators as v } from 'easevalidation';
 import invariant from 'invariant';
 import { ObjectID as objectId } from 'mongodb';
 import jwt from 'jsonwebtoken';
 import pick from 'lodash/pick';
 import moment from 'moment';
 import Boom from 'boom';
-import { validate } from 'oors/build/helpers';
+import isObjectId from 'oors-mongodb/build/libs/isObjectId';
 import { FailedLogin } from '../libs/errors';
 import { hashPassword } from '../libs/helpers';
 
@@ -20,33 +21,16 @@ class User {
   }
 
   createToken(params) {
-    const { options, user } = validate(params, {
-      type: 'object',
-      properties: {
-        user: {
-          type: 'object',
-          properties: {
-            id: {
-              type: 'string',
-            },
-            accountId: {
-              isObjectId: true,
-            },
-            username: {
-              type: 'string',
-            },
-            scope: {
-              type: 'array',
-              items: {
-                type: 'string',
-              },
-              default: [],
-            },
-          },
-          required: ['id', 'username'],
-        },
-      },
-    });
+    const { options, user } = validate(
+      v.isSchema({
+        user: v.isSchema({
+          id: [v.isRequired(), v.isString()],
+          accountId: v.isAny(v.isUndefined(), isObjectId()),
+          username: [v.isRequired(), v.isString()],
+          scope: [v.isDefault([]), v.isArray(v.isString())],
+        }),
+      }),
+    )(params);
 
     return jwt.sign(user, this.jwtConfig.key, {
       ...this.jwtConfig.options,

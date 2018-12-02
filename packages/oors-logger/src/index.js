@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { test, validators as v } from 'easevalidation';
+import { validate, validators as v } from 'easevalidation';
 import path from 'path';
 import Table from 'cli-table';
 import { inspect } from 'util';
@@ -7,7 +7,7 @@ import { Module } from 'oors';
 import * as winston from 'winston';
 
 class LoggerModule extends Module {
-  static validateConfig = test(
+  static validateConfig = validate(
     v.isSchema({
       level: [v.isDefault('info'), v.isString()],
       printModules: [v.isDefault(true), v.isBoolean()],

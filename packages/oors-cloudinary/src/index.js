@@ -1,4 +1,4 @@
-import { test, validators as v } from 'easevalidation';
+import { validate, validators as v } from 'easevalidation';
 import { promisify } from 'util';
 import snakeCase from 'lodash/snakeCase';
 import { Module } from 'oors';
@@ -17,7 +17,7 @@ const objToSnakeCase = obj =>
   );
 
 class CloudinaryModule extends Module {
-  static validateConfig = test(
+  static validateConfig = validate(
     v.isSchema({
       config: [
         v.isRequired(),

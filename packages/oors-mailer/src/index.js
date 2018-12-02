@@ -1,4 +1,4 @@
-import { test, validators as v } from 'easevalidation';
+import { validate, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import express from 'express';
 import serverIndex from 'serve-index';
@@ -7,7 +7,7 @@ import ReactDOMServer from 'react-dom/server';
 import MailService from './services/Mail';
 
 class Mailer extends Module {
-  static validateConfig = test(
+  static validateConfig = validate(
     v.isSchema({
       transport: [
         v.isDefault({

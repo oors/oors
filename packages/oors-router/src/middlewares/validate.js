@@ -1,4 +1,4 @@
-import ValidationError from 'oors/build/errors/ValidationError';
+import ValidationError from 'oors-ajv/build/ValidationError';
 
 export default schemas => {
   let validate;

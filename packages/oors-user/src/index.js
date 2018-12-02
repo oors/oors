@@ -1,4 +1,4 @@
-import { test, validators as v } from 'easevalidation';
+import { validate, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import upperFirst from 'lodash/upperFirst';
 import camelCase from 'lodash/camelCase';
@@ -17,7 +17,7 @@ import PermissionsManager from './libs/PermissionsManager';
 import { roles } from './constants/user';
 
 class UserModule extends Module {
-  static validateConfig = test(
+  static validateConfig = validate(
     v.isSchema({
       jwtSecret: [v.isRequired(), v.isString()],
       jwtConfig: [v.isRequired(), v.isObject()],

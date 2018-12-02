@@ -1,11 +1,11 @@
-import { test, validators as v } from 'easevalidation';
+import { validate, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import minimatch from 'minimatch';
 import glob from 'glob';
 import path from 'path';
 
 class AutoloaderModule extends Module {
-  static validateConfig = test(
+  static validateConfig = validate(
     v.isSchema({
       scan: [v.isDefault(false), v.isBoolean()],
     }),

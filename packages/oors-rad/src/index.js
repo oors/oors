@@ -1,4 +1,4 @@
-import { test, validators as v } from 'easevalidation';
+import { validate, validators as v } from 'easevalidation';
 import pluralize from 'pluralize';
 import { Module } from 'oors';
 import camelCase from 'lodash/camelCase';
@@ -6,7 +6,7 @@ import path from 'path';
 import { createLoaders } from 'oors-mongodb/build/graphql';
 
 class RADModule extends Module {
-  static validateConfig = test(
+  static validateConfig = validate(
     v.isSchema({
       autoload: [
         v.isDefault({}),

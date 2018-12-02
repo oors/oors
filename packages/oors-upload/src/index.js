@@ -1,12 +1,11 @@
-import { test, validators as v } from 'easevalidation';
+import { validate, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import File from './services/File';
 import router from './router';
 import createUploadMiddleware from './middlewares/createUploadMiddleware';
-import uploadSchema from './schemas/upload';
 
 class UploadModule extends Module {
-  static validateConfig = test(
+  static validateConfig = validate(
     v.isSchema({
       uploadDir: [v.isRequired(), v.isString()],
     }),
@@ -51,8 +50,17 @@ class UploadModule extends Module {
     const fileService = new File({
       uploadDir: this.getConfig('uploadDir'),
       FileRepository,
-      validateUpload: this.manager.compileSchema(uploadSchema),
+      validateUpload: validate(
+        v.isSchema({
+          originalname: [v.isRequired(), v.isString()],
+          path: [v.isRequired(), v.isString()],
+          size: [v.isRequired(), v.isNumber()],
+          mimetype: [v.isRequired(), v.isString()],
+          destination: v.isAny(v.isUndefined(), v.isString()),
+        }),
+      ),
     });
+
     FileRepository.File = fileService;
 
     this.export({

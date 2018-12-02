@@ -1,10 +1,10 @@
 /* eslint-disable class-methods-use-this */
-import { test, validators as v } from 'easevalidation';
+import { validate, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import Raven from 'raven';
 
 class SentryModule extends Module {
-  static validateConfig = test(
+  static validateConfig = validate(
     v.isSchema({
       dsn: [v.isRequired(), v.isString()],
       options: [v.isDefault({}), v.isObject()],

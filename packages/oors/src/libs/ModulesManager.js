@@ -1,10 +1,9 @@
-import Ajv from 'ajv';
-import ajvKeywords from 'ajv-keywords';
+/* eslint-disable class-methods-use-this */
 import uniq from 'lodash/uniq';
 import getPath from 'lodash/get';
 import setPath from 'lodash/set';
 import EventEmitter from 'events';
-import ValidationError from '../errors/ValidationError';
+import ErrorWrapper from '../errors/ErrorWrapper';
 
 class ModulesManager extends EventEmitter {
   constructor(context = {}) {
@@ -16,53 +15,14 @@ class ModulesManager extends EventEmitter {
     this.loads = {};
     this.modules = {};
     this.exportMap = {};
-    this.createValidator();
-  }
-
-  createValidator() {
-    this.ajv = new Ajv({
-      allErrors: true,
-      async: 'es7',
-      coerceTypes: 'array',
-      useDefaults: true,
-    });
-
-    ajvKeywords(this.ajv, 'instanceof');
-  }
-
-  compileSchema(schema) {
-    return this.ajv.compile(schema);
   }
 
   parseModuleConfig(module) {
-    const { config } = module;
-    const schema = module.constructor.schema || {};
-
-    const validate =
-      module.constructor.validateConfig ||
-      this.compileSchema({
-        type: 'object',
-        ...schema,
-        properties: {
-          enabled: {
-            type: 'boolean',
-            default: true,
-          },
-          ...(schema.properties || {}),
-          name: {
-            type: 'string',
-          },
-        },
-      });
-
-    if (!validate(config)) {
-      throw new ValidationError(
-        validate.errors || [validate.error],
-        `Invalid "${module.name}" module schema!`,
-      );
+    try {
+      return module.constructor.validateConfig(module.config);
+    } catch (error) {
+      throw new ErrorWrapper(error, `Invalid "${module.name}" module configuration!`);
     }
-
-    return config;
   }
 
   setContext(key, value) {

@@ -19,11 +19,11 @@ class Repository extends Store {
     this.relations = relations || this.relations || this.constructor.relations || {};
     this.validators = [];
 
-    const validationSchema = schema || this.schema || this.constructor.schema;
-    if (typeof validationSchema === 'object') {
-      this.validators.push(v.isSchema(validationSchema));
-    } else if (typeof validationSchema === 'function') {
-      this.validators.push(validationSchema);
+    this.schema = schema || this.schema || this.constructor.schema;
+    if (typeof this.schema === 'object') {
+      this.validators.push(v.isSchema(this.schema));
+    } else if (typeof this.schema === 'function') {
+      this.validators.push(this.schema);
     }
   }
 

@@ -1,8 +1,8 @@
 import Ajv from 'ajv';
 import ajvKeywords from 'ajv-keywords';
-import ValidationError from './errors/ValidationError';
+import ValidationError from './ValidationError';
 
-export const validate = (data, schema, options = {}) => {
+export default (data, schema, options = {}) => {
   const ajv = new Ajv({
     allErrors: true,
     async: 'es7',

@@ -1,10 +1,9 @@
-import { test, validators as v } from 'easevalidation';
+import { validate, validators as v } from 'easevalidation';
 import invariant from 'invariant';
 import { MongoClient, ObjectID } from 'mongodb';
 import { Module } from 'oors';
 import Repository from './libs/Repository';
 import * as helpers from './libs/helpers';
-import idValidator from './libs/idValidator';
 import * as decorators from './decorators';
 import MigrationRepository from './repositories/Migration';
 import Seeder from './libs/Seeder';
@@ -15,7 +14,7 @@ import GQLQueryParser from './graphql/GQLQueryParser';
 import Migrator from './libs/Migrator';
 
 class MongoDB extends Module {
-  static validateConfig = test(
+  static validateConfig = validate(
     v.isSchema({
       connections: [
         v.isRequired(),
@@ -85,10 +84,6 @@ class MongoDB extends Module {
   hooks = {
     'oors.graphql.buildContext': ({ context }) => {
       const { fromMongo, fromMongoCursor, fromMongoArray, toMongo } = helpers;
-
-      if (context.ajv) {
-        context.ajv.addKeyword('isObjectId', idValidator);
-      }
 
       Object.assign(context, {
         fromMongo,
