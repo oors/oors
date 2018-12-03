@@ -1,4 +1,5 @@
 import last from 'lodash/last';
+import isEqual from 'lodash/isEqual';
 
 class AggregationPipeline {
   static stages = [
@@ -87,7 +88,10 @@ class AggregationPipeline {
         : fields,
     });
 
-  lookup = (relation, { as = relation, match = false, projectOne = true, ...rest } = {}) => {
+  lookup = (
+    relation,
+    { as = relation, match = false, projectOne = true, ignoreIfExists = true, ...rest } = {},
+  ) => {
     if (typeof relation === 'object') {
       return this.push({
         $lookup: relation,
@@ -101,6 +105,10 @@ class AggregationPipeline {
     }
 
     const { type } = this.repository.getRelation(relation);
+
+    if (!ignoreIfExists && this.hasLookup(relation, { as, ...rest })) {
+      return this;
+    }
 
     this.push({
       $lookup: this.repository.relationToLookup(relation, { as, ...rest }),
@@ -124,6 +132,13 @@ class AggregationPipeline {
 
     return this;
   };
+
+  hasLookup = (relation, options = {}) =>
+    !!this.pipeline.find(
+      stage =>
+        stage.$lookup &&
+        isEqual(stage.$lookup, this.repository.relationToLookup(relation, options)),
+    );
 
   sort = fields =>
     this.push({

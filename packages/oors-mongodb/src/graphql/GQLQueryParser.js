@@ -1,13 +1,14 @@
 import has from 'lodash/has';
+import uniq from 'lodash/uniq';
 import get from 'lodash/get';
 import escapeRegexp from 'escape-string-regexp';
 import { ObjectID as objectId } from 'mongodb';
 
 class GQLQueryParser {
   static NODE_TYPES = {
-    FIELD: Symbol('field'),
-    RELATION: Symbol('relation'),
-    LOGICAL_QUERY: Symbol('logicalQuery'),
+    FIELD: 'FIELD',
+    RELATION: 'RELATION',
+    LOGICAL_QUERY: 'LOGICAL_QUERY',
   };
 
   constructor(module) {
@@ -115,14 +116,19 @@ class GQLQueryParser {
     );
   }
 
-  branchToMongo(branch, namespace = '', pipeline) {
-    return branch.reduce((acc, node) => {
+  nodesToMongo(nodes, options = {}) {
+    const { namespace, pipeline } = {
+      namespace: '',
+      ...options,
+    };
+
+    return nodes.reduce((acc, node) => {
       if (node.skip) {
         return acc;
       }
 
       if (typeof node.toMongo === 'function') {
-        node.toMongo(acc, branch, namespace, pipeline);
+        node.toMongo(acc, { nodes, namespace, pipeline });
         return acc;
       }
 
@@ -135,7 +141,7 @@ class GQLQueryParser {
       if (node.type === this.constructor.NODE_TYPES.LOGICAL_QUERY) {
         const operator = `$${node.field.toLowerCase()}`;
         const queries = node.children.map(children =>
-          this.branchToMongo(children, namespace, pipeline),
+          this.nodesToMongo(children, { namespace, pipeline }),
         );
 
         if (!queries.length) {
@@ -150,17 +156,10 @@ class GQLQueryParser {
       }
 
       if (node.type === this.constructor.NODE_TYPES.RELATION) {
-        const query = this.branchToMongo(node.children, '', pipeline);
-
-        if (!Object.keys(query).length) {
-          return acc;
-        }
-
-        if (typeof acc[node.field] === 'undefined') {
-          acc[node.field] = {};
-        }
-
-        Object.assign(acc[node.field], query);
+        Object.assign(
+          acc,
+          this.nodesToMongo(node.children, { namespace: `${node.field}.`, pipeline }),
+        );
       }
 
       return acc;
@@ -206,6 +205,29 @@ class GQLQueryParser {
     } while (index < branch.length);
   };
 
+  embedsRelation = node =>
+    node.type === this.constructor.NODE_TYPES.LOGICAL_QUERY &&
+    node.children.some(children =>
+      children.some(
+        child => child.type === this.constructor.NODE_TYPES.RELATION || this.embedsRelation(child),
+      ),
+    );
+
+  getEmbeddedRelations = nodes =>
+    nodes.reduce((relations, node) => {
+      if (node.type === this.constructor.NODE_TYPES.RELATION && !relations.includes(node.field)) {
+        relations.push(node.field);
+      }
+
+      if (node.type === this.constructor.NODE_TYPES.LOGICAL_QUERY) {
+        node.children.forEach(children => {
+          relations.push(...this.getEmbeddedRelations(children));
+        });
+      }
+
+      return uniq(relations);
+    }, []);
+
   toPipeline(
     { where = {}, skip, after, first, last, pivot, orderBy = [] } = {},
     { repository, pipeline = repository.createPipeline(), nodeVisitors = [] },
@@ -214,18 +236,39 @@ class GQLQueryParser {
 
     this.visitBranch(tree, [...this.nodeVisitors, ...nodeVisitors]);
 
-    const matchersBranch = tree.filter(node => node.type !== this.constructor.NODE_TYPES.RELATION);
+    // we need to split matchers that reference relations from those that don't, to filter out the data set before running the lookups
+    const nodes = {
+      filters: [],
+      logicalWithRelations: [],
+      relational: [],
+    };
 
-    if (matchersBranch.length) {
-      pipeline.match(this.branchToMongo(matchersBranch, '', pipeline));
+    tree.forEach(node => {
+      if (node.type === this.constructor.NODE_TYPES.RELATION) {
+        nodes.relational.push(node);
+      } else if (this.embedsRelation(node)) {
+        nodes.logicalWithRelations.push(node);
+      } else {
+        nodes.filters.push(node);
+      }
+    });
+
+    if (nodes.filters.length) {
+      pipeline.match(this.nodesToMongo(nodes.filters, { pipeline }));
     }
 
-    tree
-      .filter(node => node.type === this.constructor.NODE_TYPES.RELATION)
-      .forEach(node => {
-        pipeline.lookup(node.field);
-        pipeline.match(this.branchToMongo(node.children, `${node.field}.`), pipeline);
+    if (nodes.logicalWithRelations) {
+      this.getEmbeddedRelations(nodes.logicalWithRelations).forEach(relation => {
+        pipeline.lookup(relation, { ignoreIfExists: false });
       });
+
+      pipeline.match(this.nodesToMongo(nodes.logicalWithRelations, { pipeline }));
+    }
+
+    nodes.relational.forEach(node => {
+      pipeline.lookup(node.field, { ignoreIfExists: false });
+      pipeline.match(this.nodesToMongo(node.children, { namespace: `${node.field}.`, pipeline }));
+    });
 
     if (pivot) {
       if (!orderBy.length) {
