@@ -16,7 +16,7 @@
   "dependencies": {
     "ajv": "6.5.5",
     "ajv-keywords": "3.2.0",
-    "easevalidation": "0.14.0",
+    "easevalidation": "0.15.0",
     "escape-string-regexp": "1.0.5",
     "fs-extra": "7.0.1",
     "glob": "7.1.3",
