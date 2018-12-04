@@ -14,7 +14,7 @@
   },
   "homepage": "https://github.com/viczam/oors#readme",
   "dependencies": {
-    "apollo-server": "2.2.4",
+    "apollo-server": "2.2.6",
     "bcryptjs": "2.4.3",
     "boom": "7.2.2",
     "celebrate": "9.0.1",
