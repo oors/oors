@@ -1,1 +1,1 @@
-export default (comment, args, { loaders }) => loaders.users.findById.load(comment.createdBy);
+export default (comment, args, { loaders }) => loaders.oorsUserUsers.findById.load(comment.createdBy);

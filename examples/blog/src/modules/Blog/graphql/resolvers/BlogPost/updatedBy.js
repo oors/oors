@@ -1,1 +1,1 @@
-export default (post, args, { loaders }) => post.updatedBy ? loaders.users.findById.load(post.updatedBy) : null;
+export default (post, args, { loaders }) => post.updatedBy ? loaders.oorsUserUsers.findById.load(post.updatedBy) : null;
