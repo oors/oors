@@ -1,8 +1,9 @@
 class ErrorWrapper extends Error {
-  constructor(error, message) {
+  constructor(error, message, props = {}) {
     super(message, error.message);
     this.error = error;
     Error.captureStackTrace(this, ErrorWrapper);
+    Object.assign(this, props);
   }
 
   toString() {
