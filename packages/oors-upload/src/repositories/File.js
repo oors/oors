@@ -1,31 +1,15 @@
+import { validators as v } from 'easevalidation';
 import { ObjectID as objectId } from 'mongodb';
 import { Repository } from 'oors-mongodb';
 
 class File extends Repository {
   static schema = {
-    type: 'object',
-    properties: {
-      filename: {
-        type: 'string',
-      },
-      mimeType: {
-        type: 'string',
-      },
-      extension: {
-        type: 'string',
-      },
-      size: {
-        type: 'number',
-      },
-      uploadedAt: {
-        instanceof: 'Date',
-      },
-      meta: {
-        type: 'object',
-        default: {},
-      },
-    },
-    required: ['filename', 'mimeType', 'extension', 'size'],
+    filename: [v.isRequired(), v.isString()],
+    mimeType: [v.isRequired(), v.isString()],
+    extension: [v.isRequired(), v.isString()],
+    size: [v.isRequired(), v.isNumber()],
+    uploadedAt: v.isAny(v.isUndefined(), v.isDate()),
+    meta: [v.isDefault({}), v.isObject()],
   };
 
   static collectionName = 'oorsFile';

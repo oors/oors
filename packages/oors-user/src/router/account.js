@@ -1,3 +1,4 @@
+import { validators as v } from 'easevalidation';
 import { Router } from 'express';
 import { ObjectID as objectId } from 'mongodb';
 import { helpers } from 'oors-router';
@@ -12,15 +13,9 @@ router.use(injectServices);
 router.get(
   '/:id/confirm',
   validate({
-    params: {
-      type: 'object',
-      properties: {
-        id: {
-          type: 'string',
-        },
-      },
-      required: ['id'],
-    },
+    params: v.isSchema({
+      id: [v.isRequired(), v.isString()],
+    }),
   }),
   wrapHandler(async req => {
     const { Account } = req.services;
@@ -31,16 +26,9 @@ router.get(
 router.post(
   '/resend-activation-email',
   validate({
-    body: {
-      type: 'object',
-      properties: {
-        email: {
-          type: 'string',
-          format: 'email',
-        },
-      },
-      required: ['email'],
-    },
+    body: v.isSchema({
+      email: [v.isRequired(), v.isString(), v.isEmail()],
+    }),
   }),
   wrapHandler(async req => {
     const { Account } = req.services;

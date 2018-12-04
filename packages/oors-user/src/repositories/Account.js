@@ -1,27 +1,13 @@
+import { validators as v } from 'easevalidation';
 import { Repository } from 'oors-mongodb';
 
 class Account extends Repository {
   static schema = {
-    type: 'object',
-    properties: {
-      name: {
-        type: 'string',
-      },
-      isActive: {
-        type: 'boolean',
-        default: true,
-      },
-      isDeleted: {
-        type: 'boolean',
-      },
-      isConfirmed: {
-        type: 'boolean',
-        default: false,
-      },
-      deletedAt: {
-        instanceof: 'Date',
-      },
-    },
+    name: v.isAny(v.isUndefined(), v.isString()),
+    isActive: [v.isDefault(true), v.isBoolean()],
+    isConfirmed: [v.isDefault(false), v.isBoolean()],
+    isDeleted: v.isAny(v.isUndefined(), v.isBoolean()),
+    deletedAt: v.isAny(v.isUndefined(), v.isDate()),
   };
 
   static collectionName = 'userAccount';

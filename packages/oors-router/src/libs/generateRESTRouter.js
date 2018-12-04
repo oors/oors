@@ -2,6 +2,7 @@ import { Router } from 'express';
 import Boom from 'boom';
 import { ObjectID as objectId } from 'mongodb';
 import pick from 'lodash/pick';
+import { validators as v } from 'easevalidation';
 import { wrapHandler, toBSON } from './helpers';
 import validate from '../middlewares/validate';
 
@@ -34,30 +35,16 @@ export default ({ router = Router(), repository }) => {
     .route('/')
     .get(
       validate({
-        query: {
-          type: 'object',
-          properties: {
-            query: {
-              type: 'object',
-              default: {},
-            },
-            offset: {
-              type: 'number',
-            },
-            limit: {
-              type: 'number',
-            },
-            orderBy: {
-              type: 'object',
-              default: {},
-            },
-            fields: {
-              type: 'object',
-              default: {},
-            },
-          },
-          default: {},
-        },
+        query: [
+          v.isDefault({}),
+          v.isSchema({
+            query: [v.isDefault({}), v.isObject()],
+            offset: v.isAny(v.isUndefined(), v.isNumber()),
+            limit: v.isAny(v.isUndefined(), v.isNumber()),
+            orderBy: [v.isDefault({}), v.isObject()],
+            fields: [v.isDefault({}), v.isObject()],
+          }),
+        ],
       }),
       wrapHandler(async req => {
         const params = pick(req.query, ['fields', 'orderBy']);
@@ -79,16 +66,12 @@ export default ({ router = Router(), repository }) => {
   router.get(
     '/count',
     validate({
-      query: {
-        type: 'object',
-        properties: {
-          query: {
-            type: 'object',
-            default: {},
-          },
-        },
-        default: {},
-      },
+      query: [
+        v.isDefault({}),
+        v.isSchema({
+          query: [v.isDefault({}), v.isObject()],
+        }),
+      ],
     }),
     wrapHandler(req => repository.count({ query: toBSON(req.query.query) })),
   );
@@ -96,15 +79,9 @@ export default ({ router = Router(), repository }) => {
   router.delete(
     '/deleteOne',
     validate({
-      query: {
-        type: 'object',
-        properties: {
-          query: {
-            type: 'object',
-          },
-        },
-        required: ['query'],
-      },
+      query: v.isSchema({
+        query: [v.isRequired(), v.isObject()],
+      }),
     }),
     wrapHandler(req => repository.deleteOne({ query: toBSON(req.query.query) })),
   );
@@ -142,16 +119,12 @@ export default ({ router = Router(), repository }) => {
   router.get(
     '/findOne',
     validate({
-      query: {
-        type: 'object',
-        properties: {
-          query: {
-            type: 'object',
-            default: {},
-          },
-        },
-        default: {},
-      },
+      query: [
+        v.isDefault({}),
+        v.isSchema({
+          query: [v.isDefault({}), v.isObject()],
+        }),
+      ],
     }),
     wrapHandler(async req => {
       const query = toBSON(req.query.query);

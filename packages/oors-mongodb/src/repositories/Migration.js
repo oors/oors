@@ -1,20 +1,11 @@
+import { validators as v } from 'easevalidation';
 import Repository from '../libs/Repository';
 
 class MigrationRepository extends Repository {
   static schema = {
-    type: 'object',
-    properties: {
-      timestamp: {
-        type: 'string',
-      },
-      name: {
-        type: 'string',
-      },
-      duration: {
-        type: 'integer',
-      },
-    },
-    required: ['timestamp'],
+    timestamp: [v.isRequired(), v.isString()],
+    name: v.isAny(v.isUndefined(), v.isString()),
+    duration: v.isAny(v.isUndefined(), v.isInteger()),
   };
 
   static collectionName = 'Migration';

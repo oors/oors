@@ -1,3 +1,4 @@
+import { validators as v } from 'easevalidation';
 import { Router } from 'express';
 import { helpers } from 'oors-router';
 import Boom from 'boom';
@@ -16,18 +17,10 @@ export default ({ jwtMiddleware }) => {
   router.post(
     '/login',
     validate({
-      body: {
-        type: 'object',
-        properties: {
-          username: {
-            type: 'string',
-          },
-          password: {
-            type: 'string',
-          },
-        },
-        required: ['username', 'password'],
-      },
+      body: v.isSchema({
+        username: [v.isRequired(), v.isString()],
+        password: [v.isRequired(), v.isString()],
+      }),
     }),
     wrapHandler(async (req, res) => {
       const { User } = req.services;
@@ -68,25 +61,12 @@ export default ({ jwtMiddleware }) => {
   router.post(
     '/signup',
     validate({
-      body: {
-        type: 'object',
-        properties: {
-          username: {
-            type: 'string',
-          },
-          name: {
-            type: 'string',
-          },
-          email: {
-            type: 'string',
-            format: 'email',
-          },
-          password: {
-            type: 'string',
-          },
-        },
-        required: ['username', 'name', 'email', 'password'],
-      },
+      body: v.isSchema({
+        username: [v.isRequired(), v.isString()],
+        name: [v.isRequired(), v.isString()],
+        email: [v.isRequired(), v.isString(), v.isEmail()],
+        password: [v.isRequired(), v.isString()],
+      }),
     }),
     wrapHandler(req => req.services.User.signup(req.body)),
   );
@@ -94,15 +74,9 @@ export default ({ jwtMiddleware }) => {
   router.post(
     '/reset-password',
     validate({
-      body: {
-        type: 'object',
-        properties: {
-          usernameOrEmail: {
-            type: 'string',
-          },
-        },
-        required: ['usernameOrEmail'],
-      },
+      body: v.isSchema({
+        usernameOrEmail: [v.isRequired(), v.isString()],
+      }),
     }),
     wrapHandler(async req => {
       const { User } = req.services;
@@ -118,24 +92,12 @@ export default ({ jwtMiddleware }) => {
   router.post(
     '/recover-password/:token',
     validate({
-      body: {
-        type: 'object',
-        properties: {
-          password: {
-            type: 'string',
-          },
-        },
-        required: ['password'],
-      },
-      params: {
-        type: 'object',
-        properties: {
-          token: {
-            type: 'string',
-          },
-        },
-        required: ['token'],
-      },
+      body: v.isSchema({
+        password: [v.isRequired(), v.isString()],
+      }),
+      params: v.isSchema({
+        token: [v.isRequired(), v.isString()],
+      }),
     }),
     wrapHandler(async req => {
       const { User } = req.services;
@@ -157,18 +119,10 @@ export default ({ jwtMiddleware }) => {
     '/change-password',
     jwtMiddleware,
     validate({
-      body: {
-        type: 'object',
-        properties: {
-          password: {
-            type: 'string',
-          },
-          oldPassword: {
-            type: 'string',
-          },
-        },
-        required: ['password, oldPassword'],
-      },
+      body: v.isSchema({
+        password: [v.isRequired(), v.isString()],
+        oldPassword: [v.isRequired(), v.isString()],
+      }),
     }),
     wrapHandler(req =>
       req.services.User.changePassword({
@@ -184,17 +138,10 @@ export default ({ jwtMiddleware }) => {
     '/me',
     jwtMiddleware,
     validate({
-      body: {
-        type: 'object',
-        properties: {
-          name: {
-            type: 'string',
-          },
-          username: {
-            type: 'string',
-          },
-        },
-      },
+      body: v.isSchema({
+        name: v.isAny(v.isUndefined(), v.isString()),
+        username: v.isAny(v.isUndefined(), v.isString()),
+      }),
     }),
     wrapHandler(async req => {
       await req.services['repositories.User'].updateOne({

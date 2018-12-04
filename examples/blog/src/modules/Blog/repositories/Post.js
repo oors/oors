@@ -1,4 +1,6 @@
+import { validators as v } from 'easevalidation';
 import { Repository } from '../../../../../../packages/oors-mongodb';
+import isObjectId from '../../../../../../packages/oors-mongodb/build/libs/isObjectId';
 
 const statuses = ['DRAFT', 'PUBLISHED'];
 
@@ -6,51 +8,16 @@ class Post extends Repository {
   static statuses = statuses;
 
   static schema = {
-    type: 'object',
-    properties: {
-      title: {
-        type: 'string',
-      },
-      slug: {
-        type: 'string',
-      },
-      status: {
-        type: 'string',
-        enum: statuses,
-        default: 'DRAFT',
-      },
-      excerpt: {
-        type: 'string',
-        default: '',
-      },
-      body: {
-        type: 'string',
-      },
-      tags: {
-        type: 'array',
-        items: {
-          type: 'string',
-        },
-        default: [],
-      },
-      relatedPostIds: {
-        type: 'array',
-        items: {
-          isObjectId: true,
-        },
-        default: [],
-      },
-      categoryId: {
-        isObjectId: true,
-      },
-      createdBy: {
-        isObjectId: true,
-      },
-      updatedBy: {
-        isObjectId: true,
-      },
-    },
-    required: ['title', 'createdBy', 'categoryId'],
+    title: [v.isRequired(), v.isString()],
+    slug: v.isAny(v.isUndefined(), v.isString()),
+    status: [v.isDefault('DRAFT'), v.isString(), v.isOneOf(statuses)],
+    excerpt: [v.isDefault(''), v.isString()],
+    body: v.isAny(v.isUndefined(), v.isString()),
+    tags: [v.isDefault([]), v.isArray(v.isString())],
+    relatedPostIds: [v.isDefault([]), v.isArray(isObjectId())],
+    categoryId: [v.isRequired(), isObjectId()],
+    createdBy: [v.isRequired(), isObjectId()],
+    updatedBy: v.isAny(v.isUndefined(), isObjectId()),
   };
 
   static collectionName = 'BlogPost';

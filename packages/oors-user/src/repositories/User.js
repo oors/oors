@@ -1,97 +1,44 @@
+import { validators as v } from 'easevalidation';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { Repository } from 'oors-mongodb';
+import isObjectId from 'oors-mongodb/build/libs/isObjectId';
 import { hashPassword } from '../libs/helpers';
 import { roles, defaultRoles } from '../constants/user';
 
 class User extends Repository {
   static schema = {
-    type: 'object',
-    properties: {
-      accountId: {
-        isObjectId: true,
-      },
-      username: {
-        type: 'string',
-      },
-      name: {
-        type: 'string',
-      },
-      email: {
-        type: 'string',
-        format: 'email',
-      },
-      password: {
-        type: 'string',
-      },
-      salt: {
-        type: 'string',
-      },
-      isActive: {
-        type: 'boolean',
-        default: true,
-      },
-      isOwner: {
-        type: 'boolean',
-        default: true,
-      },
-      isDeleted: {
-        type: 'boolean',
-      },
-      roles: {
-        type: 'array',
-        items: {
-          type: 'string',
-          enum: roles,
-        },
-        default: defaultRoles,
-      },
-      resetPassword: {
-        type: 'object',
-        properties: {
-          token: {
-            type: 'string',
-          },
-          resetAt: {
-            instanceof: 'Date',
-          },
-        },
-        default: {},
-      },
-      lastLogin: {
-        instanceof: 'Date',
-      },
-      socialLogins: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: {
-            id: {
-              type: 'string',
-            },
-            name: {
-              type: 'string',
-            },
-            email: {
-              type: 'string',
-              format: 'email',
-            },
-            token: {
-              type: 'string',
-            },
-            expiresAt: {
-              instanceof: 'Date',
-            },
-          },
-          required: ['id', 'token'],
-        },
-        default: [],
-      },
-      deletedAt: {
-        instanceof: 'Date',
-      },
-    },
-    required: ['accountId', 'username', 'name', 'email', 'password'],
+    accountId: [v.isRequired(), isObjectId()],
+    username: [v.isRequired(), v.isString()],
+    name: [v.isRequired(), v.isString()],
+    email: [v.isRequired(), v.isString(), v.isEmail()],
+    password: [v.isRequired(), v.isString()],
+    salt: v.isAny(v.isUndefined(), v.isString()),
+    isActive: [v.isDefault(true), v.isBoolean()],
+    isOwner: [v.isDefault(true), v.isBoolean()],
+    isDeleted: v.isAny(v.isUndefined(), v.isBoolean()),
+    roles: [v.isDefault(defaultRoles), v.isArray(v.isString(), v.isOneOf(roles))],
+    resetPassword: [
+      v.isDefault({}),
+      v.isSchema({
+        token: v.isAny(v.isUndefined(), v.isString()),
+        resetAt: v.isAny(v.isUndefined(), v.isDate()),
+      }),
+    ],
+    lastLogin: v.isAny(v.isUndefined(), v.isDate()),
+    socialLogins: [
+      v.isDefault([]),
+      v.isArray(
+        v.isSchema({
+          id: [v.isRequired(), v.isString()],
+          name: v.isAny(v.isUndefined(), v.isString()),
+          email: v.isAny(v.isUndefined(), v.isEvery(v.isString(), v.isEmail())),
+          token: [v.isRequired(), v.isString()],
+          expiresAt: v.isAny(v.isUndefined(), v.isDate()),
+        }),
+      ),
+    ],
+    deletedAt: v.isAny(v.isUndefined(), v.isDate()),
   };
 
   static collectionName = 'userUser';

@@ -1,27 +1,14 @@
+import { validators as v } from 'easevalidation';
 import { Repository } from '../../../../../../packages/oors-mongodb';
+import isObjectId from '../../../../../../packages/oors-mongodb/build/libs/isObjectId';
 
 class Comment extends Repository {
   static schema = {
-    type: 'object',
-    properties: {
-      parentId: {
-        isObjectId: true,
-      },
-      postId: {
-        isObjectId: true,
-      },
-      body: {
-        type: 'string',
-      },
-      isHidden: {
-        type: 'boolean',
-        default: false,
-      },
-      createdBy: {
-        isObjectId: true,
-      },
-    },
-    required: ['postId', 'body', 'createdBy'],
+    parentId: v.isAny(v.isUndefined(), isObjectId()),
+    postId: [v.isRequired(), isObjectId()],
+    body: [v.isRequired(), v.isString()],
+    isHidden: [v.isDefault(false), v.isBoolean()],
+    createdBy: [v.isRequired(), isObjectId()],
   };
 
   static collectionName = 'BlogComment';

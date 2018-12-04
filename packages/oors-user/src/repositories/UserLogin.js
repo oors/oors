@@ -1,26 +1,14 @@
+import { validators as v } from 'easevalidation';
 import { Repository } from 'oors-mongodb';
+import isObjectId from 'oors-mongodb/build/libs/isObjectId';
 
 class UserLogin extends Repository {
   static schema = {
-    type: 'object',
-    properties: {
-      userId: {
-        isObjectId: true,
-      },
-      ip: {
-        type: 'string',
-      },
-      browser: {
-        type: 'string',
-      },
-      os: {
-        type: 'string',
-      },
-      platform: {
-        type: 'string',
-      },
-    },
-    required: ['userId', 'ip', 'browser', 'os', 'platform'],
+    userId: [v.isRequired(), isObjectId()],
+    ip: [v.isRequired(), v.isString()],
+    browser: [v.isRequired(), v.isString()],
+    os: [v.isRequired(), v.isString()],
+    platform: [v.isRequired(), v.isString()],
   };
 
   static collectionName = 'userUserLogin';

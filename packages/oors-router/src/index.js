@@ -6,7 +6,6 @@ import ErrorWrapper from 'oors/build/errors/ErrorWrapper';
 import BaseRouter from './libs/Router';
 import * as helpers from './libs/helpers';
 import generateRESTRouter from './libs/generateRESTRouter';
-import validatorMiddleware from './middlewares/validator';
 
 class Router extends Module {
   static validateConfig = validate(
@@ -18,29 +17,11 @@ class Router extends Module {
           after: v.isAny(v.isString(), v.isUndefined()),
         }),
       ),
-      validatorMiddlewarePivot: [
-        v.isDefault({
-          before: 'isMethod',
-        }),
-        v.isAny(
-          v.isString(),
-          v.isSchema({
-            before: v.isAny(v.isString(), v.isUndefined()),
-            after: v.isAny(v.isString(), v.isUndefined()),
-          }),
-        ),
-      ],
       autoload: [v.isDefault(true), v.isBoolean()],
     }),
   );
 
   name = 'oors.router';
-
-  hooks = {
-    'oors.express.middlewares': ({ middlewares }) => {
-      middlewares.insert(this.getConfig('validatorMiddlewarePivot'), validatorMiddleware);
-    },
-  };
 
   addRouter = (...args) => {
     if (args.length === 2) {
