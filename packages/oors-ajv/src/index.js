@@ -1,11 +1,29 @@
-import { test, validators as v } from 'easevalidation';
+import { test, validate, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import Ajv from 'ajv';
 import ajvKeywords from 'ajv-keywords';
 import idValidator from './idValidator';
 import ValidationError from './ValidationError';
+import validationErrorHandler from './middlewares/validationErrorHandler';
 
 class AJVModule extends Module {
+  static validateConfig = validate(
+    v.isSchema({
+      validationMiddlewarePivot: [
+        v.isDefault({
+          before: 'errorHandler',
+        }),
+        v.isAny(
+          v.isString(),
+          v.isSchema({
+            before: v.isAny(v.isString(), v.isUndefined()),
+            after: v.isAny(v.isString(), v.isUndefined()),
+          }),
+        ),
+      ],
+    }),
+  );
+
   name = 'oors.ajv';
 
   hooks = {
@@ -35,20 +53,27 @@ class AJVModule extends Module {
       }
 
       const isValid = this.ajv.compile(repository.schema);
-      const validate = (data = {}) => {
-        if (!isValid(data)) {
-          throw new ValidationError(isValid.errors);
-        }
-        return data;
-      };
 
       Object.assign(repository, {
         isValid,
-        validate,
+        validate: (data = {}) => {
+          if (!isValid(data)) {
+            throw new ValidationError(isValid.errors);
+          }
+          return data;
+        },
       });
     });
 
     this.exportProperties(['validate']);
+  }
+
+  async setup() {
+    await this.loadDependencies(['oors.express']);
+    this.deps['oors.express'].middlewares.insert(this.getConfig('validationMiddlewarePivot'), {
+      path: '/',
+      ...validationErrorHandler,
+    });
   }
 
   validate = (data, schema) => {
