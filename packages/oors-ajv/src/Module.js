@@ -40,4 +40,13 @@ export default class extends Module {
 
     return config;
   }
+
+  constructor(...args) {
+    super(...args);
+    const { stack } = new Error();
+    this.filePath = stack
+      .toString()
+      .split(/\r\n|\n/)[2]
+      .match(/\((.*.js)/)[1];
+  }
 }
