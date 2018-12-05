@@ -2,22 +2,8 @@
 import { validators as v } from 'easevalidation';
 import invariant from 'invariant';
 import identity from 'lodash/identity';
-import merge from 'lodash/merge';
 import omit from 'lodash/omit';
 import withValidator from 'oors-graphql/build/decorators/withValidator';
-import isObjectId from '../libs/isObjectId';
-
-const createPaginationSchema = ({ maxPerPage, defaultPerPage, schema } = {}) =>
-  merge(
-    {
-      skip: [v.isDefault(0), v.isMin(0), v.isInteger()],
-      after: v.isAny(v.isUndefined(), isObjectId()),
-      before: v.isAny(v.isUndefined(), isObjectId()),
-      first: [v.isDefault(defaultPerPage), v.isMin(1), v.isMax(maxPerPage), v.isInteger()],
-      last: v.isAny(v.isUndefined(), v.isEvery(v.isMin(1), v.isMax(maxPerPage), v.isInteger())),
-    },
-    schema || {},
-  );
 
 export const buildConfig = config => {
   if (typeof config === 'string') {
@@ -85,12 +71,6 @@ export const buildConfig = config => {
     canDelete: () => true,
     canUpdate: () => true,
     ...config,
-    pagination: {
-      maxPerPage: 20,
-      defaultPerPage: 10,
-      schema: {},
-      ...(config.pagination || {}),
-    },
   };
 };
 
@@ -114,14 +94,9 @@ export const findOne = config => {
 };
 
 export const findMany = config => {
-  const { getLoaders, createPipeline, pagination } = buildConfig(config);
+  const { getLoaders, createPipeline } = buildConfig(config);
 
-  return withValidator(
-    v.isSchema({
-      ...createPaginationSchema(pagination),
-      where: [v.isDefault({}), v.isRequired(), v.isObject()],
-    }),
-  )(async (_, args, ctx, info) => {
+  return async (_, args, ctx, info) => {
     const pivot = args.before || args.after;
 
     if (pivot) {
@@ -133,7 +108,7 @@ export const findMany = config => {
     return getLoaders(ctx)
       .aggregate.load(createPipeline(_, args, ctx, info))
       .then(ctx.fromMongoArray);
-  });
+  };
 };
 
 export const count = config => {
