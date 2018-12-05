@@ -1,12 +1,13 @@
 /* eslint-disable no-console */
 import random from 'lodash/random';
-import config from '../../../packages/oors-presets/src/config';
-import Application from '../../../packages/oors-presets/src/applications/Standard';
+import config from '../../../packages/oors-presets/build/config';
+import Application from '../../../packages/oors-presets/build/applications/Standard';
 import BlogModule from '../src/modules/Blog';
 
 config.set('modules.oors.logger.printModules', false);
 config.set('modules.oors.logger.printDependencyGraph', false);
 config.set('modules.oors.logger.printMiddlewares', false);
+config.set('modules.oors.mongodb.autoloadRepositories', true);
 
 const app = new Application(config);
 
@@ -84,10 +85,10 @@ const createBlogComments = async ({ CommentRepository, posts, users }) => Promis
 app
   .boot()
   .then(async () => {
-    const { closeConnection, getRepository } = app.modules.get('oors.mongodb');
-    const PostRepository = getRepository('blogPost');
-    const CategoryRepository = getRepository('blogCategory');
-    const CommentRepository = getRepository('blogComment');
+    const { getRepository } = app.modules.get('oors.mongodb');
+    const PostRepository = getRepository('oors.blog.Post');
+    const CategoryRepository = getRepository('oors.blog.Category');
+    const CommentRepository = getRepository('oors.blog.Comment');
     const { User, Account } = app.modules.get('oors.user');
 
     const users = await createUsers({ User, Account });
@@ -95,7 +96,7 @@ app
     const posts = await createBlogPosts({ PostRepository, categories, users });
     await createBlogComments({ CommentRepository, posts, users });
 
-    return closeConnection();
+    return app.shutdown();
   })
   .then(() => {
     console.log('Done!');
