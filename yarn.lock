@@ -4529,10 +4529,10 @@ duplexify@^3.4.2, duplexify@^3.6.0:
     readable-stream "^2.0.0"
     stream-shift "^1.0.0"
 
-easevalidation@0.17.0:
-  version "0.17.0"
-  resolved "https://registry.yarnpkg.com/easevalidation/-/easevalidation-0.17.0.tgz#97c443ab7beed751c17ed9b1dfea1d47b4b2f9d0"
-  integrity sha512-dfGJOSlKLBis2dITsWO2zRrb1webfUxiMj+Iz3y5MF+XKpIOAl67WwXD3bxD4qvzUhszuKfXGibPPkr+/igssg==
+easevalidation@0.19.0:
+  version "0.19.0"
+  resolved "https://registry.yarnpkg.com/easevalidation/-/easevalidation-0.19.0.tgz#05b99760818ee180f63a6406ac3c7a44f284c1c3"
+  integrity sha512-aetdTtWBHJL5SnZWsSy1xjVa+iZKPfs2b6U9OopdP3AlSEvcSSSCyz7sWx7qJ8gBDyHGE4ANcDnxa3kQpYQt+Q==
   dependencies:
     date-fns "1.29.0"
     lodash "4.17.11"
