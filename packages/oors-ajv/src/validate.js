@@ -1,6 +1,7 @@
 import Ajv from 'ajv';
 import ajvKeywords from 'ajv-keywords';
 import ValidationError from './ValidationError';
+import idValidator from './idValidator';
 
 export default (data, schema, options = {}) => {
   const ajv = new Ajv({
@@ -12,6 +13,7 @@ export default (data, schema, options = {}) => {
   });
 
   ajvKeywords(ajv, 'instanceof');
+  ajv.addKeyword('isObjectId', idValidator);
 
   const validator = ajv.compile(schema);
 

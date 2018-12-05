@@ -15,6 +15,10 @@ ajvKeywords(ajv, 'instanceof');
 export default class extends Module {
   static validateConfig = (config, configSchema) => {
     const schema = configSchema || this.schema;
+    if (!schema) {
+      return config;
+    }
+
     const validate = ajv.compile({
       type: 'object',
       ...schema,
