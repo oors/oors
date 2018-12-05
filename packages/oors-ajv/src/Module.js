@@ -13,7 +13,7 @@ const ajv = new Ajv({
 ajvKeywords(ajv, 'instanceof');
 
 export default class extends Module {
-  static validateConfig = (config, configSchema) => {
+  static validateConfig(config, configSchema) {
     const schema = configSchema || this.schema;
     if (!schema) {
       return config;
@@ -39,5 +39,5 @@ export default class extends Module {
     }
 
     return config;
-  };
+  }
 }
