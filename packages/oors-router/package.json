@@ -16,7 +16,7 @@
   "dependencies": {
     "boom": "7.2.2",
     "celebrate": "9.0.1",
-    "easevalidation": "0.20.0",
+    "easevalidation": "0.21.1",
     "express": "4.16.4",
     "lodash": "^4.17.11",
     "mongodb": "3.1.10",

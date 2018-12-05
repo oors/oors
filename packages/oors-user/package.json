@@ -18,7 +18,7 @@
     "bcryptjs": "2.4.3",
     "boom": "7.2.2",
     "celebrate": "9.0.1",
-    "easevalidation": "0.20.0",
+    "easevalidation": "0.21.1",
     "express": "4.16.4",
     "express-jwt": "5.3.1",
     "graphql": "14.0.2",
