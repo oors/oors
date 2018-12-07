@@ -22,41 +22,31 @@ Then the resolver needs to deal with:
 We can achieve all of the above with decorators:
 
 ```js
-import { compose, withJSONSchema, withArgs, withWrapper } from 'oors-graphql/build/decorators';
+import { validators as v } from 'easevalidation';
+import isObjectId from 'oors-mongodb/build/libs/isObjectId';
+import { compose, withValidator, withArgs, withWrapper } from 'oors-graphql/build/decorators';
 
 const createCommentResolver = someFunctionThatWillAchieveThat;
 
 export default compose(
   // JSON schema in here
-  withJSONSchema({
-    type: 'object',
-    properties: {
-      // we only validate what graphql can't handle
-      postId: {
-        // making sure this is a valid id
-        isObjectId: true,
-      },
-      email: {
-        type: 'string',
-        format: 'email',
-      },
-    },
-  }),
+  withValidator(
+    v.isSchema({
+      // we only validate what graphql schema can't handle
+      postId: isObjectId(), // making sure this is a valid id
+      email: [v.isString(), v.isEmail()],
+    }),
+  ),
   withArgs((_, args, ctx, info, { resolve }) => ({
     // move all the arguments inside a input argument
     input: args,
     post: resolve(ctx.db.findPostById(args.postId)),
   })),
-  withJSONSchema({
-    type: 'object',
-    properties: {
-      // making sure the post was found in the database
-      post: {
-        type: 'object',
-      },
-    },
-    required: ['post'],
-  }),
+  withValidator(
+    v.isSchema({
+      post: [v.isRequired(), v.isObject()], // making sure this is a db entry
+    }),
+  ),
   withWrapper(null, async (_, args, ctx, info, comment) => {
     // send email notification after the comment has been created
     await ctx.notifyAuthorThroughEmailABout(comment);
