@@ -259,14 +259,14 @@ class GQLQueryParser {
 
     if (nodes.logicalWithRelations) {
       this.getEmbeddedRelations(nodes.logicalWithRelations).forEach(relation => {
-        pipeline.lookup(relation, { ignoreIfExists: false });
+        pipeline.lookup(relation, { ignoreIfExists: true });
       });
 
       pipeline.match(this.nodesToMongo(nodes.logicalWithRelations, { pipeline }));
     }
 
     nodes.relational.forEach(node => {
-      pipeline.lookup(node.field, { ignoreIfExists: false });
+      pipeline.lookup(node.field, { ignoreIfExists: true });
       pipeline.match(this.nodesToMongo(node.children, { namespace: `${node.field}.`, pipeline }));
     });
 
