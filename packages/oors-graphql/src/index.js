@@ -307,7 +307,7 @@ class Gql extends Module {
   };
 
   collectFromModule = async module => {
-    if (!module.getConfig('graphql.autoload', true)) {
+    if (!module.getConfig('oors.graphql.autoload', true)) {
       return;
     }
 
