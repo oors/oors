@@ -86,6 +86,8 @@ class UserModule extends Module {
       userSignUp: UserSignupTemplate,
       ...emailTemplates,
     };
+
+    this.configureSeeder();
   }
 
   async setup({ mockUserMiddlewarePivot, mockUserConfig, storageModule }) {
@@ -119,6 +121,16 @@ class UserModule extends Module {
     }
 
     this.deps['oors.router'].addRouter('userRouter', router(routerConfig));
+  }
+
+  configureSeeder() {
+    this.addHook('oors.mongodb', 'configureSeeder', ({ seeder }) => {
+      const { User, Account } = this.get('repositories');
+      seeder.addResolver('users', User.createOne.bind(User), {
+        account: 'accounts',
+      });
+      seeder.addResolver('accounts', Account.createOne.bind(User));
+    });
   }
 
   configurePassport(routerConfig) {
