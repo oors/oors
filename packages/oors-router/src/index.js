@@ -3,6 +3,7 @@ import { Module } from 'oors';
 import path from 'path';
 import { Router as ExpressRouter } from 'express';
 import ErrorWrapper from 'oors/build/errors/ErrorWrapper';
+import { isMiddlewarePivot } from 'oors-express/build/validators';
 import BaseRouter from './libs/Router';
 import * as helpers from './libs/helpers';
 import generateRESTRouter from './libs/generateRESTRouter';
@@ -10,13 +11,7 @@ import generateRESTRouter from './libs/generateRESTRouter';
 class Router extends Module {
   static validateConfig = validate(
     v.isSchema({
-      middlewarePivot: v.isAny(
-        v.isString(),
-        v.isSchema({
-          before: v.isAny(v.isString(), v.isUndefined()),
-          after: v.isAny(v.isString(), v.isUndefined()),
-        }),
-      ),
+      middlewarePivot: isMiddlewarePivot(),
       autoload: [v.isDefault(true), v.isBoolean()],
     }),
   );

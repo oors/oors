@@ -1,21 +1,13 @@
 import { validate, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import statusMonitor from 'express-status-monitor';
+import { isMiddlewarePivot } from 'oors-express/build/validators';
 import router from './router';
 
 class Health extends Module {
   static validateConfig = validate(
     v.isSchema({
-      statusMonitorMiddlewarePivot: [
-        v.isDefault('isMethod'),
-        v.isAny(
-          v.isString(),
-          v.isSchema({
-            before: v.isAny(v.isString(), v.isUndefined()),
-            after: v.isAny(v.isString(), v.isUndefined()),
-          }),
-        ),
-      ],
+      statusMonitorMiddlewarePivot: [v.isDefault('isMethod'), isMiddlewarePivot()],
     }),
   );
 

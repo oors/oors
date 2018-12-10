@@ -27,6 +27,7 @@ import { importSchema } from 'graphql-import';
 import { Binding } from 'graphql-binding';
 import ConstraintDirective from 'graphql-constraint-directive';
 import depthLimit from 'graphql-depth-limit';
+import { isMiddlewarePivot } from 'oors-express/build/validators';
 import mainResolvers from './graphql/resolvers';
 import modulesResolvers from './graphql/modulesResolvers';
 import LoadersMap from './libs/LoadersMap';
@@ -59,7 +60,7 @@ class Gql extends Module {
           ],
         }),
       ],
-      middlewarePivot: [v.isDefault('isMethod'), v.isString()],
+      middlewarePivot: [v.isDefault('isMethod'), isMiddlewarePivot()],
       configureSchema: v.isAny(v.isFunction(), v.isUndefined()),
       exposeModules: [v.isDefault(true), v.isBoolean()],
       serverOptions: [v.isDefault({}), v.isObject()],

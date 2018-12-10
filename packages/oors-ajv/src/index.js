@@ -2,6 +2,7 @@ import { test, validate, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import Ajv from 'ajv';
 import ajvKeywords from 'ajv-keywords';
+import { isMiddlewarePivot } from 'oors-express/build/validators';
 import idValidator from './idValidator';
 import ValidationError from './ValidationError';
 import validationErrorHandler from './middlewares/validationErrorHandler';
@@ -13,13 +14,7 @@ class AJVModule extends Module {
         v.isDefault({
           before: 'errorHandler',
         }),
-        v.isAny(
-          v.isString(),
-          v.isSchema({
-            before: v.isAny(v.isString(), v.isUndefined()),
-            after: v.isAny(v.isString(), v.isUndefined()),
-          }),
-        ),
+        isMiddlewarePivot(),
       ],
     }),
   );

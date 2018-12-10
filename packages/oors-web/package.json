@@ -14,11 +14,13 @@
   },
   "homepage": "https://github.com/viczam/oors#readme",
   "dependencies": {
+    "easevalidation": "0.22.1",
     "express": "4.16.4",
     "lodash": "^4.17.11",
     "next": "7.0.2",
     "next-routes": "1.4.2",
     "oors": "^3.0.0",
+    "oors-express": "2.1.0",
     "serve-favicon": "2.5.0"
   }
 }

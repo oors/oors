@@ -4,6 +4,7 @@ import express from 'express';
 import serverIndex from 'serve-index';
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
+import { isMiddlewarePivot } from 'oors-express/build/validators';
 import MailService from './services/Mail';
 
 class Mailer extends Module {
@@ -17,13 +18,7 @@ class Mailer extends Module {
       ],
       saveToDisk: [v.isDefault(false), v.isBoolean()],
       emailsDir: [v.isRequired(), v.isString()],
-      middlewarePivot: v.isAny(
-        v.isString(),
-        v.isSchema({
-          before: v.isAny(v.isString(), v.isUndefined()),
-          after: v.isAny(v.isString(), v.isUndefined()),
-        }),
-      ),
+      middlewarePivot: isMiddlewarePivot(),
     }),
   );
 

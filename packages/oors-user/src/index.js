@@ -2,6 +2,7 @@ import { validate, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import upperFirst from 'lodash/upperFirst';
 import camelCase from 'lodash/camelCase';
+import { isMiddlewarePivot } from 'oors-express/build/validators';
 import UserService from './services/User';
 import AccountService from './services/Account';
 import router from './router';
@@ -21,20 +22,8 @@ class UserModule extends Module {
     v.isSchema({
       jwtSecret: [v.isRequired(), v.isString()],
       jwtConfig: [v.isRequired(), v.isObject()],
-      passportMiddlewarePivot: v.isAny(
-        v.isString(),
-        v.isSchema({
-          before: v.isAny(v.isString(), v.isUndefined()),
-          after: v.isAny(v.isString(), v.isUndefined()),
-        }),
-      ),
-      mockUserMiddlewarePivot: v.isAny(
-        v.isString(),
-        v.isSchema({
-          before: v.isAny(v.isString(), v.isUndefined()),
-          after: v.isAny(v.isString(), v.isUndefined()),
-        }),
-      ),
+      passportMiddlewarePivot: isMiddlewarePivot(),
+      mockUserMiddlewarePivot: isMiddlewarePivot(),
       mockUserConfig: [
         v.isDefault({}),
         v.isSchema({
