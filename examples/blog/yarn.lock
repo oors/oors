@@ -1595,10 +1595,10 @@ duplexer@^0.1.1, duplexer@~0.1.1:
   resolved "https://registry.yarnpkg.com/duplexer/-/duplexer-0.1.1.tgz#ace6ff808c1ce66b57d1ebf97977acb02334cfc1"
   integrity sha1-rOb/gIwc5mtX0ev5eXessCM0z8E=
 
-easevalidation@0.21.1:
-  version "0.21.1"
-  resolved "https://registry.yarnpkg.com/easevalidation/-/easevalidation-0.21.1.tgz#46f19be9f16f8d3bdc1324a32a3e63330d5c5a58"
-  integrity sha512-RTBhaO8bzxHTcpwCPD2pwe0aGMkf2Y0mebARfTfwtsRLyQ2isY0gdSZbBpffDrgmZAPrmHYZrCMSVgZdSm1s2g==
+easevalidation@0.22.1:
+  version "0.22.1"
+  resolved "https://registry.yarnpkg.com/easevalidation/-/easevalidation-0.22.1.tgz#d29c1b5d0c67b552d2ff9ac2e1c0b1c58c2f80bf"
+  integrity sha512-cH5n0BTY0P/LkwKXwwc1WoLkK0IBB+mB7J6JOZBBRDDsL+tP+sFQDb4H5iucaxIfbVnt32bhv2iAbFrxJ+Evvg==
   dependencies:
     date-fns "1.29.0"
     lodash "4.17.11"
