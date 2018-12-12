@@ -96,9 +96,15 @@ class User {
   }
 
   async tryLogin(user) {
-    const updatedUser = await this.UserRepository.save({
-      ...user,
-      lastLogin: new Date(),
+    const updatedUser = await this.UserRepository.updateOne({
+      query: {
+        _id: user._id,
+      },
+      update: {
+        $set: {
+          lastLogin: new Date(),
+        },
+      },
     });
 
     const token = await this.createToken({

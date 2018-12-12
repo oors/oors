@@ -6,8 +6,6 @@ class Account extends Repository {
     name: v.isAny(v.isUndefined(), v.isString()),
     isActive: [v.isDefault(true), v.isBoolean()],
     isConfirmed: [v.isDefault(false), v.isBoolean()],
-    isDeleted: v.isAny(v.isUndefined(), v.isBoolean()),
-    deletedAt: v.isAny(v.isUndefined(), v.isDate()),
   };
 
   static collectionName = 'userAccount';

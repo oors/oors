@@ -3,6 +3,7 @@ import { Module } from 'oors';
 import upperFirst from 'lodash/upperFirst';
 import camelCase from 'lodash/camelCase';
 import { isMiddlewarePivot } from 'oors-express/build/validators';
+import withSoftDelete from 'oors-mongodb/build/decorators/withSoftDelete';
 import UserService from './services/User';
 import AccountService from './services/Account';
 import router from './router';
@@ -40,7 +41,6 @@ class UserModule extends Module {
       ],
       emailTemplates: [v.isDefault({}), v.isObject()],
       rootURL: [v.isRequired(), v.isString()],
-      storageModule: [v.isDefault('oors.mongodb'), v.isString()],
     }),
   );
 
@@ -79,14 +79,18 @@ class UserModule extends Module {
     this.configureSeeder();
   }
 
-  async setup({ mockUserMiddlewarePivot, mockUserConfig, storageModule }) {
+  async setup({ mockUserMiddlewarePivot, mockUserConfig }) {
     await this.loadDependencies([
-      storageModule,
+      'oors.mongodb',
       'oors.router',
       'oors.mailer',
       'oors.graphql',
       'oors.express',
     ]);
+
+    const { User, Account } = this.get('repositories');
+    withSoftDelete()(User);
+    withSoftDelete()(Account);
 
     const routerConfig = {
       jwtMiddleware: this.jwtMiddleware,
@@ -118,7 +122,7 @@ class UserModule extends Module {
       seeder.addResolver('users', User.createOne.bind(User), {
         account: 'accounts',
       });
-      seeder.addResolver('accounts', Account.createOne.bind(User));
+      seeder.addResolver('accounts', Account.createOne.bind(Account));
     });
   }
 

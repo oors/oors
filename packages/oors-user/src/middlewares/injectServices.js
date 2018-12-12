@@ -5,5 +5,5 @@ export default inject('oors.user')([
   'repositories.Account',
   'User',
   'repositories.User',
-  'repositories.UserLogin',
+  'repositories.Login',
 ]);

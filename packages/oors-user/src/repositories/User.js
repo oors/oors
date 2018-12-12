@@ -16,7 +16,6 @@ class User extends Repository {
     salt: v.isAny(v.isUndefined(), v.isString()),
     isActive: [v.isDefault(true), v.isBoolean()],
     isOwner: [v.isDefault(true), v.isBoolean()],
-    isDeleted: v.isAny(v.isUndefined(), v.isBoolean()),
     roles: [v.isDefault(defaultRoles), v.isArray(v.isString(), v.isOneOf(roles))],
     resetPassword: [
       v.isDefault({}),
@@ -38,7 +37,6 @@ class User extends Repository {
         }),
       ),
     ],
-    deletedAt: v.isAny(v.isUndefined(), v.isDate()),
   };
 
   static collectionName = 'userUser';
@@ -51,7 +49,7 @@ class User extends Repository {
       type: 'one',
     },
     logins: {
-      repositoryName: 'oors.user.UserLogin',
+      repositoryName: 'oors.user.Login',
       localField: '_id',
       foreignField: 'userId',
       type: 'many',

@@ -24,7 +24,7 @@ export default ({ jwtMiddleware }) => {
     }),
     wrapHandler(async (req, res) => {
       const { User } = req.services;
-      const UserLoginRepository = req.services['repositories.UserLogin'];
+      const LoginRepository = req.services['repositories.Login'];
       let result;
 
       try {
@@ -39,7 +39,7 @@ export default ({ jwtMiddleware }) => {
 
       const { user, token } = result;
 
-      await UserLoginRepository.createOne({
+      await LoginRepository.createOne({
         userId: user._id,
         ip: req.ip,
         browser: req.useragent.browser,
