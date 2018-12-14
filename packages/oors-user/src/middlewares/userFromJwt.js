@@ -14,11 +14,12 @@ export default {
     try {
       const { id } = req.jwtPayload;
       const user = await UserRepository.findById(objectId(id));
-      const account = await AccountRepository.findById(user.accountId);
 
       if (!user) {
         return next();
       }
+
+      const account = await AccountRepository.findById(user.accountId);
 
       await User.canLogin({ user, account });
       req.user = user;
