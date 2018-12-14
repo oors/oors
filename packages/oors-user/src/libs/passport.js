@@ -9,27 +9,20 @@ export default ({ jwtSecret }) => {
     new JwtStrategy(
       {
         secretOrKey: jwtSecret,
-        jwtFromRequest: ExtractJwt.fromExtractors([
-          ExtractJwt.fromAuthHeaderWithScheme('Bearer'),
-        ]),
+        jwtFromRequest: ExtractJwt.fromExtractors([ExtractJwt.fromAuthHeaderWithScheme('Bearer')]),
         passReqToCallback: true,
       },
       async (req, id, done) => {
-        const { UserRepository, AccountRepository, User } = req.app.modules.get(
-          'oors.user',
-        );
+        const { UserRepository, AccountRepository, User } = req.app.modules.get('oors.user');
+
         try {
           const user = await UserRepository.findById(objectId(id));
           const account = await AccountRepository.findById(user.accountId);
 
-          const canLogin = await User.canLogin({
+          await User.canLogin({
             user,
             account,
           });
-
-          if (!canLogin) {
-            return done(null, false);
-          }
 
           return done(null, user);
         } catch (error) {
@@ -67,7 +60,7 @@ export default ({ jwtSecret }) => {
 
   passport.deserializeUser((req, id, cb) => {
     req.app.modules
-      .get('oors.user.UserRepository')
+      .get('oors.user.repositories.User')
       .findById(objectId(id))
       .then(user => cb(null, user), cb);
   });

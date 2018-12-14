@@ -12,7 +12,7 @@ class User extends Repository {
     username: [v.isRequired(), v.isString()],
     name: [v.isRequired(), v.isString()],
     email: [v.isRequired(), v.isString(), v.isEmail()],
-    password: [v.isRequired(), v.isString()],
+    password: [v.isRequired(), v.isString(), v.isLength({ min: 5 })],
     salt: v.isAny(v.isUndefined(), v.isString()),
     isActive: [v.isDefault(true), v.isBoolean()],
     isOwner: [v.isDefault(true), v.isBoolean()],
@@ -25,18 +25,16 @@ class User extends Repository {
       }),
     ],
     lastLogin: v.isAny(v.isUndefined(), v.isDate()),
-    socialLogins: [
-      v.isDefault([]),
-      v.isArray(
-        v.isSchema({
-          id: [v.isRequired(), v.isString()],
-          name: v.isAny(v.isUndefined(), v.isString()),
-          email: v.isAny(v.isUndefined(), v.isEvery(v.isString(), v.isEmail())),
-          token: [v.isRequired(), v.isString()],
-          expiresAt: v.isAny(v.isUndefined(), v.isDate()),
-        }),
-      ),
-    ],
+    // authProviders: [
+    //   v.isDefault({}),
+    //   v.isObject({
+    //     validator: v.isSchema({
+    //       id: [v.isRequired(), v.isString()],
+    //       token: v.isAny(v.isUndefined(), v.isString()),
+    //       expiresAt: v.isAny(v.isUndefined(), v.isDate()),
+    //     }),
+    //   }),
+    // ],
   };
 
   static collectionName = 'userUser';

@@ -85,8 +85,11 @@ config.add({
         before: 'apolloServer',
       },
       passportMiddlewarePivot: 'cookieParser',
+      jwtMiddlewarePivot: {
+        before: 'apolloServer',
+      },
       mockUserConfig: {
-        enabled: config.ref('isDev'),
+        enabled: false,
         path: '/graphql',
         params: {}, // no params means an empty query - just load any db user
       },

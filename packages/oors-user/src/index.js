@@ -17,6 +17,7 @@ import ForgotPasswordTemplate from './mailerTemplates/ForgotPassword';
 import UserSignupTemplate from './mailerTemplates/UserSignup';
 import PermissionsManager from './libs/PermissionsManager';
 import { roles } from './constants/user';
+import userFromJwtMiddleware from './middlewares/userFromJwt';
 
 class UserModule extends Module {
   static validateConfig = validate(
@@ -25,6 +26,7 @@ class UserModule extends Module {
       jwtConfig: [v.isRequired(), v.isObject()],
       passportMiddlewarePivot: isMiddlewarePivot(),
       mockUserMiddlewarePivot: isMiddlewarePivot(),
+      jwtMiddlewarePivot: isMiddlewarePivot(),
       mockUserConfig: [
         v.isDefault({}),
         v.isSchema({
@@ -66,9 +68,13 @@ class UserModule extends Module {
   };
 
   initialize({ jwtSecret, emailTemplates }) {
-    this.jwtMiddleware = jwtMiddleware({
-      secret: jwtSecret,
-    });
+    this.jwtMiddleware = {
+      ...jwtMiddleware,
+      params: {
+        ...jwtMiddleware.params,
+        secret: jwtSecret,
+      },
+    };
 
     this.config.emailTemplates = {
       forgotPassword: ForgotPasswordTemplate,
@@ -79,7 +85,7 @@ class UserModule extends Module {
     this.configureSeeder();
   }
 
-  async setup({ mockUserMiddlewarePivot, mockUserConfig }) {
+  async setup({ mockUserMiddlewarePivot, jwtMiddlewarePivot, mockUserConfig }) {
     await this.loadDependencies([
       'oors.mongodb',
       'oors.router',
@@ -92,10 +98,6 @@ class UserModule extends Module {
     withSoftDelete()(User);
     withSoftDelete()(Account);
 
-    const routerConfig = {
-      jwtMiddleware: this.jwtMiddleware,
-    };
-
     this.setupServices();
     this.setupPermissions();
 
@@ -104,7 +106,13 @@ class UserModule extends Module {
       jwtMiddleware: this.jwtMiddleware,
     });
 
-    this.configurePassport(routerConfig);
+    const passport = this.configurePassport();
+
+    this.deps['oors.express'].middlewares.insert(
+      jwtMiddlewarePivot,
+      this.jwtMiddleware,
+      userFromJwtMiddleware,
+    );
 
     if (mockUserConfig.enabled) {
       this.deps['oors.express'].middlewares.insert(mockUserMiddlewarePivot, {
@@ -113,7 +121,12 @@ class UserModule extends Module {
       });
     }
 
-    this.deps['oors.router'].addRouter('userRouter', router(routerConfig));
+    const userRouter = router({
+      jwtMiddleware,
+      passport,
+    });
+
+    this.deps['oors.router'].addRouter('userRouter', userRouter);
   }
 
   configureSeeder() {
@@ -126,21 +139,24 @@ class UserModule extends Module {
     });
   }
 
-  configurePassport(routerConfig) {
+  configurePassport() {
     const { passportConfig, passportMiddlewarePivot, jwtSecret } = this.getConfig();
 
     if (!passportConfig.enabled) {
-      return;
+      return false;
     }
 
     const passport = passportFactory({ jwtSecret });
+
     this.deps['oors.express'].middlewares.insert(
       passportMiddlewarePivot,
       passportInitialize,
       passportSession,
     );
+
     this.export({ passport });
-    Object.assign(routerConfig, { passport });
+
+    return passport;
   }
 
   setupServices() {

@@ -1,14 +1,13 @@
 /* eslint-disable class-methods-use-this */
-import { validate, validators as v } from 'easevalidation';
 import invariant from 'invariant';
 import { ObjectID as objectId } from 'mongodb';
 import jwt from 'jsonwebtoken';
 import pick from 'lodash/pick';
 import moment from 'moment';
 import Boom from 'boom';
-import isObjectId from 'oors-mongodb/build/libs/isObjectId';
 import { FailedLogin } from '../libs/errors';
 import { hashPassword } from '../libs/helpers';
+import { roles } from '../constants/user';
 
 class User {
   constructor({ jwtConfig, emailTemplates, rootURL, UserRepository, AccountRepository, Mail }) {
@@ -20,19 +19,8 @@ class User {
     this.rootURL = rootURL;
   }
 
-  createToken(params) {
-    const { options, user } = validate(
-      v.isSchema({
-        user: v.isSchema({
-          id: [v.isRequired(), v.isString()],
-          accountId: v.isAny(v.isUndefined(), isObjectId()),
-          username: [v.isRequired(), v.isString()],
-          scope: [v.isDefault([]), v.isArray(v.isString())],
-        }),
-      }),
-    )(params);
-
-    return jwt.sign(user, this.jwtConfig.key, {
+  createToken(user, options = {}) {
+    return jwt.sign(this.serialize(user), this.jwtConfig.key, {
       ...this.jwtConfig.options,
       ...options,
     });
@@ -55,10 +43,16 @@ class User {
     await this.canLogin({ user, account });
 
     const isValidPassword = await this.checkPassword({ user, password });
+
     if (!isValidPassword) {
       throw new FailedLogin('Incorrect password!');
     }
 
+    return this.tryLogin(user);
+  }
+
+  async doLogin(user) {
+    await this.canLogin(user);
     return this.tryLogin(user);
   }
 
@@ -82,11 +76,13 @@ class User {
     if (!account.isActive) {
       throw new FailedLogin('Account is not active!');
     }
-
-    return account;
   }
 
   async checkPassword({ password, user }) {
+    if (!user.password) {
+      return false;
+    }
+
     const hashedPassword = await hashPassword({
       password,
       salt: user.salt,
@@ -107,9 +103,7 @@ class User {
       },
     });
 
-    const token = await this.createToken({
-      user: this.serialize(updatedUser),
-    });
+    const token = await this.createToken(updatedUser);
 
     return {
       user: updatedUser,
@@ -121,8 +115,7 @@ class User {
     return pick(userData, [
       'accountId',
       'username',
-      'firstName',
-      'lastName',
+      'name',
       'email',
       '_id',
       'updatedAt',
@@ -137,8 +130,8 @@ class User {
     return {
       id: data._id.toString(),
       username: data.username,
-      accountId: data.accountId,
-      scope: data.roles,
+      accountId: data.accountId.toString(),
+      roles: data.roles,
     };
   }
 
@@ -341,10 +334,7 @@ class User {
       lastLogin: new Date(),
     });
 
-    const authToken = await this.createToken({
-      id: user._id,
-      username: user.username,
-    });
+    const authToken = await this.createToken(updatedUser);
 
     return {
       ...updatedUser,
@@ -355,10 +345,7 @@ class User {
   verify({ token }) {
     const { UserRepository, AccountRepository } = this;
 
-    /**
-     * TODO
-     * check if we need to specify maxAge as an option for jwt.verify
-     */
+    // @TODO: - check if we need to specify maxAge as an option for jwt.verify
     return new Promise((resolve, reject) => {
       jwt.verify(token, this.jwtConfig.key, async (err, decoded) => {
         if (err) {
@@ -367,17 +354,14 @@ class User {
 
         try {
           const { id } = decoded;
+          // @TODO: maybe load these 2 in an aggregate query
           const user = await UserRepository.findById(objectId(id));
           const account = await AccountRepository.findById(user.accountId);
 
-          const canLogin = await User.canLogin({
+          await this.canLogin({
             user,
             account,
           });
-
-          if (!canLogin) {
-            return reject(Boom.unauthorized('Unable to find user!'));
-          }
 
           return resolve(user);
         } catch (error) {
@@ -385,6 +369,14 @@ class User {
         }
       });
     });
+  }
+
+  is(user, role) {
+    if (!roles.includes(role)) {
+      throw new Error(`Unknown role - "${role}"!`);
+    }
+
+    return user.roles.includes(role);
   }
 }
 
