@@ -5,7 +5,6 @@ import camelCase from 'lodash/camelCase';
 import { isMiddlewarePivot } from 'oors-express/build/validators';
 import withSoftDelete from 'oors-mongodb/build/decorators/withSoftDelete';
 import UserService from './services/User';
-import AccountService from './services/Account';
 import router from './router';
 import * as gqlMiddlewares from './graphql/middlewares';
 import jwtMiddleware from './middlewares/jwt';
@@ -13,8 +12,6 @@ import passportInitialize from './middlewares/passportInitialize';
 import passportSession from './middlewares/passportSession';
 import passportFactory from './libs/passport';
 import mockUser from './middlewares/mockUser';
-import ForgotPasswordTemplate from './mailerTemplates/ForgotPassword';
-import UserSignupTemplate from './mailerTemplates/UserSignup';
 import PermissionsManager from './libs/PermissionsManager';
 import { roles } from './constants/user';
 import userFromJwtMiddleware from './middlewares/userFromJwt';
@@ -41,8 +38,6 @@ class UserModule extends Module {
           enabled: [v.isDefault(false), v.isBoolean()],
         }),
       ],
-      emailTemplates: [v.isDefault({}), v.isObject()],
-      rootURL: [v.isRequired(), v.isString()],
     }),
   );
 
@@ -67,7 +62,7 @@ class UserModule extends Module {
     'oors.router.load': () => {},
   };
 
-  initialize({ jwtSecret, emailTemplates }) {
+  initialize({ jwtSecret }) {
     this.jwtMiddleware = {
       ...jwtMiddleware,
       params: {
@@ -76,23 +71,11 @@ class UserModule extends Module {
       },
     };
 
-    this.config.emailTemplates = {
-      forgotPassword: ForgotPasswordTemplate,
-      userSignUp: UserSignupTemplate,
-      ...emailTemplates,
-    };
-
     this.configureSeeder();
   }
 
   async setup({ mockUserMiddlewarePivot, jwtMiddlewarePivot, mockUserConfig }) {
-    await this.loadDependencies([
-      'oors.mongodb',
-      'oors.router',
-      'oors.mailer',
-      'oors.graphql',
-      'oors.express',
-    ]);
+    await this.loadDependencies(['oors.mongodb', 'oors.router', 'oors.graphql', 'oors.express']);
 
     const { User, Account } = this.get('repositories');
     withSoftDelete()(User);
@@ -160,32 +143,23 @@ class UserModule extends Module {
   }
 
   setupServices() {
-    const { jwtSecret, jwtConfig, emailTemplates, rootURL } = this.getConfig();
+    const { jwtSecret, jwtConfig } = this.getConfig();
     const AccountRepository = this.get('repositories.Account');
     const UserRepository = this.get('repositories.User');
-    const { Mail } = this.deps['oors.mailer'];
 
     const User = new UserService({
       jwtConfig: {
         key: jwtSecret,
         options: jwtConfig,
       },
-      emailTemplates,
-      rootURL,
       UserRepository,
       AccountRepository,
-      Mail,
-    });
-
-    const Account = new AccountService({
-      UserRepository,
-      AccountRepository,
-      Mail,
+      onSignup: data => this.asyncEmit('signup', data),
+      onResetPassword: data => this.asyncEmit('resetPassword', data),
     });
 
     this.export({
       User,
-      Account,
     });
   }
 

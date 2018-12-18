@@ -10,13 +10,12 @@ import { hashPassword } from '../libs/helpers';
 import { roles } from '../constants/user';
 
 class User {
-  constructor({ jwtConfig, emailTemplates, rootURL, UserRepository, AccountRepository, Mail }) {
+  constructor({ jwtConfig, UserRepository, AccountRepository, onSignup, onResetPassword }) {
     this.UserRepository = UserRepository;
     this.AccountRepository = AccountRepository;
-    this.Mail = Mail;
     this.jwtConfig = jwtConfig;
-    this.emailTemplates = emailTemplates;
-    this.rootURL = rootURL;
+    this.onSignup = onSignup;
+    this.onResetPassword = onResetPassword;
   }
 
   createToken(user, options = {}) {
@@ -232,33 +231,9 @@ class User {
       isOwner: true,
     });
 
-    this.Mail.send({
-      to: user.email,
-      subject: 'welcome',
-      template: this.emailTemplates.userSignUp,
-      context: {
-        user,
-        account,
-        rootURL: this.rootURL,
-      },
-    });
+    await this.onSignup({ user, account });
 
-    return {
-      user: pick(user, [
-        'accountId',
-        '_id',
-        'title',
-        'firstName',
-        'lastName',
-        'email',
-        'username',
-        'roles',
-        'isActive',
-        'createdAt',
-        'updatedAt',
-      ]),
-      account: pick(account, ['isConfirmed', 'isActive', '_id', 'updatedAt', 'createdAt']),
-    };
+    return { user, account };
   }
 
   async resetPassword(usernameOrEmail) {
@@ -275,24 +250,9 @@ class User {
 
     const updatedUser = await this.UserRepository.resetPassword(user._id);
 
-    this.Mail.send({
-      to: user.email,
-      subject: 'forgot password',
-      template: this.emailTemplates.forgotPassword,
-      context: {
-        user,
-        resetPassword: updatedUser.resetPassword,
-        rootURL: this.rootURL,
-      },
-    });
+    await this.onResetPassword(updatedUser);
 
-    return {
-      user: {
-        ...user,
-        resetPassword: updatedUser.resetPassword,
-      },
-      updatedUser,
-    };
+    return updatedUser;
   }
 
   async socialLogin({ provider, token, expiresIn, profile }) {

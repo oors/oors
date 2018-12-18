@@ -1,3 +1,4 @@
+import pick from 'lodash/pick';
 import { validators as v } from 'easevalidation';
 import { Router } from 'express';
 import { helpers } from 'oors-router';
@@ -68,7 +69,25 @@ export default ({ jwtMiddleware }) => {
         password: [v.isRequired(), v.isString()],
       }),
     }),
-    wrapHandler(req => req.services.User.signup(req.body)),
+    wrapHandler(async req => {
+      const { user, account } = await req.services.User.signup(req.body);
+
+      return {
+        user: pick(user, [
+          'accountId',
+          '_id',
+          'title',
+          'name',
+          'email',
+          'username',
+          'roles',
+          'isActive',
+          'createdAt',
+          'updatedAt',
+        ]),
+        account: pick(account, ['isConfirmed', 'isActive', '_id', 'updatedAt', 'createdAt']),
+      };
+    }),
   );
 
   router.post(

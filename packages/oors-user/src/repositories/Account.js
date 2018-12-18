@@ -18,6 +18,33 @@ class Account extends Repository {
       type: 'many',
     },
   };
+
+  async confirm(id) {
+    if (!id) {
+      throw new Error('Missing account id!');
+    }
+
+    const account = await this.findById(id);
+
+    if (!account) {
+      throw new Error('Account not found!');
+    }
+
+    if (account.isConfirmed) {
+      throw new Error('Account is already confirmed!');
+    }
+
+    return this.updateOne({
+      query: {
+        _id: account._id,
+      },
+      update: {
+        $set: {
+          isConfirmed: true,
+        },
+      },
+    });
+  }
 }
 
 export default Account;

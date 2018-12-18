@@ -18,8 +18,9 @@ router.get(
     }),
   }),
   wrapHandler(async req => {
-    const { Account } = req.services;
-    return Account.confirm(objectId(req.params.id));
+    const { AccountRepository } = req.services.repositories;
+
+    return AccountRepository.confirm(objectId(req.params.id));
   }),
 );
 
@@ -31,10 +32,25 @@ router.post(
     }),
   }),
   wrapHandler(async req => {
-    const { Account } = req.services;
     const { email } = req.body;
 
-    await Account.resendActivationEmail({ email });
+    const { UserRepository, AccountRepository } = req.services.repositories;
+
+    const user = await UserRepository.findOne({
+      query: { email },
+    });
+
+    if (!user) {
+      throw new Error('User not found!');
+    }
+
+    const account = await AccountRepository.findById(user.accountId);
+
+    if (account.isConfirmed) {
+      throw new Error('Account is already confirmed!');
+    }
+
+    // @TODO: send the actual email
 
     return { ok: true };
   }),
