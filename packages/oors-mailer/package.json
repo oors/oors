@@ -21,8 +21,8 @@
     "oors": "^3.0.0",
     "oors-express": "^2.2.0",
     "prop-types": "^15.6.2",
-    "react": "16.6.3",
-    "react-dom": "16.6.3",
+    "react": "16.7.0",
+    "react-dom": "16.7.0",
     "serve-index": "1.9.1"
   }
 }
