@@ -6,16 +6,23 @@ import pick from 'lodash/pick';
 import moment from 'moment';
 import Boom from 'boom';
 import { FailedLogin } from '../libs/errors';
-import { hashPassword } from '../libs/helpers';
 import { roles } from '../constants/user';
 
 class User {
-  constructor({ jwtConfig, UserRepository, AccountRepository, onSignup, onResetPassword }) {
+  constructor({
+    jwtConfig,
+    UserRepository,
+    AccountRepository,
+    onSignup,
+    onResetPassword,
+    hashPassword,
+  }) {
     this.UserRepository = UserRepository;
     this.AccountRepository = AccountRepository;
     this.jwtConfig = jwtConfig;
     this.onSignup = onSignup;
     this.onResetPassword = onResetPassword;
+    this.hashPassword = hashPassword;
   }
 
   createToken(user, options = {}) {
@@ -82,10 +89,7 @@ class User {
       return false;
     }
 
-    const hashedPassword = await hashPassword({
-      password,
-      salt: user.salt,
-    });
+    const hashedPassword = await this.hashPassword(password, user.salt);
 
     return user.password === hashedPassword;
   }
@@ -148,19 +152,13 @@ class User {
       throw Boom.badRequest('User not found!');
     }
 
-    const oldHashedPassword = await hashPassword({
-      password: oldPassword,
-      salt: user.salt,
-    });
+    const oldHashedPassword = await this.hashPassword(oldPassword, user.salt);
 
     if (oldHashedPassword !== user.password) {
       throw Boom.badRequest('Invalid password!');
     }
 
-    const hashedPassword = await hashPassword({
-      password,
-      salt: user.salt,
-    });
+    const hashedPassword = await this.hashPassword(password, user.salt);
 
     if (hashedPassword === user.password) {
       throw Boom.badRequest("You can't use the same password!");
@@ -186,10 +184,7 @@ class User {
       throw Boom.badRequest('Token not found!');
     }
 
-    const hashedPassword = await hashPassword({
-      password,
-      salt: user.salt,
-    });
+    const hashedPassword = await this.hashPassword(password, user.salt);
 
     if (hashedPassword === user.password) {
       throw Boom.badRequest("You can't use the same password!");

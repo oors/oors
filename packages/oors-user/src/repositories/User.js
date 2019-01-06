@@ -3,7 +3,6 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { Repository } from 'oors-mongodb';
 import isObjectId from 'oors-mongodb/build/libs/isObjectId';
-import { hashPassword } from '../libs/helpers';
 import { roles, defaultRoles } from '../constants/user';
 
 class User extends Repository {
@@ -123,7 +122,10 @@ class User extends Repository {
     const shouldHashPassword = (!finalData[this.id] || doHashPassword) && !!finalData.password;
 
     if (shouldHashPassword) {
-      finalData.password = await hashPassword(finalData);
+      finalData.password = await this.module.getConfig('hashPassword')(
+        finalData.password,
+        finalData.salt,
+      );
     }
 
     return finalData;

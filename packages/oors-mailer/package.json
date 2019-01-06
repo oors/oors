@@ -17,7 +17,7 @@
     "easevalidation": "0.22.1",
     "express": "4.16.4",
     "fs-extra": "^7.0.1",
-    "nodemailer": "4.7.0",
+    "nodemailer": "5.0.0",
     "oors": "^3.0.0",
     "oors-express": "^2.2.0",
     "prop-types": "^15.6.2",

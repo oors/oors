@@ -14,7 +14,7 @@ export const sanitizeUserData = user => ({
   ]),
 });
 
-export const hashPassword = ({ password, salt }) =>
+export const hashPassword = (password, salt) =>
   new Promise((resolve, reject) => {
     bcrypt.hash(password, salt, (err, result) => {
       if (err) {

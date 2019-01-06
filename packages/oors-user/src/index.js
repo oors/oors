@@ -15,6 +15,7 @@ import mockUser from './middlewares/mockUser';
 import PermissionsManager from './libs/PermissionsManager';
 import { roles } from './constants/user';
 import userFromJwtMiddleware from './middlewares/userFromJwt';
+import { hashPassword as defaultHashPassword } from './libs/helpers';
 
 class UserModule extends Module {
   static validateConfig = validate(
@@ -38,6 +39,7 @@ class UserModule extends Module {
           enabled: [v.isDefault(false), v.isBoolean()],
         }),
       ],
+      hashPassword: [v.isDefault(defaultHashPassword), v.isFunction()],
     }),
   );
 
@@ -156,6 +158,7 @@ class UserModule extends Module {
       AccountRepository,
       onSignup: data => this.asyncEmit('signup', data),
       onResetPassword: data => this.asyncEmit('resetPassword', data),
+      hashPassword: this.getConfig('hashPassword'),
     });
 
     this.export({
