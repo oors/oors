@@ -76,7 +76,7 @@ class UserModule extends Module {
     this.configureSeeder();
   }
 
-  async setup({ mockUserMiddlewarePivot, jwtMiddlewarePivot, mockUserConfig }) {
+  async setup({ mockUserMiddlewarePivot, jwtMiddlewarePivot, mockUserConfig, hashPassword }) {
     await this.loadDependencies(['oors.mongodb', 'oors.router', 'oors.graphql', 'oors.express']);
 
     const { User, Account } = this.get('repositories');
@@ -89,6 +89,7 @@ class UserModule extends Module {
     this.export({
       gqlMiddlewares,
       jwtMiddleware: this.jwtMiddleware,
+      hashPassword,
     });
 
     const passport = this.configurePassport();
