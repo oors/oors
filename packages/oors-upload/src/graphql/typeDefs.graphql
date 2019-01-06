@@ -4,5 +4,7 @@ type File {
   mimeType: String!
   extension: String!
   size: Int!
-  uploadedAt: DateTime
+  url: String!
+  createdAt: DateTime
+  updatedAt: DateTime
 }
