@@ -1,6 +1,6 @@
 {
   "name": "oors-upload",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "oors file upload",
   "main": "build/index.js",
   "repository": {
