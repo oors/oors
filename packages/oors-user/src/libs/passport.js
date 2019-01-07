@@ -2,7 +2,7 @@ import { ObjectID as objectId } from 'mongodb';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
-import { FailedLogin } from './errors';
+import FailedLogin from '../errors/FailedLogin';
 
 export default ({ jwtSecret }) => {
   passport.use(

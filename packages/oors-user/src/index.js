@@ -1,11 +1,14 @@
+import crypto from 'crypto';
 import { validate, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import upperFirst from 'lodash/upperFirst';
 import camelCase from 'lodash/camelCase';
+import ms from 'ms';
+import moment from 'moment';
 import { isMiddlewarePivot } from 'oors-express/build/validators';
 import withSoftDelete from 'oors-mongodb/build/decorators/withSoftDelete';
-import UserService from './services/User';
-import router from './router';
+import jwt from 'jsonwebtoken';
+import Boom from 'boom';
 import * as gqlMiddlewares from './graphql/middlewares';
 import jwtMiddleware from './middlewares/jwt';
 import passportInitialize from './middlewares/passportInitialize';
@@ -16,6 +19,7 @@ import PermissionsManager from './libs/PermissionsManager';
 import { roles } from './constants/user';
 import userFromJwtMiddleware from './middlewares/userFromJwt';
 import { hashPassword as defaultHashPassword } from './libs/helpers';
+import FailedLogin from './errors/FailedLogin';
 
 class UserModule extends Module {
   static validateConfig = validate(
@@ -40,6 +44,7 @@ class UserModule extends Module {
         }),
       ],
       hashPassword: [v.isDefault(defaultHashPassword), v.isFunction()],
+      resetPasswordTokenExpiresIn: [v.isDefault('1d'), v.isAny(v.isString(), v.isNumber())],
     }),
   );
 
@@ -60,10 +65,6 @@ class UserModule extends Module {
 
   name = 'oors.user';
 
-  hooks = {
-    'oors.router.load': () => {},
-  };
-
   initialize({ jwtSecret }) {
     this.jwtMiddleware = {
       ...jwtMiddleware,
@@ -83,7 +84,6 @@ class UserModule extends Module {
     withSoftDelete()(User);
     withSoftDelete()(Account);
 
-    this.setupServices();
     this.setupPermissions();
 
     this.export({
@@ -92,7 +92,7 @@ class UserModule extends Module {
       hashPassword,
     });
 
-    const passport = this.configurePassport();
+    this.configurePassport();
 
     this.deps['oors.express'].middlewares.insert(
       jwtMiddlewarePivot,
@@ -107,12 +107,17 @@ class UserModule extends Module {
       });
     }
 
-    const userRouter = router({
-      jwtMiddleware,
-      passport,
-    });
-
-    this.deps['oors.router'].addRouter('userRouter', userRouter);
+    this.exportProperties([
+      'login',
+      'canLogin',
+      'checkPassword',
+      'tryLogin',
+      'signup',
+      'changePassword',
+      'recoverPassword',
+      'resetPassword',
+      'socialLogin',
+    ]);
   }
 
   configureSeeder() {
@@ -132,7 +137,7 @@ class UserModule extends Module {
       return false;
     }
 
-    const passport = passportFactory({ jwtSecret });
+    const passport = passportFactory({ jwtSecret, socialLogin: this.socialLogin });
 
     this.deps['oors.express'].middlewares.insert(
       passportMiddlewarePivot,
@@ -143,28 +148,6 @@ class UserModule extends Module {
     this.export({ passport });
 
     return passport;
-  }
-
-  setupServices() {
-    const { jwtSecret, jwtConfig } = this.getConfig();
-    const AccountRepository = this.get('repositories.Account');
-    const UserRepository = this.get('repositories.User');
-
-    const User = new UserService({
-      jwtConfig: {
-        key: jwtSecret,
-        options: jwtConfig,
-      },
-      UserRepository,
-      AccountRepository,
-      onSignup: data => this.asyncEmit('signup', data),
-      onResetPassword: data => this.asyncEmit('resetPassword', data),
-      hashPassword: this.getConfig('hashPassword'),
-    });
-
-    this.export({
-      User,
-    });
   }
 
   setupPermissions() {
@@ -186,6 +169,285 @@ class UserModule extends Module {
     this.deps['oors.graphql'].extendContext(context => {
       Object.assign(context, {
         permissionsManager: this.permissions,
+      });
+    });
+  }
+
+  createToken = (user, options = {}) =>
+    jwt.sign(this.serializeUser(user), this.getConfig('jwtSecret'), {
+      ...this.getConfig('jwtConfig'),
+      ...options,
+    });
+
+  serializeUser = data => ({
+    id: data._id.toString(),
+    username: data.username,
+    accountId: data.accountId.toString(),
+    roles: data.roles,
+  });
+
+  login = async ({ username, password }) => {
+    const { User } = this.get('repositories');
+
+    const user = await User.findOneByUsername(username);
+
+    if (!user) {
+      throw new FailedLogin('User not found!');
+    }
+
+    await this.canLogin(user);
+
+    const isValidPassword = await this.checkPassword({ user, password });
+
+    if (!isValidPassword) {
+      throw new FailedLogin('Incorrect password!');
+    }
+
+    return this.tryLogin(user);
+  };
+
+  canLogin = async user => {
+    if (user.isDeleted) {
+      throw new FailedLogin('User not found!');
+    }
+
+    if (!user.isActive) {
+      throw new FailedLogin('User is not active!');
+    }
+
+    const account =
+      user.account || (await this.get('repositories').Account.findById(user.accountId));
+
+    if (!account) {
+      throw new FailedLogin('Unable to find user account!');
+    }
+
+    if (!account.confirmation.isCompleted) {
+      throw new FailedLogin('Account is not confirmed!');
+    }
+
+    if (!account.isActive) {
+      throw new FailedLogin('Account is not active!');
+    }
+  };
+
+  checkPassword = async ({ password, user }) => {
+    if (!user.password) {
+      return false;
+    }
+
+    const hashedPassword = await this.getConfig('hashPassword')(password, user.salt);
+
+    return user.password === hashedPassword;
+  };
+
+  tryLogin = async user => {
+    const { User } = this.get('repositories');
+    const updatedUser = await User.updateOne({
+      query: {
+        _id: user._id,
+      },
+      update: {
+        $set: {
+          lastLogin: new Date(),
+          resetPassword: {},
+        },
+      },
+    });
+    const token = await this.createToken(updatedUser);
+
+    return {
+      user: updatedUser,
+      token,
+    };
+  };
+
+  changePassword = async ({ userId, oldPassword, password }) => {
+    const { User } = this.get('repositories');
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw Boom.badRequest('User not found!');
+    }
+
+    await this.canLogin(user);
+
+    const oldHashedPassword = await this.getConfig('hashPassword')(oldPassword, user.salt);
+
+    if (oldHashedPassword !== user.password) {
+      throw Boom.badRequest('Invalid password!');
+    }
+
+    const hashedPassword = await this.getConfig('hashPassword')(password, user.salt);
+
+    if (hashedPassword === user.password) {
+      throw Boom.badRequest("You can't use the same password!");
+    }
+
+    return User.updatePassword({
+      userId: user._id,
+      password: hashedPassword,
+    });
+  };
+
+  recoverPassword = async ({ password, token }) => {
+    const { User } = this.get('repositories');
+    const user = await User.findOne({
+      query: {
+        'resetPassword.token': token,
+        'resetPassword.resetAt': {
+          $gt: moment()
+            .subtract(ms(this.getConfig('resetPasswordTokenExpiresIn')))
+            .toDate(),
+        },
+      },
+    });
+
+    if (!user) {
+      throw Boom.badRequest('Token not found!');
+    }
+
+    await this.canLogin(user);
+
+    const hashedPassword = await this.getConfig('hashPassword')(password, user.salt);
+
+    if (hashedPassword === user.password) {
+      throw Boom.badRequest("You can't use the same password!");
+    }
+
+    return User.updatePassword({
+      userId: user._id,
+      password: hashedPassword,
+    });
+  };
+
+  signup = async data => {
+    const { User, Account } = this.get('repositories');
+    const { username, email } = data;
+    const existingUser = await User.findOneByUsernameOrEmail({
+      username,
+      email,
+    });
+
+    if (existingUser) {
+      if (existingUser.username === username) {
+        throw Boom.badRequest('Username already taken.');
+      }
+
+      if (existingUser.email === email) {
+        throw Boom.badRequest('Email already taken.');
+      }
+    }
+
+    const account = await Account.createOne({
+      confirmation: {
+        token: crypto.randomBytes(20).toString('hex'),
+      },
+    });
+
+    const user = await User.createOne({
+      accountId: account._id,
+      ...data,
+      isOwner: true,
+    });
+
+    this.asyncEmit('signup', { user, account });
+
+    user.account = account;
+
+    return user;
+  };
+
+  resetPassword = async usernameOrEmail => {
+    const { User } = this.get('repositories');
+    const user = await User.findOneByUsername(usernameOrEmail);
+
+    if (!user) {
+      throw Boom.badRequest('User not found!');
+    }
+
+    await this.canLogin(user);
+
+    const updatedUser = await User.resetPassword(user._id);
+
+    this.asyncEmit('resetPassword', updatedUser);
+
+    return updatedUser;
+  };
+
+  socialLogin = async ({ accessToken, refreshToken, profile }) => {
+    const { User, Account } = this.get('repositories');
+
+    let user = await User.findOne({
+      query: {
+        [`authProviders.${profile.provider}.id`]: profile.id,
+      },
+    });
+
+    if (!user) {
+      const account = await Account.createOne({
+        confirmation: {
+          isCompleted: true,
+        },
+      });
+
+      user = await User.createOne({
+        name: profile.displayName,
+        accountId: account._id,
+        isOwner: true,
+        ...(Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0].value : {}),
+        authProviders: {
+          [profile.provider]: {
+            id: profile.id,
+            accessToken,
+            refreshToken,
+          },
+        },
+      });
+    }
+
+    await this.canLogin(user);
+
+    const updatedUser = await User.updateOne({
+      query: {
+        _id: user._id,
+      },
+      update: {
+        $set: {
+          lastLogin: new Date(),
+        },
+      },
+    });
+
+    const authToken = await this.createToken(updatedUser);
+
+    return {
+      user: updatedUser,
+      token: authToken,
+    };
+  };
+
+  verify({ token }) {
+    const { User } = this.get('repositories');
+
+    // @TODO: - check if we need to specify maxAge as an option for jwt.verify
+    return new Promise((resolve, reject) => {
+      jwt.verify(token, this.getConfig('jwtSecret'), async (err, decoded) => {
+        if (err) {
+          return reject(err);
+        }
+
+        try {
+          const { id } = decoded;
+          // @TODO: maybe load these 2 in an aggregate query
+          const user = await User.findById(id);
+
+          await this.canLogin(user);
+
+          return resolve(user);
+        } catch (error) {
+          return reject(error);
+        }
       });
     });
   }

@@ -7,11 +7,15 @@ extend type Query {
 
 extend type Mutation {
   login(username: String!, password: String!): AuthenticatedUser
+  signup(name: String!, username: String!, email: String!, password: String!): User!
+  resetPassword(usernameOrEmail: String!): Boolean!
+  recoverPassword(token: String!, password: String!): User!
+  changePassword(userId: ID!, oldPassword: String!, password: String!): User!
+  confirmUserAccount(token: String!): UserAccount!
 }
 
-type Account {
+type UserAccount {
   id: ID!
-  name: String
   isActive: Boolean!
   users: [User!]!
   owner: User!
@@ -19,12 +23,12 @@ type Account {
 
 type User {
   id: ID!
-  account: Account!
+  account: UserAccount!
   name: String
   username: String
   email: String
   isActive: Boolean!
-  roles: [String!]!
+  roles: [UserRole!]!
   createdAt: DateTime
   lastLogin: DateTime
 }

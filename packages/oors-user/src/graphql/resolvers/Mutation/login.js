@@ -1,8 +1,7 @@
 export default async (_, { username, password }, { modules, req, fromMongo, getRepository }) => {
-  const { User } = modules.get('oors.user');
   const LoginRepository = getRepository('oors.user.Login');
 
-  const { token, user } = await User.login({ username, password });
+  const { token, user } = await modules.get('oors.user').login({ username, password });
 
   await LoginRepository.createOne({
     userId: user._id,
@@ -14,6 +13,6 @@ export default async (_, { username, password }, { modules, req, fromMongo, getR
 
   return {
     token,
-    user: fromMongo(User.dump(user)),
+    user: fromMongo(user),
   };
 };

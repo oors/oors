@@ -27,6 +27,7 @@
     "lodash": "4.17.11",
     "moment": "2.23.0",
     "mongodb": "3.1.10",
+    "ms": "2.1.1",
     "oors": "^3.0.0",
     "oors-express": "^2.2.0",
     "oors-mongodb": "^4.5.0",

@@ -4,8 +4,6 @@ export default {
   id: 'userFromJwt',
   factory: () => async (req, res, next) => {
     const UserRepository = req.modules.get('oors.mongodb').getRepository('oors.user.User');
-    const AccountRepository = req.modules.get('oors.mongodb').getRepository('oors.user.Account');
-    const { User } = req.modules.get('oors.user');
 
     if (!req.jwtPayload) {
       return next();
@@ -19,9 +17,8 @@ export default {
         return next();
       }
 
-      const account = await AccountRepository.findById(user.accountId);
+      await req.modules.get('oors.user').canLogin(user);
 
-      await User.canLogin({ user, account });
       req.user = user;
       return next();
     } catch (error) {

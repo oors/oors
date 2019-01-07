@@ -3,19 +3,19 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { Repository } from 'oors-mongodb';
 import isObjectId from 'oors-mongodb/build/libs/isObjectId';
-import { roles, defaultRoles } from '../constants/user';
+import { /* roles, */ defaultRoles } from '../constants/user';
 
 class User extends Repository {
   static schema = {
     accountId: [v.isRequired(), isObjectId()],
-    username: [v.isRequired(), v.isString()],
-    name: [v.isRequired(), v.isString()],
-    email: [v.isRequired(), v.isString(), v.isEmail()],
-    password: [v.isRequired(), v.isString(), v.isLength({ min: 5 })],
+    username: v.isAny(v.isUndefined(), v.isString()),
+    name: v.isAny(v.isUndefined(), v.isString()),
+    email: v.isAny(v.isUndefined(), v.isEvery(v.isString(), v.isEmail())),
+    password: v.isAny(v.isUndefined(), v.isEvery(v.isString(), v.isLength({ min: 5 }))),
     salt: v.isAny(v.isUndefined(), v.isString()),
     isActive: [v.isDefault(true), v.isBoolean()],
     isOwner: [v.isDefault(true), v.isBoolean()],
-    roles: [v.isDefault(defaultRoles), v.isArray(v.isString(), v.isOneOf(roles))],
+    roles: [v.isDefault(defaultRoles), v.isArray(v.isString() /* , v.isOneOf(roles) */)],
     resetPassword: [
       v.isDefault({}),
       v.isSchema({
@@ -24,16 +24,17 @@ class User extends Repository {
       }),
     ],
     lastLogin: v.isAny(v.isUndefined(), v.isDate()),
-    // authProviders: [
-    //   v.isDefault({}),
-    //   v.isObject({
-    //     validator: v.isSchema({
-    //       id: [v.isRequired(), v.isString()],
-    //       token: v.isAny(v.isUndefined(), v.isString()),
-    //       expiresAt: v.isAny(v.isUndefined(), v.isDate()),
-    //     }),
-    //   }),
-    // ],
+    authProviders: [
+      v.isDefault({}),
+      v.isObject({
+        validator: v.isSchema({
+          id: [v.isRequired(), v.isString()],
+          accessToken: v.isAny(v.isUndefined(), v.isString()),
+          refreshToken: v.isAny(v.isUndefined(), v.isString()),
+          expiresAt: v.isAny(v.isUndefined(), v.isDate()),
+        }),
+      }),
+    ],
   };
 
   static collectionName = 'userUser';

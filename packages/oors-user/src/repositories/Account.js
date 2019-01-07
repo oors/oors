@@ -3,9 +3,15 @@ import { Repository } from 'oors-mongodb';
 
 class Account extends Repository {
   static schema = {
-    name: v.isAny(v.isUndefined(), v.isString()),
     isActive: [v.isDefault(true), v.isBoolean()],
-    isConfirmed: [v.isDefault(false), v.isBoolean()],
+    confirmation: [
+      v.isDefault({}),
+      v.isSchema({
+        isCompleted: [v.isDefault(false), v.isBoolean()],
+        token: v.isAny(v.isUndefined(), v.isString()),
+        confirmedAt: v.isAny(v.isUndefined(), v.isDate()),
+      }),
+    ],
   };
 
   static collectionName = 'userAccount';
@@ -19,18 +25,18 @@ class Account extends Repository {
     },
   };
 
-  async confirm(id) {
-    if (!id) {
-      throw new Error('Missing account id!');
-    }
-
-    const account = await this.findById(id);
+  async confirm(token) {
+    const account = await this.findOne({
+      query: {
+        'confirmation.token': token,
+      },
+    });
 
     if (!account) {
       throw new Error('Account not found!');
     }
 
-    if (account.isConfirmed) {
+    if (account.confirmation.isCompleted) {
       throw new Error('Account is already confirmed!');
     }
 
@@ -40,7 +46,8 @@ class Account extends Repository {
       },
       update: {
         $set: {
-          isConfirmed: true,
+          'confirmation.isCompleted': true,
+          'confirmation.confirmedAt': new Date(),
         },
       },
     });
