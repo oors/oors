@@ -117,6 +117,7 @@ class UserModule extends Module {
       'recoverPassword',
       'resetPassword',
       'socialLogin',
+      'createToken',
     ]);
   }
 
