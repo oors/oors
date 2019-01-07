@@ -408,7 +408,7 @@ class UserModule extends Module {
 
     await this.canLogin(user);
 
-    const updatedUser = await User.updateOne({
+    return User.updateOne({
       query: {
         _id: user._id,
       },
@@ -418,13 +418,6 @@ class UserModule extends Module {
         },
       },
     });
-
-    const authToken = await this.createToken(updatedUser);
-
-    return {
-      user: updatedUser,
-      token: authToken,
-    };
   };
 
   verify({ token }) {
