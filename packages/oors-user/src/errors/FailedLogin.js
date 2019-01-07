@@ -1,3 +1,5 @@
-export class FailedLogin extends Error {
+class FailedLogin extends Error {
   status = 401;
 }
+
+export default FailedLogin;
