@@ -1,6 +1,6 @@
 {
   "name": "oors-mailer",
-  "version": "3.4.0",
+  "version": "3.4.1",
   "description": "oors module providing email services: sending emails using nodemailer, saving emails on disk and much more",
   "main": "build/index.js",
   "repository": {
@@ -19,7 +19,7 @@
     "fs-extra": "^7.0.1",
     "nodemailer": "5.0.0",
     "oors": "^3.0.0",
-    "oors-express": "^2.2.0",
+    "oors-express": "^2.2.1",
     "prop-types": "^15.6.2",
     "react": "16.7.0",
     "react-dom": "16.7.0",

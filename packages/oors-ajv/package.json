@@ -1,6 +1,6 @@
 {
   "name": "oors-ajv",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "main": "build/index.js",
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "MIT",
@@ -12,6 +12,6 @@
     "lodash": "4.17.11",
     "mongodb": "3.1.10",
     "oors": "^3.0.0",
-    "oors-express": "^2.2.0"
+    "oors-express": "^2.2.1"
   }
 }
