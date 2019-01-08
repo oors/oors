@@ -378,18 +378,28 @@ class UserModule extends Module {
 
   socialLogin = async (
     { accessToken, refreshToken, profile },
-    parseProfile = ({ displayName, emails, username }) => ({
+    parseProfile = ({ displayName, username }) => ({
       name: displayName,
-      ...(Array.isArray(emails) && emails.length ? emails[0].value : {}),
       username,
     }),
   ) => {
     const { User, Account } = this.get('repositories');
+    const email =
+      Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0].value : undefined;
+    const matchesProfileId = { [`authProviders.${profile.provider}.id`]: profile.id };
+    const query = email
+      ? {
+          $or: [
+            matchesProfileId,
+            {
+              email,
+            },
+          ],
+        }
+      : matchesProfileId;
 
     let user = await User.findOne({
-      query: {
-        [`authProviders.${profile.provider}.id`]: profile.id,
-      },
+      query,
     });
 
     if (!user) {
@@ -409,6 +419,7 @@ class UserModule extends Module {
             refreshToken,
           },
         },
+        email,
         ...parseProfile(profile),
       });
     }
