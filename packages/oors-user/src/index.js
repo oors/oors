@@ -132,7 +132,7 @@ class UserModule extends Module {
   }
 
   configurePassport() {
-    const { User, Account } = this.get('repositories');
+    const { User } = this.get('repositories');
     const { passportConfig, passportMiddlewarePivot, jwtSecret } = this.getConfig();
 
     if (!passportConfig.enabled) {
@@ -142,7 +142,6 @@ class UserModule extends Module {
     const passport = passportFactory({
       jwtSecret,
       User,
-      Account,
       canLogin: this.canLogin,
       login: this.login,
     });

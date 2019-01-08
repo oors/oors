@@ -40,6 +40,15 @@ config.add({
           params: {
             secret: 'THIS_IS_MY_SECRET',
           },
+          enabled: false,
+        },
+        {
+          ...middlewares.session,
+          params: {
+            secret: 'THIS_IS_MY_SECRET',
+            resave: false,
+            saveUninitialized: true,
+          },
         },
         middlewares.isMethod,
         middlewares.validationErrorHandler,
@@ -84,7 +93,9 @@ config.add({
       mockUserMiddlewarePivot: {
         before: 'apolloServer',
       },
-      passportMiddlewarePivot: 'cookieParser',
+      passportMiddlewarePivot: {
+        after: 'session',
+      },
       jwtMiddlewarePivot: {
         before: 'apolloServer',
       },

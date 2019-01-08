@@ -95,6 +95,11 @@ class MiddlewareStore extends Array {
     this.insertAfter(pivotId, item);
     return this;
   }
+
+  config(id, configurator) {
+    const index = findIndexById(this, id);
+    this[index] = configurator(this[index]);
+  }
 }
 
 export default MiddlewareStore;
