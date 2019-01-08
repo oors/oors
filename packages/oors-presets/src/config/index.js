@@ -94,7 +94,7 @@ config.add({
         before: 'apolloServer',
       },
       passportMiddlewarePivot: {
-        after: 'session',
+        after: 'cookieParser',
       },
       jwtMiddlewarePivot: {
         before: 'apolloServer',
