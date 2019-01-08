@@ -376,7 +376,14 @@ class UserModule extends Module {
     return updatedUser;
   };
 
-  socialLogin = async ({ accessToken, refreshToken, profile }) => {
+  socialLogin = async (
+    { accessToken, refreshToken, profile },
+    parseProfile = ({ displayName, emails, username }) => ({
+      name: displayName,
+      ...(Array.isArray(emails) && emails.length ? emails[0].value : {}),
+      username,
+    }),
+  ) => {
     const { User, Account } = this.get('repositories');
 
     let user = await User.findOne({
@@ -393,10 +400,8 @@ class UserModule extends Module {
       });
 
       user = await User.createOne({
-        name: profile.displayName,
         accountId: account._id,
         isOwner: true,
-        ...(Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0].value : {}),
         authProviders: {
           [profile.provider]: {
             id: profile.id,
@@ -404,6 +409,7 @@ class UserModule extends Module {
             refreshToken,
           },
         },
+        ...parseProfile(profile),
       });
     }
 
