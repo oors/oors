@@ -1,10 +1,9 @@
-import { ObjectID as objectId } from 'mongodb';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import FailedLogin from '../errors/FailedLogin';
 
-export default ({ jwtSecret }) => {
+export default ({ jwtSecret, User, canLogin, login }) => {
   passport.use(
     new JwtStrategy(
       {
@@ -13,17 +12,9 @@ export default ({ jwtSecret }) => {
         passReqToCallback: true,
       },
       async (req, id, done) => {
-        const { UserRepository, AccountRepository, User } = req.app.modules.get('oors.user');
-
         try {
-          const user = await UserRepository.findById(objectId(id));
-          const account = await AccountRepository.findById(user.accountId);
-
-          await User.canLogin({
-            user,
-            account,
-          });
-
+          const user = await User.findById(id);
+          await canLogin(user);
           return done(null, user);
         } catch (error) {
           return done(error, false);
@@ -38,10 +29,8 @@ export default ({ jwtSecret }) => {
         passReqToCallback: true,
       },
       async (req, username, password, done) => {
-        const { User } = req.app.modules.get('oors.user');
-
         try {
-          const user = await User.login({ username, password });
+          const { user } = await login({ username, password });
           return done(null, user);
         } catch (error) {
           if (error instanceof FailedLogin) {
@@ -59,10 +48,7 @@ export default ({ jwtSecret }) => {
   });
 
   passport.deserializeUser((req, id, cb) => {
-    req.app.modules
-      .get('oors.user.repositories.User')
-      .findById(objectId(id))
-      .then(user => cb(null, user), cb);
+    User.findById(id).then(user => cb(null, user), cb);
   });
 
   return passport;

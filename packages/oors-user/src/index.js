@@ -132,13 +132,20 @@ class UserModule extends Module {
   }
 
   configurePassport() {
+    const { User, Account } = this.get('repositories');
     const { passportConfig, passportMiddlewarePivot, jwtSecret } = this.getConfig();
 
     if (!passportConfig.enabled) {
       return false;
     }
 
-    const passport = passportFactory({ jwtSecret, socialLogin: this.socialLogin });
+    const passport = passportFactory({
+      jwtSecret,
+      User,
+      Account,
+      canLogin: this.canLogin,
+      login: this.login,
+    });
 
     this.deps['oors.express'].middlewares.insert(
       passportMiddlewarePivot,
