@@ -15,6 +15,7 @@ config.add({
   isDev: process.env.NODE_ENV === 'development',
   port: 3000,
   hostname: 'localhost',
+  cookieSecret: 'THIS_IS_MY_SECRET',
   modules: {
     'oors.express': {
       middlewares: config.ref(() => [
@@ -38,17 +39,16 @@ config.add({
         {
           ...middlewares.cookieParser,
           params: {
-            secret: 'THIS_IS_MY_SECRET',
+            secret: config.get('cookieSecret'),
           },
         },
         {
           ...middlewares.session,
           params: {
-            secret: 'THIS_IS_MY_SECRET',
+            secret: config.get('cookieSecret'),
             resave: false,
             saveUninitialized: true,
           },
-          enabled: false,
         },
         middlewares.isMethod,
         middlewares.validationErrorHandler,
@@ -94,7 +94,7 @@ config.add({
         before: 'apolloServer',
       },
       passportMiddlewarePivot: {
-        after: 'cookieParser',
+        after: 'session',
       },
       jwtMiddlewarePivot: {
         before: 'apolloServer',
