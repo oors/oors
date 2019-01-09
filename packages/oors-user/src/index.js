@@ -52,7 +52,7 @@ class UserModule extends Module {
           maxFailedAttempts: [v.isDefault(5), v.isNumber()],
         }),
       ],
-      emailLoginTokenExpiresIn: [v.isDefault('1d'), v.isAny(v.isString(), v.isNumber())],
+      loginTokenExpiresIn: [v.isDefault('1d'), v.isAny(v.isString(), v.isNumber())],
     }),
   );
 
@@ -248,10 +248,10 @@ class UserModule extends Module {
     const { User } = this.get('repositories');
     const user = await User.findOne({
       query: {
-        'emailLogin.token': token,
-        'emailLogin.createdAt': {
+        'login.token': token,
+        'login.createdAt': {
           $gte: moment()
-            .subtract(ms(this.getConfig('emailLoginTokenExpiresIn')))
+            .subtract(ms(this.getConfig('loginTokenExpiresIn')))
             .toDate(),
         },
       },
@@ -312,7 +312,7 @@ class UserModule extends Module {
           lastLogin: new Date(),
           resetPassword: {},
           failedLoginAttempts: 0,
-          emailLogin: {},
+          login: {},
         },
       },
     });

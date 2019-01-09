@@ -36,7 +36,7 @@ class User extends Repository {
       }),
     ],
     failedLoginAttempts: [v.isDefault(0), v.isNumber()],
-    emailLogin: [
+    login: [
       v.isDefault({}),
       v.isSchema({
         token: v.isAny(v.isUndefined(), v.isString()),
@@ -124,7 +124,7 @@ class User extends Repository {
       query: { _id: userId },
       update: {
         $set: {
-          emailLogin: {
+          login: {
             token: crypto.randomBytes(20).toString('hex'),
             createdAt: new Date(),
           },
