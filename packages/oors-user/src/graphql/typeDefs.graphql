@@ -10,7 +10,7 @@ extend type Mutation {
   signup(name: String!, username: String!, email: String!, password: String!): User!
   resetPassword(usernameOrEmail: String!): Boolean!
   recoverPassword(token: String!, password: String!): User!
-  changePassword(userId: ID!, oldPassword: String!, password: String!): User!
+  changePassword(oldPassword: String, password: String!): User!
   confirmUserAccount(token: String!): UserAccount!
 }
 

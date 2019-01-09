@@ -269,6 +269,9 @@ class UserModule extends Module {
     };
   };
 
+  /**
+   * oldPassword is not present when the user signed up using a social account
+   */
   changePassword = async ({ userId, oldPassword, password }) => {
     const { User } = this.get('repositories');
     const user = await User.findById(userId);
@@ -279,15 +282,17 @@ class UserModule extends Module {
 
     await this.canLogin(user);
 
-    const oldHashedPassword = await this.getConfig('hashPassword')(oldPassword, user.salt);
+    if (oldPassword) {
+      const oldHashedPassword = await this.getConfig('hashPassword')(oldPassword, user.salt);
 
-    if (oldHashedPassword !== user.password) {
-      throw Boom.badRequest('Invalid password!');
+      if (oldHashedPassword !== user.password) {
+        throw Boom.badRequest('Invalid password!');
+      }
     }
 
     const hashedPassword = await this.getConfig('hashPassword')(password, user.salt);
 
-    if (hashedPassword === user.password) {
+    if (user.password && hashedPassword === user.password) {
       throw Boom.badRequest("You can't use the same password!");
     }
 
