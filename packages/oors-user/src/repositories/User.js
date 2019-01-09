@@ -106,15 +106,29 @@ class User extends Repository {
   }
 
   async resetPassword(userId) {
-    const resetPassword = {
-      token: crypto.randomBytes(20).toString('hex'),
-      resetAt: new Date(),
-    };
-
     return this.updateOne({
       query: { _id: userId },
       update: {
-        $set: { resetPassword },
+        $set: {
+          resetPassword: {
+            token: crypto.randomBytes(20).toString('hex'),
+            resetAt: new Date(),
+          },
+        },
+      },
+    });
+  }
+
+  createLoginToken(userId) {
+    return this.updateOne({
+      query: { _id: userId },
+      update: {
+        $set: {
+          emailLogin: {
+            token: crypto.randomBytes(20).toString('hex'),
+            createdAt: new Date(),
+          },
+        },
       },
     });
   }
