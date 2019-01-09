@@ -52,6 +52,7 @@ class UserModule extends Module {
           maxFailedAttempts: [v.isDefault(5), v.isNumber()],
         }),
       ],
+      emailLoginTokenExpiresIn: [v.isDefault('1d'), v.isAny(v.isString(), v.isNumber())],
     }),
   );
 
@@ -126,6 +127,7 @@ class UserModule extends Module {
       'socialLogin',
       'createToken',
       'findLockedUsers',
+      'loginWithToken',
     ]);
   }
 
@@ -242,6 +244,28 @@ class UserModule extends Module {
     return this.tryLogin(user);
   };
 
+  loginWithToken = async token => {
+    const { User } = this.get('repositories');
+    const user = await User.findOne({
+      query: {
+        'emailLogin.token': token,
+        'emailLogin.createdAt': {
+          $gte: moment()
+            .subtract(ms(this.getConfig('emailLoginTokenExpiresIn')))
+            .toDate(),
+        },
+      },
+    });
+
+    if (!user) {
+      throw new FailedLogin('User not found!');
+    }
+
+    await this.canLogin(user);
+
+    return this.tryLogin(user);
+  };
+
   canLogin = async user => {
     if (user.isDeleted) {
       throw new FailedLogin('User not found!');
@@ -288,6 +312,7 @@ class UserModule extends Module {
           lastLogin: new Date(),
           resetPassword: {},
           failedLoginAttempts: 0,
+          emailLogin: {},
         },
       },
     });

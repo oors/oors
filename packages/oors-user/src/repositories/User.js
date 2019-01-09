@@ -31,11 +31,18 @@ class User extends Repository {
           id: [v.isRequired(), v.isString()],
           accessToken: v.isAny(v.isUndefined(), v.isString()),
           refreshToken: v.isAny(v.isUndefined(), v.isString()),
-          expiresAt: v.isAny(v.isUndefined(), v.isDate()),
+          createdAt: v.isAny(v.isUndefined(), v.isDate()),
         }),
       }),
     ],
     failedLoginAttempts: [v.isDefault(0), v.isNumber()],
+    emailLogin: [
+      v.isDefault({}),
+      v.isSchema({
+        token: v.isAny(v.isUndefined(), v.isString()),
+        createdAt: v.isAny(v.isUndefined(), v.isDate()),
+      }),
+    ],
   };
 
   static collectionName = 'userUser';
