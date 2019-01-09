@@ -35,6 +35,7 @@ class User extends Repository {
         }),
       }),
     ],
+    failedLoginAttempts: [v.isDefault(0), v.isNumber()],
   };
 
   static collectionName = 'userUser';
@@ -91,6 +92,7 @@ class User extends Repository {
         $set: {
           resetPassword: {},
           password,
+          failedLoginAttempts: 0,
         },
       },
     });

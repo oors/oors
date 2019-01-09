@@ -45,6 +45,13 @@ class UserModule extends Module {
       ],
       hashPassword: [v.isDefault(defaultHashPassword), v.isFunction()],
       resetPasswordTokenExpiresIn: [v.isDefault('1d'), v.isAny(v.isString(), v.isNumber())],
+      lockable: [
+        v.isDefault({}),
+        v.isSchema({
+          enabled: [v.isDefault(true), v.isBoolean()],
+          maxFailedAttempts: [v.isDefault(5), v.isNumber()],
+        }),
+      ],
     }),
   );
 
@@ -118,6 +125,7 @@ class UserModule extends Module {
       'resetPassword',
       'socialLogin',
       'createToken',
+      'findLockedUsers',
     ]);
   }
 
@@ -204,9 +212,30 @@ class UserModule extends Module {
 
     await this.canLogin(user);
 
+    if (
+      this.getConfig('lockable.enabled') &&
+      user.failedLoginAttempts &&
+      user.failedLoginAttempts > this.getConfig('lockable.maxFailedAttempts')
+    ) {
+      throw new FailedLogin('User is locked because of failed login attempts!');
+    }
+
     const isValidPassword = await this.checkPassword({ user, password });
 
     if (!isValidPassword) {
+      if (this.getConfig('lockable.enabled')) {
+        await User.updateOne({
+          query: {
+            _id: user._id,
+          },
+          update: {
+            $inc: {
+              failedLoginAttempts: 1,
+            },
+          },
+        });
+      }
+
       throw new FailedLogin('Incorrect password!');
     }
 
@@ -258,6 +287,7 @@ class UserModule extends Module {
         $set: {
           lastLogin: new Date(),
           resetPassword: {},
+          failedLoginAttempts: 0,
         },
       },
     });
@@ -269,9 +299,6 @@ class UserModule extends Module {
     };
   };
 
-  /**
-   * oldPassword is not present when the user signed up using a social account
-   */
   changePassword = async ({ userId, oldPassword, password }) => {
     const { User } = this.get('repositories');
     const user = await User.findById(userId);
@@ -282,23 +309,17 @@ class UserModule extends Module {
 
     await this.canLogin(user);
 
-    if (oldPassword) {
-      const oldHashedPassword = await this.getConfig('hashPassword')(oldPassword, user.salt);
-
-      if (oldHashedPassword !== user.password) {
-        throw Boom.badRequest('Invalid password!');
-      }
+    if (user.password && !this.checkPassword({ password: oldPassword, user })) {
+      throw Boom.badRequest('Invalid password!');
     }
 
-    const hashedPassword = await this.getConfig('hashPassword')(password, user.salt);
-
-    if (user.password && hashedPassword === user.password) {
+    if (user.password && this.checkPassword({ password, user })) {
       throw Boom.badRequest("You can't use the same password!");
     }
 
     return User.updatePassword({
       userId: user._id,
-      password: hashedPassword,
+      password: await this.getConfig('hashPassword')(password, user.salt),
     });
   };
 
@@ -388,13 +409,13 @@ class UserModule extends Module {
   };
 
   socialLogin = async (
-    { accessToken, refreshToken, profile },
+    { req, accessToken, refreshToken, profile },
     parseProfile = ({ displayName, username }) => ({
       name: displayName,
       username,
     }),
   ) => {
-    const { User, Account } = this.get('repositories');
+    const { User, Account, Login } = this.get('repositories');
     const email =
       Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0].value : undefined;
     const matchesProfileId = { [`authProviders.${profile.provider}.id`]: profile.id };
@@ -437,6 +458,16 @@ class UserModule extends Module {
 
     await this.canLogin(user);
 
+    if (req) {
+      await Login.createOne({
+        userId: user._id,
+        ip: req.ip,
+        browser: req.useragent.browser,
+        os: req.useragent.os,
+        platform: req.useragent.platform,
+      });
+    }
+
     return User.updateOne({
       query: {
         _id: user._id,
@@ -473,6 +504,17 @@ class UserModule extends Module {
       });
     });
   }
+
+  findLockedUsers = ({ query = {}, ...rest } = {}) =>
+    this.get('repositories').User.findMany({
+      query: {
+        failedLoginAttempts: {
+          $gt: this.getConfig('lockable.maxFailedAttempts'),
+        },
+        ...query,
+      },
+      ...rest,
+    });
 }
 
 export default UserModule;
