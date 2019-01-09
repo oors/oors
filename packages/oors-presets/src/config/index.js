@@ -47,7 +47,7 @@ config.add({
           params: {
             secret: config.get('cookieSecret'),
             resave: false,
-            saveUninitialized: true,
+            saveUninitialized: false,
           },
         },
         middlewares.isMethod,
