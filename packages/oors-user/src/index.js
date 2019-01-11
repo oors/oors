@@ -529,17 +529,6 @@ class UserModule extends Module {
       });
     });
   }
-
-  findLockedUsers = ({ query = {}, ...rest } = {}) =>
-    this.get('repositories').User.findMany({
-      query: {
-        failedLoginAttempts: {
-          $gt: this.getConfig('lockable.maxFailedAttempts'),
-        },
-        ...query,
-      },
-      ...rest,
-    });
 }
 
 export default UserModule;

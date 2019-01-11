@@ -154,6 +154,12 @@ class User extends Repository {
 
     return finalData;
   }
+
+  getLockedQuery = () => ({
+    failedLoginAttempts: {
+      $gt: this.module.getConfig('lockable.maxFailedAttempts'),
+    },
+  });
 }
 
 export default User;
