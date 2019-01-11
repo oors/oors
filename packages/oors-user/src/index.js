@@ -16,7 +16,7 @@ import passportSession from './middlewares/passportSession';
 import passportFactory from './libs/passport';
 import mockUser from './middlewares/mockUser';
 import PermissionsManager from './libs/PermissionsManager';
-import { roles } from './constants/user';
+import { roles as defaultRoles } from './constants/user';
 import userFromJwtMiddleware from './middlewares/userFromJwt';
 import { hashPassword as defaultHashPassword } from './libs/helpers';
 import FailedLogin from './errors/FailedLogin';
@@ -53,6 +53,7 @@ class UserModule extends Module {
         }),
       ],
       loginTokenExpiresIn: [v.isDefault('1d'), v.isAny(v.isString(), v.isNumber())],
+      roles: [v.isDefault(defaultRoles), v.isArray(v.isString())],
     }),
   );
 
@@ -91,6 +92,8 @@ class UserModule extends Module {
     const { User, Account } = this.get('repositories');
     withSoftDelete()(User);
     withSoftDelete()(Account);
+
+    User.validators.push(v.isProperty('roles', v.isOneOf(this.getConfig('roles'))));
 
     this.setupPermissions();
 
@@ -173,7 +176,7 @@ class UserModule extends Module {
       permissions: this.permissions,
     });
 
-    roles.forEach(role => {
+    this.getConfig('roles').forEach(role => {
       this.permissions.define(
         `is${upperFirst(camelCase(role))}`,
         user => (user.roles || []).includes(role),

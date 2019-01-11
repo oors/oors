@@ -15,7 +15,7 @@ class User extends Repository {
     salt: v.isAny(v.isUndefined(), v.isString()),
     isActive: [v.isDefault(true), v.isBoolean()],
     isOwner: [v.isDefault(true), v.isBoolean()],
-    roles: [v.isDefault(defaultRoles), v.isArray(v.isString() /* , v.isOneOf(roles) */)],
+    roles: [v.isDefault(defaultRoles), v.isArray(v.isString())],
     resetPassword: [
       v.isDefault({}),
       v.isSchema({
