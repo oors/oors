@@ -32,6 +32,10 @@ config.add({
           enabled: !config.get('isDev'),
         },
         {
+          ...middlewares.latency,
+          enabled: false,
+        },
+        {
           ...middlewares.bodyParserJSON,
           params: { limit: '20mb' },
         },

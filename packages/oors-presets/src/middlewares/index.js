@@ -11,6 +11,7 @@ import errorHandler from './errorHandler';
 import cookieParser from './cookieParser';
 import validationErrorHandler from './validationErrorHandler';
 import boomErrorHandler from './boomErrorHandler';
+import latency from './latency';
 
 export {
   bodyParserJSON,
@@ -26,4 +27,5 @@ export {
   cookieParser,
   validationErrorHandler,
   boomErrorHandler,
+  latency,
 };
