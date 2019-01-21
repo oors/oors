@@ -2,6 +2,8 @@ import cors from 'cors';
 
 export default {
   id: 'cors',
-  factory: cors,
-  params: {},
+  apply: ({ app }) => {
+    app.use(cors);
+    app.options('*', cors);
+  },
 };

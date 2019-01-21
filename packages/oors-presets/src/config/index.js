@@ -54,6 +54,7 @@ config.add({
             saveUninitialized: false,
           },
         },
+        middlewares.lastRequest,
         middlewares.isMethod,
         middlewares.validationErrorHandler,
         {
