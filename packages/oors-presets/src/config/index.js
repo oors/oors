@@ -21,6 +21,7 @@ config.add({
       middlewares: config.ref(() => [
         middlewares.cors,
         middlewares.useragent,
+        middlewares.hpp,
         middlewares.helmet,
         {
           ...middlewares.morgan,

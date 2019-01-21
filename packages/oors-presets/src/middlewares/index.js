@@ -13,6 +13,7 @@ import validationErrorHandler from './validationErrorHandler';
 import boomErrorHandler from './boomErrorHandler';
 import latency from './latency';
 import lastRequest from './lastRequest';
+import hpp from './hpp';
 
 export {
   bodyParserJSON,
@@ -30,4 +31,5 @@ export {
   boomErrorHandler,
   latency,
   lastRequest,
+  hpp,
 };
