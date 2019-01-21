@@ -1,7 +1,7 @@
 import random from 'lodash/random';
 
 export default {
-  id: 'isMethod',
+  id: 'latency',
   factory: ({ min, max }) => (req, res, next) => {
     setTimeout(next, random(min, max));
   },

@@ -94,6 +94,7 @@ class ExpressModule extends Module {
           const middleware = factory ? await Promise.resolve(factory(...args)) : false;
 
           return {
+            params,
             path,
             middleware,
             apply,
@@ -101,9 +102,9 @@ class ExpressModule extends Module {
         }),
     );
 
-    middlewares.forEach(({ middleware, path, apply }) => {
+    middlewares.forEach(({ middleware, path, apply, params }) => {
       if (apply) {
-        apply({ app: this.app, path, middleware });
+        apply({ app: this.app, path, middleware, params });
       } else if (path) {
         this.app.use(path, middleware);
       } else {
