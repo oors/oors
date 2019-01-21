@@ -14,7 +14,7 @@
   },
   "homepage": "https://github.com/viczam/oors#readme",
   "dependencies": {
-    "easevalidation": "0.22.1",
+    "easevalidation": "0.23.0",
     "escape-string-regexp": "1.0.5",
     "fs-extra": "7.0.1",
     "glob": "7.1.3",

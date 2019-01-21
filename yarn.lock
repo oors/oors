@@ -5041,10 +5041,10 @@ duplexify@^3.4.2, duplexify@^3.6.0:
     readable-stream "^2.0.0"
     stream-shift "^1.0.0"
 
-easevalidation@0.22.1:
-  version "0.22.1"
-  resolved "https://registry.yarnpkg.com/easevalidation/-/easevalidation-0.22.1.tgz#d29c1b5d0c67b552d2ff9ac2e1c0b1c58c2f80bf"
-  integrity sha512-cH5n0BTY0P/LkwKXwwc1WoLkK0IBB+mB7J6JOZBBRDDsL+tP+sFQDb4H5iucaxIfbVnt32bhv2iAbFrxJ+Evvg==
+easevalidation@0.23.0:
+  version "0.23.0"
+  resolved "https://registry.yarnpkg.com/easevalidation/-/easevalidation-0.23.0.tgz#b9441ef4df5b6a0ca7d175ab703c23da0785aba6"
+  integrity sha512-6L4d/qWFzaNKlekftIs35pTcuGM5BiYTFbzY56+Zvwdi9YfG2ESeru4T6veAqTU/qv6mNHYjIu4iYpRL6rHsvg==
   dependencies:
     date-fns "1.29.0"
     lodash "4.17.11"

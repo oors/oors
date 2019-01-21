@@ -5,7 +5,7 @@
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "easevalidation": "0.22.1",
+    "easevalidation": "0.23.0",
     "oors": "^3.0.0",
     "oors-express": "^2.2.1",
     "raven": "2.6.4"

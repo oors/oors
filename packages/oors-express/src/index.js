@@ -6,6 +6,7 @@ import expressReactViews from 'express-react-views';
 import ExpressApplication from './ExpressApplication';
 import MiddlewareStore from './MiddlewareStore';
 import * as helpers from './helpers';
+import isMiddlewareValidator from './validators/isMiddleware';
 
 class ExpressModule extends Module {
   static validateConfig = validate(
@@ -24,16 +25,7 @@ class ExpressModule extends Module {
           'view engine': [v.isDefault('js'), v.isString()],
         }),
       ],
-      middlewares: v.isArray(
-        v.isSchema({
-          id: v.isString(),
-          path: [v.isDefault('/'), v.isString()],
-          factory: v.isFunction(),
-          apply: v.isAny(v.isFunction(), v.isUndefined()),
-          params: v.isDefault({}),
-          enabled: [v.isDefault(true), v.isBoolean()],
-        }),
-      ),
+      middlewares: v.isArray(isMiddlewareValidator()),
     }),
   );
 

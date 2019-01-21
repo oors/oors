@@ -15,7 +15,7 @@
   "homepage": "https://github.com/viczam/oors#readme",
   "dependencies": {
     "boom": "7.3.0",
-    "easevalidation": "0.22.1",
+    "easevalidation": "0.23.0",
     "express": "4.16.4",
     "fs-extra": "^7.0.1",
     "mongodb": "3.1.12",

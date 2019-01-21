@@ -15,7 +15,7 @@
   "homepage": "https://github.com/viczam/oors#readme",
   "dependencies": {
     "cli-table": "0.3.1",
-    "easevalidation": "0.22.1",
+    "easevalidation": "0.23.0",
     "oors": "^3.0.0",
     "winston": "3.1.0"
   }
