@@ -1,6 +1,6 @@
 {
   "name": "oors-express",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "main": "build/index.js",
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "ISC",
