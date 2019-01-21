@@ -1,13 +1,13 @@
 {
   "name": "oors-sentry",
-  "version": "3.2.2",
+  "version": "3.2.3",
   "main": "build/index.js",
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "easevalidation": "0.23.0",
     "oors": "^3.0.0",
-    "oors-express": "^2.2.2",
+    "oors-express": "^2.2.3",
     "raven": "2.6.4"
   }
 }
