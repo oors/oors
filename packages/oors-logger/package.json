@@ -17,6 +17,6 @@
     "cli-table": "0.3.1",
     "easevalidation": "0.23.0",
     "oors": "^3.0.0",
-    "winston": "3.2.0"
+    "winston": "3.2.1"
   }
 }
