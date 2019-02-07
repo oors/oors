@@ -14,8 +14,8 @@
   },
   "homepage": "https://github.com/viczam/oors#readme",
   "dependencies": {
-    "apollo-server": "2.3.3",
-    "apollo-server-express": "2.3.3",
+    "apollo-server": "2.4.0",
+    "apollo-server-express": "2.4.0",
     "apollo-upload-server": "7.1.0",
     "dataloader": "1.4.0",
     "easevalidation": "0.23.0",
