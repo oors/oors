@@ -20,9 +20,9 @@
     "nodemailer": "5.1.1",
     "oors": "^3.0.0",
     "oors-express": "^2.2.3",
-    "prop-types": "^15.7.1",
-    "react": "16.8.1",
-    "react-dom": "16.8.1",
+    "prop-types": "^15.7.2",
+    "react": "16.8.4",
+    "react-dom": "16.8.4",
     "serve-index": "1.9.1"
   }
 }

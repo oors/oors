@@ -5,9 +5,9 @@
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "ajv": "6.9.1",
+    "ajv": "6.10.0",
     "ajv-keywords": "3.4.0",
-    "apollo-server": "2.4.0",
+    "apollo-server": "2.4.8",
     "easevalidation": "0.23.0",
     "lodash": "4.17.11",
     "mongodb": "3.1.13",

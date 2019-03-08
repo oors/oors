@@ -14,7 +14,7 @@
   },
   "homepage": "https://github.com/viczam/oors#readme",
   "dependencies": {
-    "apollo-server": "2.4.0",
+    "apollo-server": "2.4.8",
     "bcryptjs": "2.4.3",
     "boom": "7.3.0",
     "celebrate": "9.0.2",
@@ -23,7 +23,7 @@
     "express-jwt": "5.3.1",
     "graphql": "14.1.1",
     "invariant": "2.2.4",
-    "jsonwebtoken": "8.4.0",
+    "jsonwebtoken": "8.5.0",
     "lodash": "4.17.11",
     "moment": "2.24.0",
     "mongodb": "3.1.13",
@@ -35,7 +35,7 @@
     "passport": "0.4.0",
     "passport-jwt": "^4.0.0",
     "passport-local": "1.0.0",
-    "prop-types": "^15.7.1",
-    "react": "16.8.1"
+    "prop-types": "^15.7.2",
+    "react": "16.8.4"
   }
 }
