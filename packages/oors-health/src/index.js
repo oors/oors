@@ -25,8 +25,15 @@ class Health extends Module {
   initialize() {
     this.export({
       startTime: Date.now(),
+      checkServices: this.checkServices,
     });
   }
+
+  checkServices = async () => {
+    const services = {};
+    await this.runHook('scan', () => {}, { services });
+    return services;
+  };
 
   router = router;
 }

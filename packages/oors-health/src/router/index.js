@@ -1,24 +1,30 @@
 import { Router } from 'express';
 import ms from 'ms';
+import { helpers } from 'oors-router';
 
+const { wrapHandler } = helpers;
 const router = Router();
 
-router.get('/health', (req, res) => {
-  // @TODO: fixme
-  const { startTime } = req.app.modules.get('oors.health');
-  const upTime = Date.now() - startTime;
+router.get(
+  '/health',
+  wrapHandler(async req => {
+    const { startTime, checkServices } = req.app.modules.get('oors.health');
+    const upTime = Date.now() - startTime;
+    const services = await checkServices();
 
-  res.json({
-    startTime,
-    upTime,
-    memoryUsage: process.memoryUsage(),
-    readable: {
-      startTime: ms(startTime, { long: true }),
-      upTime: ms(upTime, {
-        long: true,
-      }),
-    },
-  });
-});
+    return {
+      startTime,
+      upTime,
+      memoryUsage: process.memoryUsage(),
+      readable: {
+        startTime: new Date(startTime).toString(),
+        upTime: ms(upTime, {
+          long: true,
+        }),
+      },
+      services,
+    };
+  }),
+);
 
 export default router;
