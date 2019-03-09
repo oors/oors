@@ -3,10 +3,19 @@ import identity from 'lodash/identity';
 import get from 'lodash/get';
 import Store from './Store';
 import AggregationPipeline from './AggregationPipeline';
+import { isRelation } from './validators';
 
 class Repository extends Store {
   static getCollectionName() {
     return this.collectionName || this.name.replace(/Repository$/, '');
+  }
+
+  static validateRelations(relations) {
+    return validate(
+      v.isObject({
+        validator: isRelation,
+      }),
+    )(relations);
   }
 
   constructor({ collection, collectionName, schema, relations } = {}) {
@@ -16,7 +25,9 @@ class Repository extends Store {
       collectionName ||
       this.collectionName ||
       this.constructor.getCollectionName();
-    this.relations = relations || this.relations || this.constructor.relations || {};
+    this.relations = this.constructor.validateRelations(
+      relations || this.relations || this.constructor.relations || {},
+    );
     this.validators = [];
 
     this.schema = schema || this.schema || this.constructor.schema;
