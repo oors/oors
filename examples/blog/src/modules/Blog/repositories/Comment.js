@@ -10,8 +10,6 @@ class Comment extends Repository {
     isHidden: [v.isDefault(false), v.isBoolean()],
     createdBy: [v.isRequired(), isObjectId()],
   };
-
-  static collectionName = 'BlogComment';
 }
 
 export default Comment;

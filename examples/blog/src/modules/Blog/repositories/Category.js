@@ -9,8 +9,6 @@ class Category extends Repository {
     updatedBy: v.isAny(isObjectId(), v.isUndefined()),
   };
 
-  static collectionName = 'BlogCategory';
-
   static relations = {
     posts: {
       repositoryName: 'oors.blog.Post',

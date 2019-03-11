@@ -1,5 +1,6 @@
 import { validate, validators as v } from 'easevalidation';
 import invariant from 'invariant';
+import merge from 'lodash/merge';
 import { MongoClient, ObjectID } from 'mongodb';
 import { Module } from 'oors';
 import Repository from './libs/Repository';
@@ -53,20 +54,22 @@ class MongoDB extends Module {
           isEnabled: [v.isDefault(false), v.isBoolean()],
         }),
       ],
-      autoloadRepositories: [v.isDefault(true), v.isBoolean()],
-      moduleRepositoriesDir: [v.isDefault('repositories'), v.isString()],
+      moduleDefaultConfig: [
+        v.isDefault({}),
+        v.isSchema({
+          repositories: [
+            v.isDefault({}),
+            v.isSchema({
+              autoload: [v.isDefault(true), v.isBoolean()],
+              dir: [v.isDefault('repositories'), v.isString()],
+              prefix: [v.isDefault(''), v.isString()],
+              collectionPrefix: [v.isDefault(''), v.isString()],
+            }),
+          ],
+        }),
+      ],
     }),
   );
-
-  static defaultConfig = {
-    oors: {
-      mongodb: {
-        repositories: {
-          autoload: false,
-        },
-      },
-    },
-  };
 
   static RELATION_TYPE = {
     ONE: 'one',
@@ -186,34 +189,36 @@ class MongoDB extends Module {
     this.configureRepositories();
   };
 
+  getModuleConfig = module =>
+    merge({}, this.getConfig('moduleDefaultConfig'), module.getConfig(this.name));
+
   collectFromModule = async module => {
-    if (
-      !module.getConfig(
-        'oors.mongodb.repositories.autoload',
-        this.getConfig('autoloadRepositories'),
-      )
-    ) {
+    const config = this.getModuleConfig(module);
+
+    if (!config.repositories.autoload) {
       return;
     }
 
-    await this.loadModuleRepositories(module);
+    await this.loadModuleRepositories(module, config);
   };
 
-  async loadModuleRepositories(module) {
+  async loadModuleRepositories(module, config) {
     const { glob } = this.deps['oors.autoloader'].wrap(module);
-    const files = await glob(`${this.getConfig('moduleRepositoriesDir')}/*.js`, {
+    const files = await glob(`${config.repositories.dir}/*.js`, {
       nodir: true,
     });
 
     files.forEach(file => {
       const ModuleRepository = require(file).default; // eslint-disable-line global-require, import/no-dynamic-require
       const repository = new ModuleRepository();
-      repository.module = module;
-      const name =
-        repository.name ||
-        `${module.getConfig('oors.mongodb.repositories.prefix', module.name)}.${
-          repository.constructor.name
+      if (config.repositories.collectionPrefix) {
+        repository.collectionName = `${config.repositories.collectionPrefix}${
+          repository.collectionName
         }`;
+      }
+      repository.module = module;
+      const name = `${config.repositories.prefix || module.name}.${repository.name ||
+        repository.constructor.name}`;
 
       this.addRepository(name, repository);
 
@@ -275,13 +280,10 @@ class MongoDB extends Module {
   }
 
   createConnection = async ({ name, url, options }) => {
-    this.connections[name] = await MongoClient.connect(
-      url,
-      {
-        ...options,
-        useNewUrlParser: true,
-      },
-    );
+    this.connections[name] = await MongoClient.connect(url, {
+      ...options,
+      useNewUrlParser: true,
+    });
     return this.connections[name];
   };
 

@@ -58,16 +58,14 @@ class UserModule extends Module {
   );
 
   static defaultConfig = {
-    oors: {
-      mongodb: {
-        repositories: {
-          autoload: true,
-        },
+    'oors.mongodb': {
+      repositories: {
+        collectionPrefix: 'user',
       },
-      rad: {
-        autoload: {
-          services: false,
-        },
+    },
+    'oors.rad': {
+      autoload: {
+        services: false,
       },
     },
   };

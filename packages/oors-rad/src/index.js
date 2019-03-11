@@ -2,20 +2,26 @@ import { validate, validators as v } from 'easevalidation';
 import pluralize from 'pluralize';
 import { Module } from 'oors';
 import camelCase from 'lodash/camelCase';
+import merge from 'lodash/merge';
 import path from 'path';
 import { createLoaders } from 'oors-mongodb/build/graphql';
 
 class RADModule extends Module {
   static validateConfig = validate(
     v.isSchema({
-      autoload: [
+      autoCreateLoaders: [v.isDefault(true), v.isBoolean()],
+      moduleDefaultConfig: [
         v.isDefault({}),
         v.isSchema({
-          services: [v.isDefault(true), v.isBoolean()],
-          methods: [v.isDefault(true), v.isBoolean()],
+          autoload: [
+            v.isDefault({}),
+            v.isSchema({
+              services: [v.isDefault(true), v.isBoolean()],
+              methods: [v.isDefault(true), v.isBoolean()],
+            }),
+          ],
         }),
       ],
-      autoCreateLoaders: [v.isDefault(true), v.isBoolean()],
     }),
   );
 
@@ -67,14 +73,15 @@ class RADModule extends Module {
   }
 
   collectFromModule = async module => {
+    const config = merge({}, this.getConfig('moduleDefaultConfig'), module.getConfig(this.name));
     const tasks = [];
     const wrapper = this.deps['oors.autoloader'].wrap(module);
 
-    if (module.getConfig('oors.rad.autoload.services', this.getConfig('autoload.services'))) {
+    if (config.autoload.services) {
       tasks.push(this.loadModuleServices(wrapper));
     }
 
-    if (module.getConfig('oors.rad.autoload.methods', this.getConfig('autoload.methods'))) {
+    if (config.autoload.methods) {
       tasks.push(this.loadModuleMethods(wrapper));
     }
 

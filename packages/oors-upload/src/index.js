@@ -12,16 +12,9 @@ class UploadModule extends Module {
   );
 
   static defaultConfig = {
-    oors: {
-      mongodb: {
-        repositories: {
-          autoload: true,
-        },
-      },
-      rad: {
-        autoload: {
-          services: false,
-        },
+    'oors.rad': {
+      autoload: {
+        services: false,
       },
     },
   };

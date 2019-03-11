@@ -9,6 +9,14 @@ class BlogModule extends Module {
   //   }),
   // );
 
+  static defaultConfig = {
+    'oors.mongodb': {
+      repositories: {
+        collectionPrefix: 'Blog',
+      },
+    },
+  };
+
   name = 'oors.blog';
 
   async setup() {
