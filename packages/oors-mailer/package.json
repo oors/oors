@@ -1,6 +1,6 @@
 {
   "name": "oors-mailer",
-  "version": "3.7.0",
+  "version": "3.8.0",
   "description": "oors module providing email services: sending emails using nodemailer, saving emails on disk and much more",
   "main": "build/index.js",
   "repository": {
