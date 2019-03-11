@@ -8,9 +8,9 @@ const router = Router();
 router.get(
   '/health',
   wrapHandler(async req => {
-    const { startTime, checkServices } = req.app.modules.get('oors.health');
+    const { startTime, checkModules } = req.app.modules.get('oors.health');
     const upTime = Date.now() - startTime;
-    const services = await checkServices();
+    const modules = await checkModules();
 
     return {
       startTime,
@@ -22,7 +22,7 @@ router.get(
           long: true,
         }),
       },
-      services,
+      modules,
     };
   }),
 );

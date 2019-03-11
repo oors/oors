@@ -122,6 +122,22 @@ class MongoDB extends Module {
         withTimestamps()(repository);
       }
     });
+
+    this.addHook('oors.health', 'scan', async collector => {
+      const databases = {};
+
+      await Promise.all(
+        Object.keys(this.connections).map(async name => {
+          databases[name] = await this.connections[name].isConnected();
+        }),
+      );
+
+      Object.assign(collector, {
+        'oors.mongodb': {
+          databases,
+        },
+      });
+    });
   }
 
   async setup({ connections }) {
