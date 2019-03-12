@@ -2,7 +2,7 @@ import padStart from 'lodash/padStart';
 import { GraphQLScalarType } from 'graphql';
 import { Kind } from 'graphql/language';
 import GraphQLJSON from 'graphql-type-json';
-import { GraphQLUpload } from 'apollo-upload-server';
+import { GraphQLUpload } from 'graphql-upload';
 
 export default {
   Mutation: {

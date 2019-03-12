@@ -16,7 +16,7 @@
   "dependencies": {
     "apollo-server": "2.4.8",
     "apollo-server-express": "2.4.8",
-    "apollo-upload-server": "7.1.0",
+    "graphql-upload": "8.0.4",
     "dataloader": "1.4.0",
     "easevalidation": "0.23.0",
     "fs-extra": "^7.0.1",
