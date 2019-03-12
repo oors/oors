@@ -1,6 +1,6 @@
 {
   "name": "oors-graphql",
-  "version": "4.9.0",
+  "version": "4.10.0",
   "description": "GraphQL module that integrates apollo-server and helps you build a GraphQL API quickly",
   "main": "build/index.js",
   "repository": {
@@ -16,7 +16,6 @@
   "dependencies": {
     "apollo-server": "2.4.8",
     "apollo-server-express": "2.4.8",
-    "graphql-upload": "8.0.4",
     "dataloader": "1.4.0",
     "easevalidation": "0.23.0",
     "fs-extra": "^7.0.1",
@@ -30,6 +29,7 @@
     "graphql-subscriptions": "1.0.0",
     "graphql-tools": "4.0.4",
     "graphql-type-json": "0.2.1",
+    "graphql-upload": "8.0.4",
     "graphql-voyager": "1.0.0-rc.26",
     "invariant": "2.2.4",
     "isomorphic-fetch": "2.2.1",
