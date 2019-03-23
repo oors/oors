@@ -124,6 +124,7 @@ config.add({
       middlewarePivot: {
         before: 'isMethod',
       },
+      isDev: config.ref('isDev'),
     },
     'oors.upload': {
       uploadDir: config.ref(() => path.resolve(config.get('rootDir'), './uploads')),

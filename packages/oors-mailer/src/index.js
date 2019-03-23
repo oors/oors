@@ -19,6 +19,7 @@ class Mailer extends Module {
       saveToDisk: [v.isDefault(false), v.isBoolean()],
       emailsDir: [v.isRequired(), v.isString()],
       middlewarePivot: isMiddlewarePivot(),
+      isDev: [v.isDefault(false), v.isBoolean()],
     }),
   );
 
@@ -53,7 +54,9 @@ class Mailer extends Module {
   };
 
   async setup({ transport, emailsDir, saveToDisk }) {
-    const Mail = new MailService({
+    await this.loadDependencies(['oors.logger']);
+
+    this.Mail = new MailService({
       transport,
       emailsDir,
       saveToDisk,
@@ -61,11 +64,18 @@ class Mailer extends Module {
         ReactDOMServer.renderToStaticMarkup(React.createElement(component, context)),
     });
 
-    this.export({
-      Mail,
-      send: (...args) => Mail.send(...args),
-    });
+    this.exportProperties(['Mail', 'send']);
   }
+
+  send = async (...args) => {
+    const email = await this.Mail.send(...args);
+
+    if (this.getConfig('transport.jsonTransport') && this.getConfig('isDev')) {
+      this.deps['oors.logger'].info(JSON.stringify(JSON.parse(email.message), null, 2));
+    }
+
+    return email;
+  };
 }
 
 export default Mailer;
