@@ -17,12 +17,12 @@
     "easevalidation": "0.23.0",
     "express": "4.16.4",
     "fs-extra": "^7.0.1",
-    "nodemailer": "5.1.1",
+    "nodemailer": "6.0.0",
     "oors": "^3.0.0",
     "oors-express": "^2.2.3",
     "prop-types": "^15.7.2",
-    "react": "16.8.4",
-    "react-dom": "16.8.4",
+    "react": "16.8.6",
+    "react-dom": "16.8.6",
     "serve-index": "1.9.1"
   }
 }

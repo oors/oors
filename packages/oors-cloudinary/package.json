@@ -5,7 +5,7 @@
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "cloudinary": "1.13.2",
+    "cloudinary": "1.14.0",
     "easevalidation": "0.23.0",
     "lodash": "4.17.11",
     "multer": "1.4.1",

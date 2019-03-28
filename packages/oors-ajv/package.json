@@ -10,7 +10,7 @@
     "apollo-server": "2.4.8",
     "easevalidation": "0.23.0",
     "lodash": "4.17.11",
-    "mongodb": "3.1.13",
+    "mongodb": "3.2.2",
     "oors": "^3.0.0",
     "oors-express": "^2.2.3"
   }
