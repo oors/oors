@@ -91,7 +91,7 @@ class UserModule extends Module {
     withSoftDelete()(User);
     withSoftDelete()(Account);
 
-    User.validators.push(v.isProperty('roles', v.isOneOf(this.getConfig('roles'))));
+    User.validators.push(v.isProperty('roles', v.isArray(v.isOneOf(this.getConfig('roles')))));
 
     this.setupPermissions();
 
