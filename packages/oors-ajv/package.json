@@ -1,6 +1,6 @@
 {
   "name": "oors-ajv",
-  "version": "0.11.0",
+  "version": "0.11.1",
   "main": "build/index.js",
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "MIT",
