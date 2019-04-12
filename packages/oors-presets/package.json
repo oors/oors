@@ -22,7 +22,7 @@
     "cors": "2.8.5",
     "dotenv": "7.0.0",
     "easevalidation": "0.23.0",
-    "express-session": "1.15.6",
+    "express-session": "1.16.1",
     "express-useragent": "1.0.12",
     "helmet": "3.16.0",
     "hpp": "0.2.2",
