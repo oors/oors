@@ -2,6 +2,7 @@ import { validate, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import { Router } from 'express';
 import { isMiddlewarePivot } from 'oors-express/build/validators';
+import cacheableResponse from 'cacheable-response';
 import nextInstallMiddleware from './middlewares/nextInstall';
 import nextRenderMiddleware from './middlewares/nextRender';
 
@@ -23,7 +24,6 @@ class Web extends Module {
                   dir: [v.isRequired(), v.isString()],
                 }),
               ],
-              routes: [v.isDefault({}), v.isObject()],
             }),
           ],
         }),
@@ -32,6 +32,12 @@ class Web extends Module {
         v.isDefault({}),
         v.isSchema({
           autoload: [v.isDefault(false), v.isBoolean()],
+        }),
+      ],
+      cacheConfig: [
+        v.isDefault({}),
+        v.isSchema({
+          ttl: [v.isDefault(1000 * 60 * 60), v.isNumber()],
         }),
       ],
     }),
@@ -54,16 +60,37 @@ class Web extends Module {
 
   async setup() {
     await this.loadDependencies(['oors.express']);
-    const router = Router();
 
-    this.deps['oors.express'].middlewares.insert('nextInstall', {
+    this.router = Router();
+
+    this.deps['oors.express'].middlewares.insertAfter('nextInstall', {
       path: '/',
       id: 'webRouter',
-      factory: () => router,
+      factory: () => this.router,
     });
 
-    this.export({ router });
+    this.cache = this.createCache();
+
+    this.exportProperties(['router', 'cache', 'renderCache']);
   }
+
+  createCache = (config = {}) =>
+    cacheableResponse({
+      get: async ({ req, res, path, params = {} }) => ({
+        data: await req.nextApp.renderToHTML(req, res, path, params),
+      }),
+      send: ({ data, res }) => res.send(data),
+      ...this.getConfig('cacheConfig'),
+      ...config,
+    });
+
+  renderCache = ({ req, res, path, params }) =>
+    this.cache({
+      req,
+      res,
+      path: path || req.path,
+      params: params || { ...req.query, ...req.params },
+    });
 }
 
 export default Web;
