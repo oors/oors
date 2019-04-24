@@ -7,7 +7,7 @@ import multer from 'multer';
 import { helpers } from 'oors-express';
 import MulterStorage from './MulterStorage';
 
-const objToSnakeCase = obj =>
+const snakeCaseProps = obj =>
   Object.keys(obj).reduce(
     (acc, key) => ({
       ...acc,
@@ -33,7 +33,7 @@ class CloudinaryModule extends Module {
   name = 'oors.cloudinary';
 
   async setup({ config }) {
-    cloudinary.config(objToSnakeCase(config));
+    cloudinary.config(snakeCaseProps(config));
 
     this.cloudinary = cloudinary;
 
@@ -80,23 +80,23 @@ class CloudinaryModule extends Module {
   }
 
   upload = (file, { stream, ...options } = {}) =>
-    this.uploader[stream ? 'uploadStream' : 'upload'](file, objToSnakeCase(options));
+    this.uploader[stream ? 'uploadStream' : 'upload'](file, snakeCaseProps(options));
 
   rename = (fromPublicId, toPublicId, options = {}) =>
-    this.uploader.rename(fromPublicId, toPublicId, objToSnakeCase(options));
+    this.uploader.rename(fromPublicId, toPublicId, snakeCaseProps(options));
 
   remove = (publicId, options = {}) => this.uploader.destroy(publicId, options);
 
   manageTags = fn => {
     fn({
       add: (tag, publicIds, options = {}) =>
-        this.uploader.addTag(tag, publicIds, objToSnakeCase(options)),
+        this.uploader.addTag(tag, publicIds, snakeCaseProps(options)),
       remove: (tag, publicIds, options = {}) =>
-        this.uploader.removeTag(tag, publicIds, objToSnakeCase(options)),
+        this.uploader.removeTag(tag, publicIds, snakeCaseProps(options)),
       removeAll: (publicIds, options = {}) =>
-        this.uploader.removeAllTags(publicIds, objToSnakeCase(options)),
+        this.uploader.removeAllTags(publicIds, snakeCaseProps(options)),
       replace: (tag, publicIds, options = {}) =>
-        this.uploader.replaceTag(tag, publicIds, objToSnakeCase(options)),
+        this.uploader.replaceTag(tag, publicIds, snakeCaseProps(options)),
     });
   };
 
