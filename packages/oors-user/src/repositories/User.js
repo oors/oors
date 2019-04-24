@@ -45,8 +45,6 @@ class User extends Repository {
     ],
   };
 
-  static collectionName = 'userUser';
-
   static relations = {
     account: {
       repositoryName: 'oors.user.Account',

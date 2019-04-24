@@ -11,8 +11,6 @@ class Login extends Repository {
     platform: [v.isRequired(), v.isString()],
   };
 
-  static collectionName = 'userLogin';
-
   static relations = {
     user: {
       repositoryName: 'oors.user.User',
