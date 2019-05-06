@@ -8,6 +8,6 @@
     "easevalidation": "0.23.0",
     "oors": "^3.0.0",
     "oors-express": "^2.2.3",
-    "raven": "2.6.4"
+    "@sentry/node": "5.1.2"
   }
 }

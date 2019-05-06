@@ -1,13 +1,13 @@
 /* eslint-disable class-methods-use-this */
 import { validate, validators as v } from 'easevalidation';
 import { Module } from 'oors';
-import Raven from 'raven';
+import * as Sentry from '@sentry/node';
 
 class SentryModule extends Module {
   static validateConfig = validate(
     v.isSchema({
       dsn: [v.isRequired(), v.isString()],
-      options: [v.isDefault({}), v.isObject()],
+      integrations: [v.isDefault([]), v.isArray()],
       middlewarePivots: [
         v.isDefault({}),
         v.isSchema({
@@ -43,29 +43,20 @@ class SentryModule extends Module {
     'oors.express.middlewares': ({ middlewares }) => {
       middlewares.insert(this.getConfig('middlewarePivots').request, {
         id: 'sentryRequestHandler',
-        factory: () => Raven.requestHandler(),
+        factory: () => Sentry.Handlers.requestHandler(),
       });
 
       middlewares.insert(this.getConfig('middlewarePivots').error, {
         id: 'sentryErrorHandler',
-        factory: () => Raven.errorHandler(),
+        factory: () => Sentry.Handlers.errorHandler(),
       });
     },
   };
 
-  async setup({ dsn, options, logGqlErrors }) {
-    await new Promise((resolve, reject) => {
-      Raven.config(dsn, {
-        parseUser: req => req.user._id,
-        captureUnhandledRejections: true,
-        ...options,
-      }).install(err => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
+  async setup({ dsn, integrations, logGqlErrors }) {
+    Sentry.init({
+      dsn,
+      integrations,
     });
 
     if (logGqlErrors) {
@@ -77,7 +68,7 @@ class SentryModule extends Module {
     this.exportProperties(['logError']);
   }
 
-  logError = error => new Promise(resolve => Raven.captureException(error, resolve));
+  logError = error => new Promise(resolve => Sentry.captureException(error, resolve));
 }
 
 export default SentryModule;
