@@ -6,7 +6,7 @@ import * as Sentry from '@sentry/node';
 class SentryModule extends Module {
   static validateConfig = validate(
     v.isSchema({
-      dsn: [v.isRequired(), v.isString()],
+      dsn: [v.isDefault(process.env.SENTRY_DSN), v.isRequired(), v.isString()],
       integrations: [v.isDefault([]), v.isArray()],
       middlewarePivots: [
         v.isDefault({}),
