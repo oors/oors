@@ -92,8 +92,13 @@ export default ({ router = Router(), repository }) => {
     .put(
       wrapHandler(req =>
         repository.replaceOne({
-          ...req.entity,
-          ...toBSON(req.body),
+          query: {
+            _id: req.entity._id,
+          },
+          replacement: {
+            ...req.entity,
+            ...toBSON(req.body),
+          },
         }),
       ),
     )

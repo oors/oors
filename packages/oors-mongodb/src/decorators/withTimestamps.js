@@ -72,9 +72,9 @@ export default ({
       );
     },
 
-    replaceOne(query, data, ...restArgs) {
-      set(data, updateProperty, new Date());
-      return replaceOne.call(repository, query, data, ...restArgs);
+    replaceOne({ query, replacement, ...restArgs }) {
+      set(replacement, updateProperty, new Date());
+      return replaceOne.call(repository, { query, replacement, ...restArgs });
     },
   });
 

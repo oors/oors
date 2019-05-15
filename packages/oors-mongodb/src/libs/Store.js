@@ -106,16 +106,17 @@ class Store {
     );
   }
 
-  async createOne(data) {
+  async createOne(data, options) {
     invariant(typeof data === 'object', 'Data is required!');
-    const result = await this.collection.insertOne(await this.parse(data));
+    const result = await this.collection.insertOne(await this.parse(data), options);
     return result.ops[0];
   }
 
-  async createMany(data) {
+  async createMany(data, options) {
     invariant(data && Array.isArray(data), 'Requires an array of items!');
     const result = await this.collection.insertMany(
       await Promise.all(data.map(this.parse.bind(this))),
+      options,
     );
     return result.ops;
   }
@@ -131,16 +132,20 @@ class Store {
     return this.collection.updateMany(query, update, options);
   }
 
-  async replaceOne(query, data) {
+  async replaceOne({ query, replacement, options }) {
     invariant(query, 'Query is required!');
-    invariant(data, 'Data is required!');
-    const result = await this.collection.findOneAndReplace(query, await this.parse(data));
+    invariant(replacement, 'replacement is required!');
+    const result = await this.collection.findOneAndReplace(
+      query,
+      await this.parse(replacement),
+      options,
+    );
     return result.value;
   }
 
   async save(data) {
     return data[this.id]
-      ? this.replaceOne({ [this.id]: this.toId(data[this.id]) }, data)
+      ? this.replaceOne({ query: { [this.id]: this.toId(data[this.id]) }, replacement: data })
       : this.createOne(data);
   }
 
