@@ -1,6 +1,6 @@
 {
   "name": "oors-rad",
-  "version": "2.13.2",
+  "version": "2.13.3",
   "main": "build/index.js",
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "ISC",
@@ -9,7 +9,7 @@
     "fs-extra": "^7.0.1",
     "lodash": "4.17.11",
     "oors": "^3.0.0",
-    "oors-mongodb": "^4.13.2",
+    "oors-mongodb": "^4.13.3",
     "pluralize": "7.0.0"
   }
 }
