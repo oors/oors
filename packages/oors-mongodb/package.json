@@ -16,11 +16,11 @@
   "dependencies": {
     "easevalidation": "0.23.0",
     "escape-string-regexp": "2.0.0",
-    "fs-extra": "7.0.1",
-    "glob": "7.1.3",
+    "fs-extra": "8.0.1",
+    "glob": "7.1.4",
     "invariant": "2.2.4",
     "lodash": "4.17.11",
-    "mongodb": "3.2.3",
+    "mongodb": "3.2.6",
     "mongodb-extended-json": "^1.10.1",
     "oors": "^3.0.0",
     "oors-graphql": "^4.11.3"

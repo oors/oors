@@ -6,10 +6,10 @@
   "license": "ISC",
   "dependencies": {
     "easevalidation": "0.23.0",
-    "fs-extra": "^7.0.1",
+    "fs-extra": "^8.0.1",
     "lodash": "4.17.11",
     "oors": "^3.0.0",
     "oors-mongodb": "^4.13.3",
-    "pluralize": "7.0.0"
+    "pluralize": "8.0.0"
   }
 }

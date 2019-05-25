@@ -7,10 +7,10 @@
   "dependencies": {
     "ajv": "6.10.0",
     "ajv-keywords": "3.4.0",
-    "apollo-server": "2.4.8",
+    "apollo-server": "2.5.0",
     "easevalidation": "0.23.0",
     "lodash": "4.17.11",
-    "mongodb": "3.2.3",
+    "mongodb": "3.2.6",
     "oors": "^3.0.0",
     "oors-express": "^2.2.3"
   }

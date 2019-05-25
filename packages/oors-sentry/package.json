@@ -5,7 +5,7 @@
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@sentry/node": "5.1.2",
+    "@sentry/node": "5.3.0",
     "easevalidation": "0.23.0",
     "oors": "^3.0.0",
     "oors-express": "^2.2.3"

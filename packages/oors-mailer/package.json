@@ -15,9 +15,9 @@
   "homepage": "https://github.com/viczam/oors#readme",
   "dependencies": {
     "easevalidation": "0.23.0",
-    "express": "4.16.4",
-    "fs-extra": "^7.0.1",
-    "nodemailer": "6.1.1",
+    "express": "4.17.0",
+    "fs-extra": "^8.0.1",
+    "nodemailer": "6.2.1",
     "oors": "^3.0.0",
     "oors-express": "^2.2.3",
     "prop-types": "^15.7.2",

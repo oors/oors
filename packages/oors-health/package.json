@@ -15,7 +15,7 @@
   "homepage": "https://github.com/viczam/oors#readme",
   "dependencies": {
     "easevalidation": "0.23.0",
-    "express": "4.16.4",
+    "express": "4.17.0",
     "express-status-monitor": "1.2.5",
     "ms": "2.1.1",
     "oors": "^3.0.0",
