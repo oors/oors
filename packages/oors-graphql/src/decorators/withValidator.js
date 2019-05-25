@@ -1,7 +1,7 @@
 import { UserInputError } from 'apollo-server';
 import { validate, formatError } from 'easevalidation';
 
-export default validatorOrFactory => {
+export default (validatorOrFactory, message = 'Failed validation!') => {
   const { stack } = new Error();
 
   return resolver => (_, startArgs, ctx, info) => {
@@ -17,7 +17,7 @@ export default validatorOrFactory => {
     try {
       args = validate(validator)(startArgs);
     } catch (error) {
-      throw new UserInputError('Failed validation!', {
+      throw new UserInputError(message, {
         invalidArgs: Object.keys(error.error),
         error: formatError(error),
         stack,
