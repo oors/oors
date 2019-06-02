@@ -6,7 +6,7 @@
   "license": "ISC",
   "dependencies": {
     "easevalidation": "0.23.0",
-    "express": "4.17.0",
+    "express": "4.17.1",
     "express-react-views": "0.11.0",
     "lodash": "4.17.11",
     "merge-descriptors": "1.0.1",
