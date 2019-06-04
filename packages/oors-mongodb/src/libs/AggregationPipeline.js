@@ -170,7 +170,7 @@ class AggregationPipeline {
   toResult = async () => {
     const pipeline = this.toArray();
     const lastStage = last(pipeline);
-    const result = await this.repository.aggregate(pipeline);
+    const result = await this.repository.aggregate(pipeline, this.options);
 
     if (!pipeline.length) {
       return result;

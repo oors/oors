@@ -90,7 +90,12 @@ class Repository extends Store {
   };
 
   aggregate = (pipeline, options = {}) =>
-    this.collection.aggregate(this.toMongoPipeline(pipeline), options).toArray();
+    this.collection
+      .aggregate(this.toMongoPipeline(pipeline), {
+        ...(pipeline instanceof AggregationPipeline ? pipeline.options : {}),
+        ...options,
+      })
+      .toArray();
 
   createPipeline = (initialPipeline = [], options) =>
     new AggregationPipeline(this, this.toMongoPipeline(initialPipeline), options);
