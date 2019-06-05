@@ -82,7 +82,7 @@ class Repository extends Store {
   };
 
   watch = (pipelineBuilder, options = {}) =>
-    this.collection.watch(pipelineBuilder(this.createPipeline()).toArray(), options);
+    this.collection.watch(pipelineBuilder(this.createPipeline()).stack, options);
 
   on = (operation, cb, pipelineBuilder = identity, options = {}) => {
     const operationType = operation === 'create' ? 'insert' : operation;
