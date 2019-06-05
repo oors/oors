@@ -5,7 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "dev": "nodemon src/index.js --exec babel-node",
-    "seed": "babel-node scripts/seed"
+    "seed": "babel-node scripts/seed",
+    "eslint": "eslint . --fix"
   },
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "MIT",
@@ -14,7 +15,7 @@
     "easevalidation": "0.23.0",
     "lodash": "4.17.11",
     "moment": "2.24.0",
-    "mongodb": "3.2.6",
+    "mongodb": "3.2.7",
     "prop-types": "^15.7.2",
     "randomstring": "1.1.5",
     "react": "16.8.6",
