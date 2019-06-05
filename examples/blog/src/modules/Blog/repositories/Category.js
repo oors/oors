@@ -19,7 +19,7 @@ class Category extends Repository {
   };
 
   getAllWithPostsWithCategory() {
-    return this.aggregate(pipeline => pipeline
+    return this.createPipeline()
       .lookup('posts')
       .unwind({ path: '$posts', preserveNullAndEmptyArrays: true })
       .lookup(
@@ -27,7 +27,8 @@ class Category extends Repository {
           localField: 'posts.categoryId',
           as: 'posts.category',
         }),
-      ));
+      )
+      .toArray();
   }
 }
 

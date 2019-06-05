@@ -51,36 +51,43 @@ const data = {
   },
 };
 
-const createUsers = async ({ User, Account }) => Promise.all(
-  data.users.map(async userEntry => {
-    const { user, account } = await User.signup(userEntry);
-    await Account.confirm(account._id);
-    return user;
-  }),
-);
+const createUsers = async ({ signup, AccountRepository }) =>
+  Promise.all(
+    data.users.map(async userEntry => {
+      const user = await signup(userEntry);
+      await AccountRepository.confirm(user.account.confirmation.token);
+      return user;
+    }),
+  );
 
-const createBlogCategories = async ({ CategoryRepository, users }) => Promise.all(
-  data.blog.categories.map(name => CategoryRepository.createOne({
-    name,
-    createdBy: users[random(users.length - 1)]._id,
-  })),
-);
+const createBlogCategories = async ({ CategoryRepository, users }) =>
+  Promise.all(
+    data.blog.categories.map(name =>
+      CategoryRepository.createOne({
+        name,
+        createdBy: users[random(users.length - 1)]._id,
+      })),
+  );
 
-const createBlogPosts = async ({ PostRepository, categories, users }) => Promise.all(
-  data.blog.posts.map(({ category, ...postData }) => PostRepository.createOne({
-    ...postData,
-    createdBy: users[random(users.length - 1)]._id,
-    categoryId: categories.find(({ name }) => name === category)._id,
-  })),
-);
+const createBlogPosts = async ({ PostRepository, categories, users }) =>
+  Promise.all(
+    data.blog.posts.map(({ category, ...postData }) =>
+      PostRepository.createOne({
+        ...postData,
+        createdBy: users[random(users.length - 1)]._id,
+        categoryId: categories.find(({ name }) => name === category)._id,
+      })),
+  );
 
-const createBlogComments = async ({ CommentRepository, posts, users }) => Promise.all(
-  data.blog.comments.map(({ post, ...commentData }) => CommentRepository.createOne({
-    ...commentData,
-    createdBy: users[random(users.length - 1)]._id,
-    postId: posts.find(({ title }) => title === post)._id,
-  })),
-);
+const createBlogComments = async ({ CommentRepository, posts, users }) =>
+  Promise.all(
+    data.blog.comments.map(({ post, ...commentData }) =>
+      CommentRepository.createOne({
+        ...commentData,
+        createdBy: users[random(users.length - 1)]._id,
+        postId: posts.find(({ title }) => title === post)._id,
+      })),
+  );
 
 app
   .boot()
@@ -89,9 +96,10 @@ app
     const PostRepository = getRepository('oors.blog.Post');
     const CategoryRepository = getRepository('oors.blog.Category');
     const CommentRepository = getRepository('oors.blog.Comment');
-    const { User, Account } = app.modules.get('oors.user');
+    const AccountRepository = getRepository('oors.user.Account');
+    const { signup } = app.modules.get('oors.user');
 
-    const users = await createUsers({ User, Account });
+    const users = await createUsers({ signup, AccountRepository });
     const categories = await createBlogCategories({ CategoryRepository, users });
     const posts = await createBlogPosts({ PostRepository, categories, users });
     await createBlogComments({ CommentRepository, posts, users });

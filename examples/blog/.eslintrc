@@ -27,7 +27,8 @@
     "jsx-a11y/href-no-hash": 0,
     "react/jsx-closing-tag-location": 0,
     "react/jsx-curly-brace-presence": 0,
-    "max-len": 0
+    "max-len": 0,
+    "implicit-arrow-linebreak": 0
   },
   "settings": {
     "import/core-modules": ["core"]

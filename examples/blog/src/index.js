@@ -12,6 +12,7 @@ config.set(
   'modules.oors.web.nextMiddlewareConfig.params.appConfig.dir',
   path.resolve(config.get('rootDir'), 'web'),
 );
+config.set('modules.oors.user.mockUserConfig.enabled', true);
 
 const app = new Application(config);
 
