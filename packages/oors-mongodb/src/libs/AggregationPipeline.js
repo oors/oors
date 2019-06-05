@@ -30,10 +30,13 @@ class AggregationPipeline {
     'unwind',
   ];
 
-  constructor(repository, pipeline = [], options = {}) {
-    this.options = options;
+  constructor(repository, startPipeline = [], options = {}) {
     this.repository = repository;
-    this.pipeline = pipeline;
+    this.stack = [];
+    this.options = options;
+
+    this.merge(startPipeline);
+
     // check if using Proxy is a better alternative
     this.constructor.stages.forEach(stage => {
       if (!this[stage]) {
@@ -54,7 +57,7 @@ class AggregationPipeline {
 
   unshift(...operations) {
     operations.reverse().forEach(operation => {
-      this.pipeline.unshift(...(Array.isArray(operation) ? operation : [operation]));
+      this.stack.unshift(...(Array.isArray(operation) ? operation : [operation]));
     });
 
     return this;
@@ -62,14 +65,14 @@ class AggregationPipeline {
 
   push(...operations) {
     operations.forEach(operation => {
-      this.pipeline.push(...(Array.isArray(operation) ? operation : [operation]));
+      this.stack.push(...(Array.isArray(operation) ? operation : [operation]));
     });
 
     return this;
   }
 
   merge(pipeline) {
-    return this.push(pipeline.toArray());
+    return this.push(Array.isArray(pipeline) ? pipeline : pipeline.stack);
   }
 
   match = query =>
@@ -134,7 +137,7 @@ class AggregationPipeline {
   };
 
   hasLookup = (relation, options = {}) =>
-    !!this.pipeline.find(
+    !!this.stack.find(
       stage =>
         stage.$lookup &&
         isEqual(stage.$lookup, this.repository.relationToLookup(relation, options)),
@@ -161,18 +164,21 @@ class AggregationPipeline {
 
   one = () => this.limit(1);
 
-  clone = pipeline => new this.constructor(this.repository, pipeline || [...this.pipeline]);
+  clone = pipeline => new this.constructor(this.repository, pipeline || [...this.stack]);
 
-  toArray = () => this.pipeline;
+  toCursor = () =>
+    this.repository.aggregate({
+      pipeline: this.stack,
+      options: this.options,
+    });
 
-  toJSON = () => this.toArray();
+  toArray = async () => (await this.toCursor()).toArray();
 
   toResult = async () => {
-    const pipeline = this.toArray();
-    const lastStage = last(pipeline);
-    const result = await this.repository.aggregate(pipeline, this.options);
+    const lastStage = last(this.stack);
+    const result = await this.toArray();
 
-    if (!pipeline.length) {
+    if (!lastStage) {
       return result;
     }
 

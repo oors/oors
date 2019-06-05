@@ -76,21 +76,24 @@ export const buildConfig = config => {
 
 export const findById = config => {
   const { getLoaders } = buildConfig(config);
+
   return (_, { id }, ctx) => getLoaders(ctx).findById.load(id);
 };
 
 export const findOne = config => {
-  const { getLoaders, createPipeline } = buildConfig(config);
+  const { createPipeline } = buildConfig(config);
+
   return withValidator(
     v.isSchema({
       where: [v.isDefault({}), v.isRequired(), v.isObject()],
     }),
-  )(async (_, args, ctx, info) => {
-    const results = await getLoaders(ctx).aggregate.load(
-      createPipeline(_, args, ctx, info).limit(1),
-    );
-    return results.length > 0 ? ctx.fromMongo(results[0]) : null;
-  });
+  )(async (_, args, ctx, info) =>
+    ctx.fromMongo(
+      await createPipeline(_, args, ctx, info)
+        .one()
+        .toResult(),
+    ),
+  );
 };
 
 export const findMany = config => {
@@ -105,20 +108,17 @@ export const findMany = config => {
       });
     }
 
-    return getLoaders(ctx)
-      .aggregate.load(createPipeline(_, args, ctx, info))
-      .then(ctx.fromMongoArray);
+    return ctx.fromMongoArray(await createPipeline(_, args, ctx, info).toArray());
   };
 };
 
 export const count = config => {
-  const { getLoaders, createPipeline } = buildConfig(config);
-  return async (_, args, ctx, info) => {
-    const results = await getLoaders(ctx).aggregate.load(
-      createPipeline(_, args, ctx, info).count(),
-    );
-    return Array.isArray(results) && results.length > 0 ? results[0].count : 0;
-  };
+  const { createPipeline } = buildConfig(config);
+
+  return async (_, args, ctx, info) =>
+    createPipeline(_, args, ctx, info)
+      .count()
+      .toResult();
 };
 
 export const createOne = config => {
@@ -133,17 +133,16 @@ export const createMany = config => {
 };
 
 export const updateOne = config => {
-  const { getRepository, getLoaders, createPipeline, canUpdate } = buildConfig(config);
+  const { getRepository, createPipeline, canUpdate } = buildConfig(config);
   return async (_, args, ctx, info) => {
     const { input } = args;
     let { item } = args;
     const Repository = getRepository(ctx);
 
     if (item === undefined) {
-      const results = await getLoaders(ctx).aggregate.load(
-        createPipeline(_, args, ctx, info).limit(1),
-      );
-      item = Array.isArray(results) && results.length > 0 ? results[0] : undefined;
+      item = createPipeline(_, args, ctx, info)
+        .one()
+        .toResult();
     }
 
     if (!item) {
@@ -178,16 +177,15 @@ export const updateOne = config => {
 };
 
 export const deleteOne = config => {
-  const { getRepository, getLoaders, createPipeline, canDelete } = buildConfig(config);
+  const { getRepository, createPipeline, canDelete } = buildConfig(config);
   return async (_, args, ctx, info) => {
     const Repository = getRepository(ctx);
     let { item } = args;
 
     if (item === undefined) {
-      const results = await getLoaders(ctx).aggregate.load(
-        createPipeline(_, args, ctx, info).limit(1),
-      );
-      item = Array.isArray(results) && results.length > 0 ? results[0] : undefined;
+      item = createPipeline(_, args, ctx, info)
+        .one()
+        .toResult();
     }
 
     if (!item) {

@@ -41,7 +41,7 @@ export default Repository => ({
   aggregate: {
     loader: pipelines => Promise.all(pipelines.map(pipeline => Repository.aggregate(pipeline))),
     options: {
-      cacheKeyFn: key => JSON.stringify(Repository.toMongoPipeline(key)),
+      cacheKeyFn: key => JSON.stringify(key),
     },
   },
   count: {

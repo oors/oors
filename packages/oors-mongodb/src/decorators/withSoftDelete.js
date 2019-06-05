@@ -24,7 +24,6 @@ export default ({ propertyName = 'isDeleted', timestampName = 'deletedAt' } = {}
     updateMany,
     deleteOne,
     deleteMany,
-    toMongoPipeline,
     aggregate,
   } = repository;
 
@@ -69,10 +68,9 @@ export default ({ propertyName = 'isDeleted', timestampName = 'deletedAt' } = {}
               },
             },
           }),
-    aggregate: (pipeline, { noSoftDeleteFilter, ...restOptions } = {}) =>
-      aggregate.call(
-        repository,
-        noSoftDeleteFilter
+    aggregate: ({ pipeline, options: { noSoftDeleteFilter, ...restOptions } = {} }) =>
+      aggregate.call(repository, {
+        pipeline: noSoftDeleteFilter
           ? pipeline
           : [
               {
@@ -80,10 +78,10 @@ export default ({ propertyName = 'isDeleted', timestampName = 'deletedAt' } = {}
                   [propertyName]: false,
                 },
               },
-              ...toMongoPipeline.call(repository, pipeline),
+              ...pipeline,
             ],
-        restOptions,
-      ),
+        options: restOptions,
+      }),
   });
 
   return repository;

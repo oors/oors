@@ -73,32 +73,7 @@ class Repository extends Store {
     return hasOperations ? bulk.execute() : false;
   };
 
-  toMongoPipeline = pipeline => {
-    if (typeof pipeline === 'function') {
-      return this.toMongoPipeline(pipeline(this.createPipeline()));
-    }
-
-    if (pipeline instanceof AggregationPipeline) {
-      return pipeline.toArray();
-    }
-
-    if (!Array.isArray(pipeline)) {
-      throw new Error('Invalid pipeline argument!');
-    }
-
-    return pipeline;
-  };
-
-  aggregate = (pipeline, options = {}) =>
-    this.collection
-      .aggregate(this.toMongoPipeline(pipeline), {
-        ...(pipeline instanceof AggregationPipeline ? pipeline.options : {}),
-        ...options,
-      })
-      .toArray();
-
-  createPipeline = (initialPipeline = [], options) =>
-    new AggregationPipeline(this, this.toMongoPipeline(initialPipeline), options);
+  createPipeline = (...args) => new AggregationPipeline(this, ...args);
 
   watchChanges = (onChange, ...args) => {
     const changeStream = this.watch(...args);
