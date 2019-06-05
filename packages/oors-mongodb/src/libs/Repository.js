@@ -1,5 +1,4 @@
 import { test, validate, validators as v } from 'easevalidation';
-import identity from 'lodash/identity';
 import get from 'lodash/get';
 import Store from './Store';
 import AggregationPipeline from './AggregationPipeline';
@@ -74,20 +73,6 @@ class Repository extends Store {
   };
 
   createPipeline = (...args) => new AggregationPipeline(this, ...args);
-
-  on = ({ operation, options = {}, wrapPipeline = identity, cb }) => {
-    const operationType = operation === 'create' ? 'insert' : operation;
-    const changeStream = wrapPipeline(
-      this.createPipeline().match({
-        operationType,
-      }),
-    ).watchChanges(change => cb(change.fullDocument, change), {
-      fullDocument: 'updateLookup',
-      ...options,
-    });
-
-    return () => changeStream.close();
-  };
 }
 
 export default Repository;

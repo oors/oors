@@ -200,6 +200,18 @@ class AggregationPipeline {
     changeStream.on('change', onChange);
     return changeStream;
   };
+
+  on = (operation, cb, options = {}) => {
+    const operationType = operation === 'create' ? 'insert' : operation;
+    const changeStream = this.match({
+      operationType,
+    }).watchChanges(change => cb(change.fullDocument, change), {
+      fullDocument: 'updateLookup',
+      ...options,
+    });
+
+    return () => changeStream.close();
+  };
 }
 
 export default AggregationPipeline;
