@@ -192,6 +192,14 @@ class AggregationPipeline {
 
     return result;
   };
+
+  watch = (options = {}) => this.repository.collection.watch(this.stack, options);
+
+  watchChanges = (onChange, ...args) => {
+    const changeStream = this.watch(...args);
+    changeStream.on('change', onChange);
+    return changeStream;
+  };
 }
 
 export default AggregationPipeline;

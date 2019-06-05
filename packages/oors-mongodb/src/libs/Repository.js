@@ -75,30 +75,16 @@ class Repository extends Store {
 
   createPipeline = (...args) => new AggregationPipeline(this, ...args);
 
-  watchChanges = (onChange, ...args) => {
-    const changeStream = this.watch(...args);
-    changeStream.on('change', onChange);
-    return changeStream;
-  };
-
-  watch = (pipelineBuilder, options = {}) =>
-    this.collection.watch(pipelineBuilder(this.createPipeline()).stack, options);
-
-  on = (operation, cb, pipelineBuilder = identity, options = {}) => {
+  on = ({ operation, options = {}, wrapPipeline = identity, cb }) => {
     const operationType = operation === 'create' ? 'insert' : operation;
-    const changeStream = this.watchChanges(
-      change => cb(change.fullDocument, change),
-      p =>
-        pipelineBuilder(
-          p.match({
-            operationType,
-          }),
-        ),
-      {
-        fullDocument: 'updateLookup',
-        ...options,
-      },
-    );
+    const changeStream = wrapPipeline(
+      this.createPipeline().match({
+        operationType,
+      }),
+    ).watchChanges(change => cb(change.fullDocument, change), {
+      fullDocument: 'updateLookup',
+      ...options,
+    });
 
     return () => changeStream.close();
   };
