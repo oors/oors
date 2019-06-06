@@ -140,7 +140,7 @@ export const updateOne = config => {
     const Repository = getRepository(ctx);
 
     if (item === undefined) {
-      item = createPipeline(_, args, ctx, info)
+      item = await createPipeline(_, args, ctx, info)
         .one()
         .toResult();
     }
@@ -183,7 +183,7 @@ export const deleteOne = config => {
     let { item } = args;
 
     if (item === undefined) {
-      item = createPipeline(_, args, ctx, info)
+      item = await createPipeline(_, args, ctx, info)
         .one()
         .toResult();
     }
