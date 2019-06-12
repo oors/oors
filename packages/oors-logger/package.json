@@ -1,6 +1,6 @@
 {
   "name": "oors-logger",
-  "version": "3.4.0",
+  "version": "3.4.1",
   "description": "oors logger module by the usage of winston.",
   "main": "build/index.js",
   "repository": {
