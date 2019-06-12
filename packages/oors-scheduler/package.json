@@ -6,7 +6,7 @@
   "license": "ISC",
   "dependencies": {
     "agenda": "2.0.2",
-    "easevalidation": "0.23.0",
+    "easevalidation": "0.24.0",
     "fs-extra": "^8.0.1",
     "lodash": "4.17.11",
     "oors": "^3.0.0"

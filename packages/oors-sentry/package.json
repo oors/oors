@@ -6,7 +6,7 @@
   "license": "MIT",
   "dependencies": {
     "@sentry/node": "5.4.0",
-    "easevalidation": "0.23.0",
+    "easevalidation": "0.24.0",
     "oors": "^3.0.0",
     "oors-express": "^2.4.0"
   }
