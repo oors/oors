@@ -1,6 +1,6 @@
 {
   "name": "oors-upload",
-  "version": "2.16.6",
+  "version": "2.16.7",
   "description": "oors file upload",
   "main": "build/index.js",
   "repository": {
@@ -22,7 +22,7 @@
     "multer": "1.4.1",
     "oors": "^3.0.0",
     "oors-express": "^2.4.1",
-    "oors-mongodb": "^4.16.4",
-    "oors-router": "^3.15.6"
+    "oors-mongodb": "^4.16.5",
+    "oors-router": "^3.15.7"
   }
 }

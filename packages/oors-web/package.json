@@ -1,6 +1,6 @@
 {
   "name": "oors-web",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "oors module integrating next.js",
   "main": "build/index.js",
   "repository": {
