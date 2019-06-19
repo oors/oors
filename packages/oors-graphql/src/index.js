@@ -246,13 +246,12 @@ class Gql extends Module {
     this.addTypeDefs(importSchema(schemaPath));
   };
 
-  loadFromDir = async dirPath => {
-    await Promise.all([
+  loadFromDir = async dirPath =>
+    Promise.all([
       this.loadTypeDefsFromDir(dirPath),
       this.loadResolversFromDir(dirPath),
       this.loadDirectivesFromDir(dirPath),
     ]);
-  };
 
   loadTypeDefsFromDir = async dirPath => {
     try {
@@ -312,17 +311,15 @@ class Gql extends Module {
       return;
     }
 
-    try {
-      if (has(module, 'graphql')) {
-        this.addTypeDefs(get(module, 'graphql.typeDefs', ''));
-        this.addResolvers(get(module, 'graphql.resolvers', {}));
-        if (has(module, 'graphql.typeDefsPath')) {
-          await this.addTypeDefsByPath(get(module, 'graphql.typeDefsPath'));
-        }
-      } else {
-        await this.loadFromDir(path.resolve(path.dirname(module.filePath), 'graphql'));
+    if (has(module, 'graphql')) {
+      this.addTypeDefs(get(module, 'graphql.typeDefs', ''));
+      this.addResolvers(get(module, 'graphql.resolvers', {}));
+      if (has(module, 'graphql.typeDefsPath')) {
+        await this.addTypeDefsByPath(get(module, 'graphql.typeDefsPath'));
       }
-    } catch (err) {}
+    } else {
+      await this.loadFromDir(path.resolve(path.dirname(module.filePath), 'graphql'));
+    }
   };
 
   buildSchema = async () => {
