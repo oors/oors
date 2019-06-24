@@ -1,6 +1,6 @@
 {
   "name": "oors-user",
-  "version": "4.16.7",
+  "version": "4.16.8",
   "description": "oors user module providing authentication, authorization, users and accounts management.",
   "main": "build/index.js",
   "repository": {
@@ -30,9 +30,9 @@
     "ms": "2.1.2",
     "oors": "^3.0.0",
     "oors-express": "^2.4.1",
-    "oors-graphql": "^4.13.2",
-    "oors-mongodb": "^4.16.5",
-    "oors-router": "^3.15.7",
+    "oors-graphql": "^4.13.3",
+    "oors-mongodb": "^4.16.6",
+    "oors-router": "^3.15.8",
     "passport": "0.4.0",
     "passport-jwt": "^4.0.0",
     "passport-local": "1.0.0",
