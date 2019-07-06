@@ -5,8 +5,8 @@
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "easevalidation": "0.24.0",
-    "fs-extra": "^8.0.1",
+    "easevalidation": "0.25.0",
+    "fs-extra": "^8.1.0",
     "glob": "7.1.4",
     "lodash": "4.17.11",
     "minimatch": "3.0.4",

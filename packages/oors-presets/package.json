@@ -21,7 +21,7 @@
     "cookie-parser": "^1.4.4",
     "cors": "2.8.5",
     "dotenv": "8.0.0",
-    "easevalidation": "0.24.0",
+    "easevalidation": "0.25.0",
     "express-session": "1.16.2",
     "express-useragent": "1.0.12",
     "helmet": "3.18.0",
