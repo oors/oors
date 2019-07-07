@@ -1,6 +1,6 @@
 {
   "name": "oors-autoloader",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "main": "build/index.js",
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "ISC",

@@ -1,6 +1,6 @@
 {
   "name": "oors-web",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "oors module integrating next.js",
   "main": "build/index.js",
   "repository": {
@@ -20,7 +20,7 @@
     "lodash": "^4.17.11",
     "next": "8.1.0",
     "oors": "^3.0.0",
-    "oors-express": "^2.4.1",
+    "oors-express": "^2.4.2",
     "serve-favicon": "2.5.0"
   }
 }

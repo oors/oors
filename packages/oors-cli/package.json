@@ -1,6 +1,6 @@
 {
   "name": "oors-cli",
-  "version": "1.17.1",
+  "version": "1.17.2",
   "description": "oors command line utilities.",
   "main": "build/index.js",
   "scripts": {},
