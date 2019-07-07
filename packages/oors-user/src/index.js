@@ -480,6 +480,18 @@ class UserModule extends Module {
         email,
         ...parseProfile(profile),
       });
+    } else {
+      user = await User.updateOne({
+        query: {
+          _id: user._id,
+        },
+        update: {
+          $set: {
+            [`authProviders.${profile.provider}.accessToken`]: accessToken,
+            [`authProviders.${profile.provider}.refreshToken`]: refreshToken,
+          },
+        },
+      });
     }
 
     await this.canLogin(user);
