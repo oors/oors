@@ -155,7 +155,7 @@ class MongoDB extends Module {
 
     await this.loadFromModules();
 
-    if (!this.getConfig('seeding.isEnabled')) {
+    if (this.getConfig('seeding.isEnabled')) {
       await this.setupSeeding();
     }
 
