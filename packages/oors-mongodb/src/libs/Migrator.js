@@ -1,10 +1,8 @@
-import path from 'path';
-import glob from 'glob';
 import { getTimestampFromMigrationFile } from './helpers';
 
 class Migrator {
   constructor({
-    migrationsDir,
+    files = [],
     context,
     MigrationRepository,
     transaction,
@@ -12,7 +10,7 @@ class Migrator {
     getRepository,
     silent = false,
   }) {
-    this.migrationsDir = migrationsDir;
+    this.files = files;
     this.context = context;
     this.MigrationRepository = MigrationRepository;
     this.transaction = transaction;
@@ -36,12 +34,9 @@ class Migrator {
 
   run = async () => {
     await this.backup();
-    const migrationFiles = glob.sync(path.join(this.migrationsDir, '*.js'));
 
-    if (!migrationFiles.length) {
-      throw new Error(
-        `No migration files were found in the migrations directory ("${this.migrationsDir}")!`,
-      );
+    if (!this.files.length) {
+      throw new Error(`Missing migration files!`);
     }
 
     const lastDbMigration = await this.MigrationRepository.findOne({
@@ -55,7 +50,7 @@ class Migrator {
 
     const lastDbMigrationTimestamp = lastDbMigration ? lastDbMigration.timestamp : 0;
 
-    return migrationFiles
+    return this.files
       .filter(file => getTimestampFromMigrationFile(file) > lastDbMigrationTimestamp)
       .reduce(
         (promise, file) => promise.then(() => this.runSingleMigration(file)),

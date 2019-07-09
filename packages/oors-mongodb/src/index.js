@@ -36,7 +36,6 @@ class MongoDB extends Module {
         v.isDefault({}),
         v.isSchema({
           isEnabled: [v.isDefault(false), v.isBoolean()],
-          dir: v.isAny(v.isString(), v.isUndefined()),
           isSilent: [v.isDefault(false), v.isBoolean()],
         }),
       ],
@@ -64,6 +63,13 @@ class MongoDB extends Module {
               dir: [v.isDefault('repositories'), v.isString()],
               prefix: [v.isDefault(''), v.isString()],
               collectionPrefix: [v.isDefault(''), v.isString()],
+            }),
+          ],
+          migrations: [
+            v.isDefault({}),
+            v.isSchema({
+              autoload: [v.isDefault(true), v.isBoolean()],
+              dir: [v.isDefault('migrations'), v.isString()],
             }),
           ],
         }),
@@ -107,9 +113,7 @@ class MongoDB extends Module {
 
     if (!names.includes(this.defaultConnectionName)) {
       throw new Error(
-        `Default connection name - "(${
-          this.defaultConnectionName
-        })" - can't be found through the list of available connections (${names})`,
+        `Default connection name - "(${this.defaultConnectionName})" - can't be found through the list of available connections (${names})`,
       );
     }
 
@@ -142,11 +146,18 @@ class MongoDB extends Module {
 
   async setup({ connections }) {
     await this.loadDependencies(['oors.autoloader']);
+
     await Promise.all(connections.map(this.createConnection));
 
-    await this.collectRepositories();
-    this.setupMigration();
-    await this.setupSeeding();
+    if (this.getConfig('migration.isEnabled')) {
+      this.createMigrator();
+    }
+
+    await this.loadFromModules();
+
+    if (!this.getConfig('seeding.isEnabled')) {
+      await this.setupSeeding();
+    }
 
     this.gqlQueryParser = new GQLQueryParser(this);
 
@@ -196,29 +207,33 @@ class MongoDB extends Module {
       Object.keys(this.connections).map(connectionName => this.closeConnection(connectionName)),
     );
 
-  collectRepositories = async () => {
-    await this.runHook('loadRepositories', this.collectFromModule, {
-      createRepository: this.createRepository,
-      bindRepositories: this.bindRepository,
-      bindRepository: this.bindRepository,
-    });
+  loadFromModules = async () => {
+    await Promise.all([
+      this.runHook('loadRepositories', this.loadRepositoriesFromModule, {
+        createRepository: this.createRepository,
+        bindRepositories: this.bindRepository,
+        bindRepository: this.bindRepository,
+      }),
+      this.getConfig('migration.isEnabled')
+        ? this.runHook('loadMigrations', this.loadMigrationsFromModule, {
+            migrator: this.migrator,
+          })
+        : Promise.resolve(),
+    ]);
+
     this.configureRepositories();
   };
 
   getModuleConfig = module =>
     merge({}, this.getConfig('moduleDefaultConfig'), module.getConfig(this.name));
 
-  collectFromModule = async module => {
+  loadRepositoriesFromModule = async module => {
     const config = this.getModuleConfig(module);
 
     if (!config.repositories.autoload) {
       return;
     }
 
-    await this.loadModuleRepositories(module, config);
-  };
-
-  async loadModuleRepositories(module, config) {
     const { glob } = this.deps['oors.autoloader'].wrap(module);
     const files = await glob(`${config.repositories.dir}/*.js`, {
       nodir: true,
@@ -228,9 +243,7 @@ class MongoDB extends Module {
       const ModuleRepository = require(file).default; // eslint-disable-line global-require, import/no-dynamic-require
       const repository = new ModuleRepository();
       if (config.repositories.collectionPrefix) {
-        repository.collectionName = `${config.repositories.collectionPrefix}${
-          repository.collectionName
-        }`;
+        repository.collectionName = `${config.repositories.collectionPrefix}${repository.collectionName}`;
       }
       repository.module = module;
       const name = `${config.repositories.prefix || module.name}.${repository.name ||
@@ -240,17 +253,27 @@ class MongoDB extends Module {
 
       module.export(`repositories.${repository.name || repository.constructor.name}`, repository);
     });
-  }
+  };
 
-  setupMigration() {
-    if (!this.getConfig('migration.isEnabled')) {
+  loadMigrationsFromModule = async module => {
+    const config = this.getModuleConfig(module);
+
+    if (!config.migrations.autoload) {
       return;
     }
 
+    const { glob } = this.deps['oors.autoloader'].wrap(module);
+    const files = await glob(`${config.migrations.dir}/*.js`, {
+      nodir: true,
+    });
+
+    this.migrator.files.push(...files);
+  };
+
+  createMigrator() {
     const migrationRepository = this.addRepository('Migration', new MigrationRepository());
 
     this.migrator = new Migrator({
-      migrationsDir: this.getConfig('migration.dir'),
       context: {
         modules: this.manager,
         db: this.getConnectionDb(),
@@ -263,15 +286,12 @@ class MongoDB extends Module {
     });
 
     this.export({
+      migrator: this.migrator,
       migrate: this.migrator.run,
     });
   }
 
   async setupSeeding() {
-    if (!this.getConfig('seeding.isEnabled')) {
-      return;
-    }
-
     const seeder = new Seeder();
     const seeds = {};
 
