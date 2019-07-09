@@ -48,10 +48,15 @@ class Migrator {
       },
     });
 
-    const lastDbMigrationTimestamp = lastDbMigration ? lastDbMigration.timestamp : 0;
+    const lastDbMigrationTimestamp = parseInt(lastDbMigration ? lastDbMigration.timestamp : 0, 10);
 
     return this.files
-      .filter(file => getTimestampFromMigrationFile(file) > lastDbMigrationTimestamp)
+      .filter(file => parseInt(getTimestampFromMigrationFile(file), 10) > lastDbMigrationTimestamp)
+      .sort(
+        (f1, f2) =>
+          parseInt(getTimestampFromMigrationFile(f1), 10) -
+          parseInt(getTimestampFromMigrationFile(f2), 10),
+      )
       .reduce(
         (promise, file) => promise.then(() => this.runSingleMigration(file)),
         Promise.resolve(),
