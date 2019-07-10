@@ -166,17 +166,18 @@ class AggregationPipeline {
 
   clone = pipeline => new this.constructor(this.repository, pipeline || [...this.stack]);
 
-  toCursor = () =>
+  toCursor = (options = {}) =>
     this.repository.aggregate({
       pipeline: this.stack,
       options: this.options,
+      ...options,
     });
 
-  toArray = async () => (await this.toCursor()).toArray();
+  toArray = async options => (await this.toCursor(options)).toArray();
 
-  toResult = async () => {
+  toResult = async options => {
     const lastStage = last(this.stack);
-    const result = await this.toArray();
+    const result = await this.toArray(options);
 
     if (!lastStage) {
       return result;
