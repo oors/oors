@@ -8,7 +8,7 @@
     "easevalidation": "0.26.0",
     "express": "4.17.1",
     "express-react-views": "0.11.0",
-    "lodash": "4.17.11",
+    "lodash": "4.17.14",
     "merge-descriptors": "1.0.1",
     "oors": "^3.0.0"
   }

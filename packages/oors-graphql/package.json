@@ -14,8 +14,8 @@
   },
   "homepage": "https://github.com/viczam/oors#readme",
   "dependencies": {
-    "apollo-server": "2.6.7",
-    "apollo-server-express": "2.6.7",
+    "apollo-server": "2.6.8",
+    "apollo-server-express": "2.6.8",
     "dataloader": "1.4.0",
     "easevalidation": "0.26.0",
     "fs-extra": "^8.1.0",
@@ -33,7 +33,7 @@
     "graphql-voyager": "1.0.0-rc.27",
     "invariant": "2.2.4",
     "isomorphic-fetch": "2.2.1",
-    "lodash": "4.17.11",
+    "lodash": "4.17.14",
     "ms": "2.1.2",
     "oors": "^3.0.0",
     "oors-express": "^2.4.3"
