@@ -170,8 +170,7 @@ class AggregationPipeline {
   toCursor = (options = {}) =>
     this.repository.aggregate({
       pipeline: this.stack,
-      options: this.options,
-      ...options,
+      options: { ...this.options, ...options },
     });
 
   toArray = async options => (await this.toCursor(options)).toArray();
