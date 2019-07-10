@@ -1,6 +1,6 @@
 {
   "name": "oors-express",
-  "version": "2.4.3",
+  "version": "2.5.0",
   "main": "build/index.js",
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "ISC",
@@ -10,6 +10,6 @@
     "express-react-views": "0.11.0",
     "lodash": "4.17.14",
     "merge-descriptors": "1.0.1",
-    "oors": "^3.0.0"
+    "oors": "^3.1.0"
   }
 }
