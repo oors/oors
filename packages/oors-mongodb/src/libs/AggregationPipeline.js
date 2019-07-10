@@ -164,7 +164,8 @@ class AggregationPipeline {
 
   one = () => this.limit(1);
 
-  clone = pipeline => new this.constructor(this.repository, pipeline || [...this.stack]);
+  clone = pipeline =>
+    new this.constructor(this.repository, pipeline || [...this.stack], { ...this.options });
 
   toCursor = (options = {}) =>
     this.repository.aggregate({
