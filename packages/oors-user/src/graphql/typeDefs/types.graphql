@@ -1,0 +1,27 @@
+type UserAccount {
+  id: ID!
+  isActive: Boolean!
+  users: [User!]!
+  owner: User!
+}
+
+type User {
+  id: ID!
+  account: UserAccount!
+  name: String
+  username: String
+  email: String
+  isActive: Boolean!
+  roles: [UserRole!]!
+  createdAt: DateTime
+  lastLogin: DateTime
+}
+
+type AuthenticatedUser {
+  token: String
+  user: User
+}
+
+enum UserRole {
+  ADMIN
+}

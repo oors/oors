@@ -1,0 +1,2 @@
+directive @isAuthenticated(roles: [UserRole!]) on OBJECT | FIELD_DEFINITION
+directive @requiresPermissions(all: [String!], any: [String!]) on OBJECT | FIELD_DEFINITION
