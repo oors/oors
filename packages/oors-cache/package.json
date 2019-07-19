@@ -1,6 +1,6 @@
 {
   "name": "oors-cache",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "main": "build/index.js",
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "ISC",
@@ -9,6 +9,6 @@
     "catbox-memory": "4.0.1",
     "easevalidation": "0.26.0",
     "lodash": "4.17.15",
-    "oors": "^3.1.0"
+    "oors": "^3.2.0"
   }
 }
