@@ -2,6 +2,8 @@ import crypto from 'crypto';
 import { validate, validators as v } from 'easevalidation';
 import { Module } from 'oors';
 import upperFirst from 'lodash/upperFirst';
+import omitBy from 'lodash/omitBy';
+import isNil from 'lodash/isNil';
 import camelCase from 'lodash/camelCase';
 import ms from 'ms';
 import moment from 'moment';
@@ -487,11 +489,14 @@ class UserModule extends Module {
           _id: user._id,
         },
         update: {
-          $set: {
-            [`authProviders.${profile.provider}.accessToken`]: accessToken,
-            [`authProviders.${profile.provider}.refreshToken`]: refreshToken,
-            [`authProviders.${profile.provider}.updatedAt`]: new Date(),
-          },
+          $set: omitBy(
+            {
+              [`authProviders.${profile.provider}.accessToken`]: accessToken,
+              [`authProviders.${profile.provider}.refreshToken`]: refreshToken,
+              [`authProviders.${profile.provider}.updatedAt`]: new Date(),
+            },
+            isNil,
+          ),
         },
       });
     }
