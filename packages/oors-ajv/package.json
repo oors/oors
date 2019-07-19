@@ -5,12 +5,12 @@
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "ajv": "6.10.1",
+    "ajv": "6.10.2",
     "ajv-keywords": "3.4.1",
-    "apollo-server": "2.6.8",
+    "apollo-server": "2.7.0",
     "easevalidation": "0.26.0",
-    "lodash": "4.17.14",
-    "mongodb": "3.2.7",
+    "lodash": "4.17.15",
+    "mongodb": "3.3.0-beta2",
     "oors": "^3.1.0",
     "oors-express": "^2.5.0"
   }
