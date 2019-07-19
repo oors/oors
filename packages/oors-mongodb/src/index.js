@@ -317,6 +317,7 @@ class MongoDB extends Module {
 
   createConnection = async ({ name, url, options }) => {
     this.connections[name] = await MongoClient.connect(url, {
+      ignoreUndefined: true,
       ...options,
       useNewUrlParser: true,
     });
