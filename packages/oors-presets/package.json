@@ -1,6 +1,6 @@
 {
   "name": "oors-presets",
-  "version": "4.22.3",
+  "version": "4.22.4",
   "description": "oors presets",
   "main": "build/index.js",
   "repository": {
@@ -43,6 +43,6 @@
     "oors-router": "^3.19.2",
     "oors-scheduler": "^2.5.0",
     "oors-upload": "^2.20.2",
-    "oors-user": "^4.20.3"
+    "oors-user": "^4.20.4"
   }
 }
