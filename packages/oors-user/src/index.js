@@ -475,6 +475,7 @@ class UserModule extends Module {
             id: profile.id,
             accessToken,
             refreshToken,
+            createdAt: new Date(),
           },
         },
         email,
@@ -489,6 +490,7 @@ class UserModule extends Module {
           $set: {
             [`authProviders.${profile.provider}.accessToken`]: accessToken,
             [`authProviders.${profile.provider}.refreshToken`]: refreshToken,
+            [`authProviders.${profile.provider}.updatedAt`]: new Date(),
           },
         },
       });
