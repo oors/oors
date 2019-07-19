@@ -15,7 +15,7 @@
     "easevalidation": "0.26.0",
     "lodash": "4.17.15",
     "moment": "2.24.0",
-    "mongodb": "3.3.0-beta2",
+    "mongodb": "3.2.7",
     "prop-types": "^15.7.2",
     "randomstring": "1.1.5",
     "react": "16.8.6",

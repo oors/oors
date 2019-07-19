@@ -30,7 +30,7 @@ class User extends Repository {
         validator: v.isSchema({
           id: [v.isRequired(), v.isString()],
           accessToken: v.isAny(v.isUndefined(), v.isString()),
-          refreshToken: v.isAny(v.isUndefined(), v.isNull(), v.isString()),
+          refreshToken: v.isAny(v.isUndefined(), v.isString()),
           createdAt: v.isAny(v.isUndefined(), v.isDate()),
           updatedAt: v.isAny(v.isUndefined(), v.isDate()),
         }),
