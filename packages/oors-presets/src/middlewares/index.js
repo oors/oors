@@ -14,6 +14,7 @@ import boomErrorHandler from './boomErrorHandler';
 import latency from './latency';
 import lastRequest from './lastRequest';
 import hpp from './hpp';
+import ip from './ip';
 
 export {
   bodyParserJSON,
@@ -32,4 +33,5 @@ export {
   latency,
   lastRequest,
   hpp,
+  ip,
 };

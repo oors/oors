@@ -19,6 +19,7 @@ config.add({
   modules: {
     'oors.express': {
       middlewares: config.ref(() => [
+        middlewares.ip,
         middlewares.cors,
         middlewares.useragent,
         middlewares.hpp,
