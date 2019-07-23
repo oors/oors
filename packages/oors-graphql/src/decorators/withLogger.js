@@ -6,7 +6,7 @@ export default (
       modules.get('oors.logger')[data.error ? 'error' : 'info'](data.message, {
         ...omit(data, ['message']),
         userId: req.user ? req.user._id : null,
-        IP: req.ip,
+        IP: req.IP,
       });
     } else {
       console.log(data);

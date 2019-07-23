@@ -5,7 +5,7 @@ export default async (_, { username, password }, { modules, req, fromMongo, getR
 
   await LoginRepository.createOne({
     userId: user._id,
-    ip: req.ip,
+    ip: req.IP,
     browser: req.useragent.browser,
     os: req.useragent.os,
     platform: req.useragent.platform,

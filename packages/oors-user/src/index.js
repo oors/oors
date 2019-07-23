@@ -506,7 +506,7 @@ class UserModule extends Module {
     if (req) {
       await Login.createOne({
         userId: user._id,
-        ip: req.ip,
+        ip: req.IP,
         browser: req.useragent.browser,
         os: req.useragent.os,
         platform: req.useragent.platform,

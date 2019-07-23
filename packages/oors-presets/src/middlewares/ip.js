@@ -9,6 +9,6 @@ export default {
     next();
   },
   params: {
-    key: 'ip',
+    key: 'IP',
   },
 };
