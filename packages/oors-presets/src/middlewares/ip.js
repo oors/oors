@@ -1,9 +1,14 @@
-import requestIp from 'request-ip';
-
 export default {
   id: 'ip',
-  factory: requestIp.mw,
+  factory: ({ key }) => (req, res, next) => {
+    req[key] = (req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip).replace(
+      '::ffff:',
+      '',
+    );
+
+    next();
+  },
   params: {
-    attributeName: 'ip',
+    key: 'ip',
   },
 };
