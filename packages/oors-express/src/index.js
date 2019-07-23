@@ -69,7 +69,7 @@ class ExpressModule extends Module {
   // eslint-disable-next-line class-methods-use-this
   createApplication(context, settings) {
     const app = new ExpressApplication(context, settings);
-    app.enable('trust proxy', 'loopback, ::ffff:127.0.0.1');
+    app.enable('trust proxy', 'loopback');
     app.disable('x-powered-by');
     app.engine('js', expressReactViews.createEngine());
     return app;

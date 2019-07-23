@@ -43,6 +43,7 @@
     "oors-router": "^3.19.3",
     "oors-scheduler": "^2.5.0",
     "oors-upload": "^2.20.3",
-    "oors-user": "^4.20.5"
+    "oors-user": "^4.20.5",
+    "request-ip": "2.1.3"
   }
 }
