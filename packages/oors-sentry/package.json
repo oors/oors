@@ -1,6 +1,6 @@
 {
   "name": "oors-sentry",
-  "version": "3.7.1",
+  "version": "3.8.0",
   "main": "build/index.js",
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "MIT",
@@ -8,6 +8,6 @@
     "@sentry/node": "5.5.0",
     "easevalidation": "0.26.0",
     "oors": "^3.2.0",
-    "oors-express": "^2.6.1"
+    "oors-express": "^2.7.0"
   }
 }
