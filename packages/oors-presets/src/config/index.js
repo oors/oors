@@ -90,7 +90,6 @@ config.add({
       autoloadRepositories: false,
     },
     'oors.user': {
-      rootURL: config.ref('rootURL'),
       jwtSecret: 'MY_JWT_SECRET',
       jwtConfig: {
         expiresIn: '1d',
