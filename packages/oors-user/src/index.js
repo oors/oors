@@ -56,6 +56,7 @@ class UserModule extends Module {
       ],
       loginTokenExpiresIn: [v.isDefault('1d'), v.isAny(v.isString(), v.isNumber())],
       roles: [v.isDefault(defaultRoles), v.isArray(v.isString())],
+      saveLogins: [v.isDefault(true), v.isBoolean()],
     }),
   );
 
@@ -131,6 +132,7 @@ class UserModule extends Module {
       'createToken',
       'findLockedUsers',
       'loginWithToken',
+      'saveLogin',
     ]);
   }
 
@@ -443,7 +445,7 @@ class UserModule extends Module {
       username,
     }),
   ) => {
-    const { User, Account, Login } = this.get('repositories');
+    const { User, Account } = this.get('repositories');
     const email =
       Array.isArray(profile.emails) && profile.emails.length ? profile.emails[0].value : undefined;
     const matchesProfileId = { [`authProviders.${profile.provider}.id`]: profile.id };
@@ -504,13 +506,7 @@ class UserModule extends Module {
     await this.canLogin(user);
 
     if (req) {
-      await Login.createOne({
-        userId: user._id,
-        ip: req.IP,
-        browser: req.useragent.browser,
-        os: req.useragent.os,
-        platform: req.useragent.platform,
-      });
+      await this.saveLogin({ req, user });
     }
 
     return User.updateOne({
@@ -549,6 +545,20 @@ class UserModule extends Module {
       });
     });
   }
+
+  saveLogin = async ({ req, user }) => {
+    if (!this.getConfig('saveLogins')) {
+      return;
+    }
+
+    await this.get('repositories').Login.createOne({
+      userId: user._id,
+      ip: req.IP,
+      browser: req.useragent.browser,
+      os: req.useragent.os,
+      platform: req.useragent.platform,
+    });
+  };
 }
 
 export default UserModule;
