@@ -1,5 +1,3 @@
-import { ObjectID as objectId } from 'mongodb';
-
 export default {
   id: 'userFromJwt',
   factory: () => async (req, res, next) => {
@@ -11,7 +9,7 @@ export default {
 
     try {
       const { id } = req.jwtPayload;
-      const user = await User.findById(objectId(id));
+      const user = await User.findById(id);
 
       if (!user) {
         return next();

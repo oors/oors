@@ -54,6 +54,11 @@ config.add({
             secret: config.get('cookieSecret'),
             resave: false,
             saveUninitialized: false,
+            ttl: 14 * 24 * 60 * 60,
+            cookie: {
+              secure: !config.get('isDev'),
+              maxAge: 14 * 24 * 60 * 60 * 1000,
+            },
           },
         },
         middlewares.lastRequest,
