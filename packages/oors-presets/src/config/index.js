@@ -135,6 +135,8 @@ config.add({
     },
     'oors.graphql': {
       serverOptions: {
+        debug: config.ref('isDev'),
+        tracing: config.ref('isDev'),
         introspection: config.ref('isDev'),
         playground: config.ref('isDev'),
       },

@@ -63,7 +63,19 @@ class Gql extends Module {
       middlewarePivot: [v.isDefault('isMethod'), isMiddlewarePivot()],
       configureSchema: v.isAny(v.isFunction(), v.isUndefined()),
       exposeModules: [v.isDefault(true), v.isBoolean()],
-      serverOptions: [v.isDefault({}), v.isObject()],
+      serverOptions: [
+        v.isDefault({
+          debug: true,
+          tracing: true,
+          cacheControl: true,
+          subscriptions: true,
+          introspection: true,
+          playground: true,
+          mocks: false,
+          persistedQueries: true,
+        }),
+        v.isObject(),
+      ],
       pubsub: v.isAny(v.isObject(), v.isUndefined()),
       depthLimit: [
         v.isDefault({}),
@@ -359,14 +371,6 @@ class Gql extends Module {
       formatParams: this.format('params'),
       formatResponse: this.format('response'),
       schema: this.schema,
-      debug: true,
-      tracing: true,
-      cacheControl: true,
-      subscriptions: true,
-      introspection: true,
-      playground: true,
-      mocks: false,
-      persistedQueries: true,
       validationRules: [
         depthLimit(
           this.getConfig('depthLimit.limit'),
