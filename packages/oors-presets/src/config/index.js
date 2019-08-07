@@ -136,6 +136,7 @@ config.add({
     'oors.graphql': {
       serverOptions: {
         introspection: config.ref('isDev'),
+        playground: config.ref('isDev'),
       },
     },
     'oors.router': {

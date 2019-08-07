@@ -364,6 +364,7 @@ class Gql extends Module {
       cacheControl: true,
       subscriptions: true,
       introspection: true,
+      playground: true,
       mocks: false,
       persistedQueries: true,
       validationRules: [
