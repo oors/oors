@@ -1,4 +1,5 @@
 /* eslint-disable class-methods-use-this, no-underscore-dangle */
+import intersection from 'lodash/intersection';
 import { SchemaDirectiveVisitor, AuthenticationError, ForbiddenError } from 'apollo-server';
 import { /* DirectiveLocation, GraphQLDirective, */ defaultFieldResolver } from 'graphql';
 
@@ -49,13 +50,17 @@ class IsAuthenticatedDirective extends SchemaDirectiveVisitor {
           throw new AuthenticationError('Not authenticated!');
         }
 
-        const requiredRoles = isAuthenticatedConfig.roles || isAuthenticatedConfig.typeRoles;
-        if (Array.isArray(requiredRoles) && requiredRoles.length) {
-          requiredRoles.forEach(role => {
-            if (!(context.user.roles || []).includes(role)) {
-              throw new ForbiddenError(`Restricted access! Missing "${role}" role!`);
-            }
-          });
+        const allowedRoles = isAuthenticatedConfig.roles || isAuthenticatedConfig.typeRoles;
+        if (
+          Array.isArray(allowedRoles) &&
+          allowedRoles.length &&
+          !intersection(allowedRoles, context.user.roles || []).length
+        ) {
+          throw new ForbiddenError(
+            `Restricted access! User has to have one of the allowed rolles: ${allowedRoles.join(
+              ',',
+            )}!`,
+          );
         }
 
         return resolve.call(this, root, args, context, info);
