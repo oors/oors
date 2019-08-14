@@ -348,25 +348,14 @@ class MongoDB extends Module {
 
   toObjectId = value => new ObjectID(value);
 
-  transaction = async (cb, options = {}, connectionName) => {
+  transaction = async (fn, options = {}, connectionName) => {
     const db = this.getConnectionDb(connectionName);
 
     if (!this.getConfig('transaction.isEnabled')) {
-      return cb(db);
+      return fn(db, this);
     }
 
-    const session = db.startSession();
-    session.startTransaction(options);
-    try {
-      const result = await cb(db);
-      await session.commitTransaction();
-      session.endSession();
-      return result;
-    } catch (error) {
-      await session.abortTransaction();
-      session.endSession();
-      throw error;
-    }
+    return db.startSession(options).withTransaction(async () => fn(db, this));
   };
 
   // eslint-disable-next-line
