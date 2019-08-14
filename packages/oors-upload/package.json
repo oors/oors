@@ -18,7 +18,7 @@
     "easevalidation": "0.26.0",
     "express": "4.17.1",
     "fs-extra": "^8.1.0",
-    "mongodb": "3.2.7",
+    "mongodb": "3.3.0",
     "multer": "1.4.2",
     "oors": "^3.2.0",
     "oors-express": "^2.7.0",
