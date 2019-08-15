@@ -1,5 +1,5 @@
 import uniq from 'lodash/uniq';
-import { Migration } from 'oors-mongodb';
+import Migration from '../libs/Migration';
 
 export default class extends Migration {
   name = 'Create Collections';
