@@ -45,8 +45,6 @@ class RateLimiterModule extends Module {
 
   name = 'oors.rateLimiter';
 
-  services = {};
-
   async setup() {
     await this.loadDependencies(['oors.express', 'oors.graphql']);
 
