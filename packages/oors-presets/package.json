@@ -40,6 +40,7 @@
     "oors-mailer": "^3.16.0",
     "oors-mongodb": "^4.26.0",
     "oors-rad": "^2.24.0",
+    "oors-rate-limiter": "*",
     "oors-router": "^3.24.0",
     "oors-scheduler": "^2.5.0",
     "oors-upload": "^2.25.0",

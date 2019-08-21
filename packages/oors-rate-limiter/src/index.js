@@ -22,12 +22,11 @@ class RateLimiterModule extends Module {
           config: [
             v.isDefault({}),
             v.isSchema({
-              max: v.isAny(
-                v.isUndefined(),
-                v.isEvery(v.isNumber(), v.isMin(0, true)),
-                v.isFunction(),
-              ),
-              windowMs: [v.isDefault(60000), v.isNumber(), v.isMin(0, true)],
+              max: [
+                v.isDefault(10),
+                v.isAny(v.isEvery(v.isNumber(), v.isMin(0, true)), v.isFunction()),
+              ],
+              windowMs: [v.isDefault(1000), v.isNumber(), v.isMin(0, true)],
               message: v.isAny(v.isUndefined(), v.isString(), v.isObject()),
               statusCode: [v.isDefault(429), v.isNumber()],
               headers: [v.isDefault(true), v.isBoolean()],
@@ -55,9 +54,7 @@ class RateLimiterModule extends Module {
     if (this.getConfig('middleware.isEnabled')) {
       this.deps['oors.express'].middlewares.insert(
         this.getConfig('middleware.pivot'),
-        this.createMiddleware({
-          params: this.getConfig('middleware.config'),
-        }),
+        this.createMiddleware(),
       );
     }
 
@@ -70,6 +67,7 @@ class RateLimiterModule extends Module {
     params: {
       ...(rateLimitMiddleware.params || {}),
       keyGenerator: this.keyGenerator,
+      ...this.getConfig('middleware.config'),
       ...params,
     },
   });
@@ -77,13 +75,15 @@ class RateLimiterModule extends Module {
   createDirective = (options = {}) =>
     createRateLimitDirective({
       identifyContext: ctx =>
-        (ctx.user && (ctx.user.id || ctx.user._id).toString()) || getClientIp(ctx.request),
+        (ctx.user && (ctx.user.id || ctx.user._id).toString()) || getClientIp(ctx.req),
       formatError: ({ fieldName, max, window }) =>
         `You've called '${fieldName}' ${max} times in the past ${ms(window, { long: true })}!`,
       ...options,
     });
 
-  keyGenerator = req => (req.user ? (req.user.id || req.user._id).toString() : getClientIp(req));
+  keyGenerator = req => {
+    return req.user ? (req.user.id || req.user._id).toString() : getClientIp(req);
+  };
 }
 
 export default RateLimiterModule;

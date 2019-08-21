@@ -7,7 +7,7 @@ extend type Query {
     before: String
     first: Int
     last: Int
-  ): [BlogCategory!]!
+  ): [BlogCategory!]! @rateLimit(window: "1s", max: 1)
   findOneBlogCategory(where: BlogCategoryFilter!): BlogCategory
 }
 

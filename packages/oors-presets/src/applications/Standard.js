@@ -14,6 +14,7 @@ import UserModule from 'oors-user';
 import CacheModule from 'oors-cache';
 import SchedulerModule from 'oors-scheduler';
 import AutoloaderModule from 'oors-autoloader';
+import RateLimiterModule from 'oors-rate-limiter';
 import { Application as BaseApplication } from 'oors';
 import config from '../config';
 
@@ -53,6 +54,7 @@ class StandardApplication extends BaseApplication {
       new CacheModule(),
       new SchedulerModule(),
       new AutoloaderModule(),
+      new RateLimiterModule(),
     );
   }
 
