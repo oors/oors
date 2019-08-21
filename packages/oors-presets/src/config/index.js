@@ -157,8 +157,8 @@ config.add({
     },
     'oors.rateLimiter': {
       middleware: {
-        isEnabled: false,
-        config: {
+        enabled: false,
+        params: {
           max: 100,
         },
       },

@@ -9,17 +9,16 @@ import rateLimitMiddleware from './middlewares/rateLimit';
 class RateLimiterModule extends Module {
   static validateConfig = validate(
     v.isSchema({
+      middlewarePivot: [
+        v.isDefault({
+          after: 'bodyParserURLEncoded',
+        }),
+        isMiddlewarePivot(),
+      ],
       middleware: [
         v.isDefault({}),
         v.isSchema({
-          isEnabled: [v.isDefault(true), v.isBoolean()],
-          pivot: [
-            v.isDefault({
-              after: 'bodyParserURLEncoded',
-            }),
-            isMiddlewarePivot(),
-          ],
-          config: [
+          params: [
             v.isDefault({}),
             v.isSchema({
               max: [
@@ -51,9 +50,9 @@ class RateLimiterModule extends Module {
   async setup() {
     await this.loadDependencies(['oors.express', 'oors.graphql']);
 
-    if (this.getConfig('middleware.isEnabled')) {
+    if (this.getConfig('middleware.enabled')) {
       this.deps['oors.express'].middlewares.insert(
-        this.getConfig('middleware.pivot'),
+        this.getConfig('middlewarePivot'),
         this.createMiddleware(),
       );
     }
@@ -63,11 +62,12 @@ class RateLimiterModule extends Module {
 
   createMiddleware = ({ params = {}, ...rest } = {}) => ({
     ...rateLimitMiddleware,
+    ...this.getConfig('middleware'),
     ...rest,
     params: {
       ...(rateLimitMiddleware.params || {}),
       keyGenerator: this.keyGenerator,
-      ...this.getConfig('middleware.config'),
+      ...this.getConfig('middleware.params'),
       ...params,
     },
   });
