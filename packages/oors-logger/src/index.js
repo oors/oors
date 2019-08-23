@@ -117,17 +117,17 @@ class LoggerModule extends Module {
       head: ['Modules'],
     });
 
-    this.on('module:loaded', module => {
+    this.manager.on('module:loaded', module => {
       modulesTable.push([module.name]);
     });
 
-    this.once('after:setup', () => {
+    this.manager.once('after:setup', () => {
       console.log(modulesTable.toString());
     });
   }
 
   printDependencyGraph() {
-    this.once('after:setup', () => {
+    this.manager.once('after:setup', () => {
       console.log(this.manager.expandedDependencyGraph);
     });
   }
@@ -137,7 +137,7 @@ class LoggerModule extends Module {
       return;
     }
 
-    this.once('after:setup', () => {
+    this.manager.once('after:setup', () => {
       const table = new Table({
         head: ['Id', 'Path', 'Params'],
       });

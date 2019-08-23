@@ -117,7 +117,7 @@ class MongoDB extends Module {
       );
     }
 
-    this.onModule(this.name, 'repository', ({ repository }) => {
+    this.on('repository', ({ repository }) => {
       if (logQueries) {
         withLogger()(repository);
       }

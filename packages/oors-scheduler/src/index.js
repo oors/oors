@@ -46,7 +46,9 @@ class SchedulerModule extends Module {
       await this.agenda.start();
     }
 
-    this.on('after:setup', async () => Promise.all(this.jobsToSave.map(job => job.save(this))));
+    this.manager.on('after:setup', async () =>
+      Promise.all(this.jobsToSave.map(job => job.save(this))),
+    );
   }
 
   teardown = () => this.agenda.stop();

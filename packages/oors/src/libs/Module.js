@@ -130,16 +130,20 @@ class Module {
     return Promise.all(dependencies.map(this.loadDependency.bind(this)));
   }
 
-  on(...args) {
-    return this.manager.on(...args);
+  on(event, handler) {
+    return this.onModule(this.name, event, handler);
   }
 
   onModule(module, event, handler) {
     return this.manager.on(`module:${module}:${event}`, handler);
   }
 
-  once(...args) {
-    return this.manager.once(...args);
+  once(event, handler) {
+    return this.onceModule(this.name, event, handler);
+  }
+
+  onceModule(module, event, handler) {
+    return this.manager.once(`module:${module}:${event}`, handler);
   }
 
   emit(event, ...args) {

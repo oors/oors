@@ -192,7 +192,7 @@ class Gql extends Module {
         attachDirectiveResolvers(this.schema, directivesResolvers),
     });
 
-    this.on('after:setup', () => {
+    this.manager.on('after:setup', () => {
       Object.assign(this.gqlContext, {
         binding,
       });
