@@ -1,6 +1,6 @@
 {
   "name": "oors-graphql",
-  "version": "4.20.0",
+  "version": "4.21.0",
   "description": "GraphQL module that integrates apollo-server and helps you build a GraphQL API quickly",
   "main": "build/index.js",
   "repository": {
@@ -36,6 +36,6 @@
     "lodash": "4.17.15",
     "ms": "2.1.2",
     "oors": "^3.3.0",
-    "oors-express": "^2.8.0"
+    "oors-express": "^2.9.0"
   }
 }
