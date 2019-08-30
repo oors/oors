@@ -14,13 +14,13 @@
   },
   "homepage": "https://github.com/viczam/oors#readme",
   "dependencies": {
-    "easevalidation": "0.26.0",
+    "easevalidation": "0.28.0",
     "escape-string-regexp": "2.0.0",
     "fs-extra": "8.1.0",
     "glob": "7.1.4",
     "invariant": "2.2.4",
     "lodash": "4.17.15",
-    "mongodb": "3.3.0",
+    "mongodb": "3.3.2",
     "mongodb-extended-json": "^1.10.1",
     "oors": "^3.3.0",
     "oors-graphql": "^4.20.0"
