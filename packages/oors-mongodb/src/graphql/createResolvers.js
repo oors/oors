@@ -87,13 +87,13 @@ export const findOne = config => {
     v.isSchema({
       where: [v.isDefault({}), v.isRequired(), v.isObject()],
     }),
-  )(async (_, args, ctx, info) =>
-    ctx.fromMongo(
-      await createPipeline(_, args, ctx, info)
-        .one()
-        .toResult(),
-    ),
-  );
+  )(async (_, args, ctx, info) => {
+    const item = await createPipeline(_, args, ctx, info)
+      .one()
+      .toResult();
+
+    return item ? ctx.fromMongo(item) : null;
+  });
 };
 
 export const findMany = config => {
