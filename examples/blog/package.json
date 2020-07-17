@@ -13,7 +13,7 @@
   "dependencies": {
     "dotenv": "8.1.0",
     "easevalidation": "0.26.0",
-    "lodash": "4.17.15",
+    "lodash": "4.17.19",
     "moment": "2.24.0",
     "mongodb": "3.3.0",
     "prop-types": "^15.7.2",
