@@ -7,7 +7,7 @@
   "dependencies": {
     "easevalidation": "0.28.0",
     "fs-extra": "^8.1.0",
-    "lodash": "4.17.15",
+    "lodash": "4.17.21",
     "oors": "^3.3.0",
     "oors-mongodb": "^4.29.0",
     "pluralize": "8.0.0"

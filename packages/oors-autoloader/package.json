@@ -8,7 +8,7 @@
     "easevalidation": "0.28.0",
     "fs-extra": "^8.1.0",
     "glob": "7.1.4",
-    "lodash": "4.17.15",
+    "lodash": "4.17.21",
     "minimatch": "3.0.4",
     "oors": "^3.3.0"
   }
