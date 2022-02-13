@@ -5,7 +5,7 @@
   "author": "Victor Zamfir <zamfir.victor@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "ajv": "6.10.2",
+    "ajv": "6.12.3",
     "ajv-keywords": "3.4.1",
     "apollo-server": "2.9.2",
     "easevalidation": "0.28.0",
