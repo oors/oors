@@ -16,7 +16,7 @@
   "dependencies": {
     "cacheable-response": "1.6.12",
     "easevalidation": "0.28.0",
-    "express": "4.17.1",
+    "express": "4.17.3",
     "lodash": "^4.17.15",
     "next": "9.0.5",
     "oors": "^3.3.0",
